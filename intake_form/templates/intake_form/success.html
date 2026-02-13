@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Submitted - Poshtik NutriVet</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #FAF7F2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .success-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+            padding: 48px 40px;
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #7A9E7E, #4A7A4F);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 2.5rem;
+        }
+        
+        h1 {
+            color: #2C2C2C;
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+        
+        p {
+            color: #6B6B6B;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .case-id {
+            background: #F0F6F1;
+            border: 2px solid #7A9E7E;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .case-id .label {
+            font-size: 0.85rem;
+            color: #6B6B6B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .case-id .id {
+            font-size: 1.5rem;
+            color: #C17A5A;
+            font-weight: 700;
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-card">
+        <div class="success-icon">✓</div>
+        <h1>Form Submitted Successfully!</h1>
+        <p>Thank you for completing the diet history form. Dr. Eunice Thomas will review your information before your consultation.</p>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="case-id">
+                    <div class="label">Your Case ID</div>
+                    <div class="id">{{ message|striptags|cut:"Form submitted successfully! Your Case ID is: " }}</div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <p style="font-size: 0.9rem; margin-top: 24px;">You will receive a confirmation email shortly with your case details.</p>
+    </div>
+</body>
+</html>

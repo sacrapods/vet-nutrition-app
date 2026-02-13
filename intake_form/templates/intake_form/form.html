@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poshtik NutriVet - Diet History Form</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #FAF7F2;
+            color: #2C2C2C;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4A7A4F, #7A9E7E);
+            padding: 32px 24px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: #4A7A4F;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #E8E4DE;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2C2C2C;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #D9D4CC;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #7A9E7E;
+            box-shadow: 0 0 0 3px rgba(122,158,126,0.15);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1.5px solid #D9D4CC;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .radio-group input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .radio-group label:hover {
+            border-color: #7A9E7E;
+            background: #F0F6F1;
+        }
+        
+        .radio-group input[type="radio"]:checked + span {
+            color: #4A7A4F;
+            font-weight: 600;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border: 1.5px solid #D9D4CC;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .checkbox-group label:hover {
+            border-color: #7A9E7E;
+            background: #F0F6F1;
+        }
+        
+        .required {
+            color: #C0392B;
+        }
+
+        /* Multi-step form styles */
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding: 0 20px;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #E8E4DE;
+            z-index: 0;
+        }
+        
+        .step:last-child::after {
+            display: none;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #E8E4DE;
+            color: #6B6B6B;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+        }
+        
+        .step.completed .step-number {
+            background: #7A9E7E;
+            color: white;
+        }
+        
+        .step.active .step-number {
+            background: #C17A5A;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(193,122,90,0.2);
+        }
+        
+        .step-label {
+            font-size: 0.75rem;
+            color: #6B6B6B;
+            font-weight: 500;
+        }
+        
+        .step.active .step-label {
+            color: #C17A5A;
+            font-weight: 600;
+        }
+        
+        .step.completed .step-label {
+            color: #4A7A4F;
+        }
+        
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #E8E4DE;
+        }
+        
+        .btn-prev {
+            background: none;
+            border: 1.5px solid #D9D4CC;
+            color: #6B6B6B;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-prev:hover {
+            border-color: #7A9E7E;
+            color: #4A7A4F;
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #C17A5A, #A85E3F);
+            border: none;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(193,122,90,0.35);
+            transition: all 0.2s;
+        }
+        
+        .btn-next:hover {
+            transform: translateY(-2px);
+        }
+        
+        .error {
+            color: #C0392B;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Poshtik NutriVet</h1>
+            <p>Canine Diet History Form</p>
+        </div>
+        
+        <div class="form-card">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Owner & Pet</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Household</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Feeding</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Preferences</div>
+                    </div>
+                    <div class="step" data-step="5">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Diet History</div>
+                    </div>
+                    <div class="step" data-step="6">
+                        <div class="step-number">6</div>
+                        <div class="step-label">Medical</div>
+                    </div>
+                    <div class="step" data-step="7">
+                        <div class="step-number">7</div>
+                        <div class="step-label">Vaccination</div>
+                    </div>
+                    <div class="step" data-step="8">
+                        <div class="step-number">8</div>
+                        <div class="step-label">Consent</div>
+                    </div>
+                </div>
+                
+                <!-- Step 1: Owner & Pet Info -->
+                <div class="form-step active" id="step-1">
+                
+                <!-- Section 1: Pet Parent Info -->
+                <h2 class="section-title">Pet Parent Information</h2>
+                
+                <div class="form-group">
+                    <label>Your Name <span class="required">*</span></label>
+                    <input type="text" name="parent_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address <span class="required">*</span></label>
+                    <input type="email" name="parent_email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <input type="tel" name="parent_phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Location / Primary Vet Clinic</label>
+                    <input type="text" name="parent_location">
+                </div>
+                
+                <!-- Section 2: Pet Info -->
+                <h2 class="section-title" style="margin-top: 40px;">Pet Information</h2>
+                
+                <div class="form-group">
+                    <label>Pet Name <span class="required">*</span></label>
+                    <input type="text" name="pet_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Date of Birth / Age <span class="required">*</span></label>
+                    <input type="text" name="pet_age" placeholder="e.g., 3 years or 2020-05-15" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Species <span class="required">*</span></label>
+                    <select name="pet_species" required>
+                        <option value="">-- Select Species --</option>
+                        <option value="dog">Dog</option>
+                        <option value="cat">Cat</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Breed <span class="required">*</span></label>
+                    <input type="text" name="pet_breed" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Colour</label>
+                    <input type="text" name="pet_colour">
+                </div>
+                
+                <div class="form-group">
+                    <label>Sex <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="pet_sex" value="male" required>
+                            <span>Male</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pet_sex" value="female" required>
+                            <span>Female</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Neutered / Spayed?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="pet_neutered" value="yes">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pet_neutered" value="no">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Current Weight (kg) <span class="required">*</span></label>
+                    <input type="number" step="0.01" name="pet_weight" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Body Condition <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="pet_body_condition" value="ideal" required>
+                            <span>Ideal</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pet_body_condition" value="underweight" required>
+                            <span>Underweight</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="pet_body_condition" value="overweight" required>
+                            <span>Overweight</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Your reasons and goals for this consultation <span class="required">*</span></label>
+                    <textarea name="pet_consultation_goals" required></textarea>
+                </div>
+
+                <!-- Navigation for Step 1 -->
+                    <div class="form-navigation">
+                        <div></div>
+                        <button type="button" class="btn-next" onclick="nextStep(2)">Next: Household →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Household Details -->
+                <div class="form-step" id="step-2">
+                <!-- Section 3: Household Details -->
+                <h2 class="section-title" style="margin-top: 40px;">Household Details</h2>
+                
+                <div class="form-group">
+                    <label>Do you have personal preferences to avoid certain food ingredients in your household?</label>
+                    <textarea name="household_avoid_ingredients" placeholder="Please list any ingredients to avoid..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>If your pet's nutritional needs demand it, would it be possible for you to arrange for the food?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="household_arrange_food" value="yes">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="household_arrange_food" value="no">
+                            <span>No</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="household_arrange_food" value="will_try">
+                            <span>I will try my best</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Who feeds your pet daily?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="household_who_feeds" value="one_person" onclick="document.getElementById('feeder_name').style.display='block'">
+                            <span>Only one person</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="household_who_feeds" value="varies" onclick="document.getElementById('feeder_name').style.display='block'">
+                            <span>Varies from day-to-day</span>
+                        </label>
+                    </div>
+                    <div id="feeder_name" style="display:none; margin-top:12px;">
+                        <input type="text" name="household_feeder_name" placeholder="Who feeds the pet?" style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Do you have other pets at home?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="household_other_pets" value="yes" onclick="document.getElementById('other_pets_details').style.display='block'">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="household_other_pets" value="no" onclick="document.getElementById('other_pets_details').style.display='none'">
+                            <span>No</span>
+                        </label>
+                    </div>
+                    <div id="other_pets_details" style="display:none; margin-top:12px;">
+                        <textarea name="household_other_pets_details" placeholder="Please specify (species, number, etc.)..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:80px;"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Where is your pet housed?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="household_pet_housed" value="indoors">
+                            <span>Indoors</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="household_pet_housed" value="outdoors">
+                            <span>Outdoors</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="household_pet_housed" value="both">
+                            <span>Both</span>
+                        </label>
+                    </div>
+                </div>
+                <!-- Navigation for Step 2 -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(1)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(3)">Next: Feeding →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Feeding Management -->
+                <div class="form-step" id="step-3">
+                <!-- Section 4: Feeding Management & Behavior -->
+                <h2 class="section-title" style="margin-top: 40px;">Feeding Management & Behavior</h2>
+                
+                <div class="form-group">
+                    <label>Food is:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="feeding_food_availability" value="always" onclick="document.getElementById('food_times').style.display='none'">
+                            <span>Always available during the day</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="feeding_food_availability" value="certain_times" onclick="document.getElementById('food_times').style.display='block'">
+                            <span>Only at certain times</span>
+                        </label>
+                    </div>
+                    <div id="food_times" style="display:none; margin-top:12px;">
+                        <input type="text" name="feeding_food_times" placeholder="e.g., 8:00 AM and 6:00 PM" style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>How many meals are fed per day?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="feeding_meals_per_day" value="1"><span>1×</span></label>
+                        <label><input type="radio" name="feeding_meals_per_day" value="2"><span>2×</span></label>
+                        <label><input type="radio" name="feeding_meals_per_day" value="3"><span>3×</span></label>
+                        <label><input type="radio" name="feeding_meals_per_day" value="4"><span>4× or more</span></label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>My pet: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="feeding_behaviors" value="eats_immediately"><span>Eats all the food as soon as it is offered</span></label>
+                        <label><input type="checkbox" name="feeding_behaviors" value="nibbles"><span>Nibbles throughout the day</span></label>
+                        <label><input type="checkbox" name="feeding_behaviors" value="returns_later"><span>Does not eat entire meal and returns later</span></label>
+                        <label><input type="checkbox" name="feeding_behaviors" value="hand_fed"><span>Only eats when hand fed</span></label>
+                        <label><input type="checkbox" name="feeding_behaviors" value="begs"><span>Begs for food between meals</span></label>
+                        <label><input type="checkbox" name="feeding_behaviors" value="table_scraps"><span>Receives human food / table scraps</span></label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Has your pet's attitude towards food changed?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="feeding_attitude_changed" value="yes" onclick="document.getElementById('attitude_details').style.display='block'">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="feeding_attitude_changed" value="no" onclick="document.getElementById('attitude_details').style.display='none'">
+                            <span>No</span>
+                        </label>
+                    </div>
+                    <div id="attitude_details" style="display:none; margin-top:12px;">
+                        <textarea name="feeding_attitude_details" placeholder="Please describe what changed..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:80px;"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Does your pet have access to any other food/unmonitored food source?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="feeding_unmonitored" value="yes" onclick="document.getElementById('unmonitored_sources').style.display='block'">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="feeding_unmonitored" value="no" onclick="document.getElementById('unmonitored_sources').style.display='none'">
+                            <span>No</span>
+                        </label>
+                    </div>
+                    <div id="unmonitored_sources" style="display:none; margin-top:12px;">
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="unmonitored_sources" value="treats_neighbors"><span>Treats/food from neighbors, children, friends, etc.</span></label>
+                            <label><input type="checkbox" name="unmonitored_sources" value="steals_bowls"><span>Steals from other pet's food bowls</span></label>
+                            <label><input type="checkbox" name="unmonitored_sources" value="garbage"><span>Gets into garbage, scavenge</span></label>
+                            <label><input type="checkbox" name="unmonitored_sources" value="prey"><span>Catches prey/hunt</span></label>
+                        </div>
+                        <input type="text" name="unmonitored_other" placeholder="Other, specify..." style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px; margin-top:8px;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Good appetite?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="feeding_good_appetite" value="yes"><span>Yes</span></label>
+                        <label><input type="radio" name="feeding_good_appetite" value="sometimes"><span>Sometimes</span></label>
+                        <label><input type="radio" name="feeding_good_appetite" value="no"><span>No</span></label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Has appetite changed recently?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="feeding_appetite_recently" value="increased"><span>Increased</span></label>
+                        <label><input type="radio" name="feeding_appetite_recently" value="same"><span>Stayed the same</span></label>
+                        <label><input type="radio" name="feeding_appetite_recently" value="decreased"><span>Decreased</span></label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Type of feeding bowl used for your pet: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="bowl_types" value="standard"><span>Standard feeding bowl</span></label>
+                        <label><input type="checkbox" name="bowl_types" value="slow_feeder"><span>Slow feeder bowls</span></label>
+                        <label><input type="checkbox" name="bowl_types" value="elevated"><span>Elevated/raised feeding bowls</span></label>
+                        <label><input type="checkbox" name="bowl_types" value="tilted"><span>Tilted feeding bowls</span></label>
+                        <label><input type="checkbox" name="bowl_types" value="anti_spill"><span>Anti-spill/No tip bowls</span></label>
+                        <label><input type="checkbox" name="bowl_types" value="puzzle"><span>Puzzle/Enrichment feeders</span></label>
+                        <label><input type="checkbox" name="bowl_types" value="travel"><span>Travel/Portable bowls</span></label>
+                        <label><input type="checkbox" name="bowl_types" value="special_therapeutic"><span>Special/therapeutic bowls (e.g. Bailey chairs, Lickmats)</span></label>
+                    </div>
+                    <input type="text" name="bowl_type_other" placeholder="Other, please specify..." style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px; margin-top:8px;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select the material of feeding bowls: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="bowl_material" value="stainless_steel"><span>Stainless Steel</span></label>
+                        <label><input type="checkbox" name="bowl_material" value="ceramic"><span>Ceramic</span></label>
+                        <label><input type="checkbox" name="bowl_material" value="plastic"><span>Plastic</span></label>
+                        <label><input type="checkbox" name="bowl_material" value="silicone"><span>Silicone</span></label>
+                    </div>
+                    <input type="text" name="bowl_material_other" placeholder="Other, please specify..." style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px; margin-top:8px;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Type of water bowl used for your pet: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="water_bowl_types" value="standard"><span>Standard water bowl</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="non_spill"><span>Non-spill/No tip water bowl</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="anti_splash"><span>Anti-splash/Splash guard</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="filtered"><span>Filtered water bowls</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="automatic"><span>Automatic water bowls</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="fountain"><span>Water fountains/continuous water flow</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="insulated"><span>Insulated/Cooling water bowls</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="travel"><span>Travel/Portable water bowl</span></label>
+                        <label><input type="checkbox" name="water_bowl_types" value="medical"><span>Medical use water bowls</span></label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select the material of water bowls: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="water_bowl_material" value="stainless_steel"><span>Stainless Steel</span></label>
+                        <label><input type="checkbox" name="water_bowl_material" value="ceramic"><span>Ceramic</span></label>
+                        <label><input type="checkbox" name="water_bowl_material" value="plastic"><span>Plastic</span></label>
+                        <label><input type="checkbox" name="water_bowl_material" value="silicone"><span>Silicone</span></label>
+                    </div>
+                    <input type="text" name="water_bowl_material_other" placeholder="Other, please specify..." style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px; margin-top:8px;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Have you made any recent changes to your pet's diet (in the last 4 weeks)?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="recent_diet_change_4wks" value="yes" onclick="document.getElementById('recent_change_4wks').style.display='block'">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="recent_diet_change_4wks" value="no" onclick="document.getElementById('recent_change_4wks').style.display='none'">
+                            <span>No</span>
+                        </label>
+                    </div>
+                    <div id="recent_change_4wks" style="display:none; margin-top:12px;">
+                        <textarea name="recent_change_4wks_details" placeholder="Please note what the change was and the reason for making it..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:80px;"></textarea>
+                    </div>
+                </div>
+                <!-- Navigation for Step 3 -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(2)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(4)">Next: Preferences →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Food Preferences -->
+                <div class="form-step" id="step-4">
+                <!-- Section 5: Food Preferences -->
+                <h2 class="section-title" style="margin-top: 40px;">Food Preferences</h2>
+                
+                <div class="form-group">
+                    <label>Food preferences: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="food_preferences" value="canned"><span>Canned/Wet food</span></label>
+                        <label><input type="checkbox" name="food_preferences" value="gravy"><span>Gravy</span></label>
+                        <label><input type="checkbox" name="food_preferences" value="dry"><span>Dry food</span></label>
+                        <label><input type="checkbox" name="food_preferences" value="homecooked"><span>Home cooked</span></label>
+                        <label><input type="checkbox" name="food_preferences" value="raw"><span>Raw</span></label>
+                        <label><input type="checkbox" name="food_preferences" value="commercial"><span>Commercial</span></label>
+                        <label><input type="checkbox" name="food_preferences" value="no_preferences"><span>No preferences</span></label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Treat preferences: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="treat_preferences" value="commercial_processed"><span>Commercial processed treats</span></label>
+                        <label><input type="checkbox" name="treat_preferences" value="dehydrated"><span>Dehydrated treats</span></label>
+                        <label><input type="checkbox" name="treat_preferences" value="raw_scraps"><span>Raw food scraps</span></label>
+                        <label><input type="checkbox" name="treat_preferences" value="homemade"><span>Homemade treats</span></label>
+                        <label><input type="checkbox" name="treat_preferences" value="fresh_bones"><span>Fresh bones</span></label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Does your pet refuse any particular foods?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="food_refuses" value="yes" onclick="document.getElementById('refuses_details').style.display='block'">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="food_refuses" value="no" onclick="document.getElementById('refuses_details').style.display='none'">
+                            <span>No</span>
+                        </label>
+                    </div>
+                    <div id="refuses_details" style="display:none; margin-top:12px;">
+                        <textarea name="food_refuses_details" placeholder="Which foods does your pet refuse?" style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:60px;"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>What treats would you prefer in the diet plan?</label>
+                    <textarea name="preferred_treats_in_plan" placeholder="e.g., chicken jerky, carrot sticks, etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Brands you wish to avoid (if any):</label>
+                    <textarea name="brands_to_avoid" placeholder="List brands and reasons (e.g., Royal Canin - caused digestive issues)..." style="min-height:80px;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>What is important for you when choosing your pet's food? <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="food_factors" value="price"><span>Price/value</span></label>
+                        <label><input type="checkbox" name="food_factors" value="convenience"><span>Convenience to purchase</span></label>
+                        <label><input type="checkbox" name="food_factors" value="quality"><span>Quality of ingredients</span></label>
+                        <label><input type="checkbox" name="food_factors" value="skin_coat"><span>Skin/coat health</span></label>
+                        <label><input type="checkbox" name="food_factors" value="dental"><span>Oral/dental care</span></label>
+                        <label><input type="checkbox" name="food_factors" value="stool"><span>Stool quality</span></label>
+                        <label><input type="checkbox" name="food_factors" value="palatability"><span>Palatability</span></label>
+                        <label><input type="checkbox" name="food_factors" value="allergies"><span>Food sensitivity/allergies</span></label>
+                    </div>
+                </div>
+
+                <h2 class="section-title" style="margin-top: 40px;">Food Storage</h2>
+                <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">How do you store opened packets/used pet food?</p>
+                
+                <div style="background:#F5F8F5; border:1.5px solid #D9D4CC; border-radius:10px; padding:24px; margin-bottom:24px;">
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:16px; font-weight:600; font-size:0.9rem; color:#4A7A4F;">
+                        <div>Food Type</div>
+                        <div>Storage Location</div>
+                        <div>Time Period</div>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:12px; align-items:center;">
+                        <div style="font-weight:500;">Dry Food</div>
+                        <input type="text" name="storage_dry_location" placeholder="e.g., airtight container" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        <input type="text" name="storage_dry_period" placeholder="e.g., 1 month" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:12px; align-items:center;">
+                        <div style="font-weight:500;">Wet food/canned food</div>
+                        <input type="text" name="storage_wet_location" placeholder="e.g., refrigerator" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        <input type="text" name="storage_wet_period" placeholder="e.g., 2-3 days" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:12px; align-items:center;">
+                        <div style="font-weight:500;">Raw food</div>
+                        <input type="text" name="storage_raw_location" placeholder="e.g., freezer" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        <input type="text" name="storage_raw_period" placeholder="e.g., 1 month" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:12px; align-items:center;">
+                        <div style="font-weight:500;">Fresh home cooked food</div>
+                        <input type="text" name="storage_homecooked_location" placeholder="e.g., refrigerator" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        <input type="text" name="storage_homecooked_period" placeholder="e.g., 3-4 days" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; align-items:center;">
+                        <div style="font-weight:500;">Dehydrated food</div>
+                        <input type="text" name="storage_dehydrated_location" placeholder="e.g., pantry" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        <input type="text" name="storage_dehydrated_period" placeholder="e.g., 6 months" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                    </div>
+                </div>
+                <!-- Navigation for Step 4 -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(3)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(5)">Next: Diet History →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 5: Diet History -->
+                <div class="form-step" id="step-5">
+                <!-- Section 6: Commercial Diet History (DYNAMIC TABLE) -->
+                <h2 class="section-title" style="margin-top: 40px;">Commercial Diet History</h2>
+                <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">List all commercial foods currently being fed. Click "Add Food" to add multiple foods.</p>
+                
+                <div id="diet-table-container">
+                    <div class="diet-entry" style="background:#F5F8F5; border:1.5px solid #D9D4CC; border-radius:10px; padding:20px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <strong style="color:#4A7A4F;">Food Item #1</strong>
+                            <button type="button" onclick="this.closest('.diet-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                        </div>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Diet Type</label>
+                                <select name="diet_type[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                    <option value="">Select...</option>
+                                    <option value="dry_kibble">Dry Kibble</option>
+                                    <option value="wet_canned">Wet/Canned</option>
+                                    <option value="raw">Raw</option>
+                                    <option value="dehydrated">Dehydrated</option>
+                                    <option value="fresh_frozen">Fresh/Freeze-dried</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Brand</label>
+                                <input type="text" name="diet_brand[]" placeholder="e.g., Royal Canin" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Product Details</label>
+                                <input type="text" name="diet_product[]" placeholder="e.g., Adult Medium Breed" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Amount per day (gm/ml)</label>
+                                <input type="text" name="diet_amount[]" placeholder="e.g., 150gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Meals per day</label>
+                                <input type="number" name="diet_meals[]" placeholder="e.g., 2" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Fed since</label>
+                                <input type="text" name="diet_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" onclick="addDietRow()" style="background:none; border:1.5px dashed #7A9E7E; color:#4A7A4F; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:24px;">+ Add Another Food</button>
+                <h2 class="section-title" style="margin-top: 40px;">Homemade Treat History</h2>
+                <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">List any homemade/human food treats given to your pet.</p>
+                
+                <div id="treat-table-container">
+                    <div class="treat-entry" style="background:#FFF8F0; border:1.5px solid #E8D5B0; border-radius:10px; padding:20px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <strong style="color:#A85E3F;">Treat #1</strong>
+                            <button type="button" onclick="this.closest('.treat-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Ingredient</label>
+                                <input type="text" name="treat_ingredient[]" placeholder="e.g., chicken breast" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Preparation Method</label>
+                                <input type="text" name="treat_preparation[]" placeholder="e.g., boiled" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Quantity per day</label>
+                                <input type="text" name="treat_quantity[]" placeholder="e.g., 50gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Fed since</label>
+                                <input type="text" name="treat_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" onclick="addTreatRow()" style="background:none; border:1.5px dashed #C17A5A; color:#A85E3F; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:24px;">+ Add Another Treat</button>
+                
+                <h2 class="section-title" style="margin-top: 40px;">Supplements</h2>
+                
+                <div class="form-group">
+                    <label>Do you give any dietary supplements? (vitamins, minerals, herbal products, oils, etc.)</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="supplements_given" value="yes" onclick="document.getElementById('supplement_details').style.display='block'">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="supplements_given" value="no" onclick="document.getElementById('supplement_details').style.display='none'">
+                            <span>No</span>
+                        </label>
+                    </div>
+                    <div id="supplement_details" style="display:none; margin-top:16px; background:#F5F8F5; padding:20px; border-radius:10px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+                            <div>
+                                <label style="font-size:0.85rem;">Brand name</label>
+                                <input type="text" name="supplement_brand" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.85rem;">Form</label>
+                                <input type="text" name="supplement_form" placeholder="tablet/powder/liquid" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.85rem;">Amount per day</label>
+                                <input type="text" name="supplement_amount" placeholder="e.g., 1 tablet" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="section-title" style="margin-top: 40px;">Recent Diet Changes (Last 2-3 Months)</h2>
+                
+                <div class="form-group">
+                    <label>Has your pet's diet changed in the last 2-3 months?</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="diet_changed_2_3_months" value="yes" onclick="document.getElementById('diet_changes_2_3').style.display='block'">
+                            <span>Yes</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="diet_changed_2_3_months" value="no" onclick="document.getElementById('diet_changes_2_3').style.display='none'">
+                            <span>No</span>
+                        </label>
+                    </div>
+                    <div id="diet_changes_2_3" style="display:none; margin-top:16px;">
+                        <textarea name="diet_changes_2_3_details" placeholder="Please list all commercial, home prepared diets including all food, snacks, treats and supplements your pet has received in the last 2-3 months..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:100px;"></textarea>
+                    </div>
+                </div>
+
+
+
+                
+                <script>
+                let dietCounter = 1;
+                function addDietRow() {
+                    dietCounter++;
+                    const container = document.getElementById('diet-table-container');
+                    const newEntry = document.createElement('div');
+                    newEntry.className = 'diet-entry';
+                    newEntry.style.cssText = 'background:#F5F8F5; border:1.5px solid #D9D4CC; border-radius:10px; padding:20px; margin-bottom:16px;';
+                    newEntry.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <strong style="color:#4A7A4F;">Food Item #${dietCounter}</strong>
+                            <button type="button" onclick="this.closest('.diet-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                        </div>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Diet Type</label>
+                                <select name="diet_type[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                    <option value="">Select...</option>
+                                    <option value="dry_kibble">Dry Kibble</option>
+                                    <option value="wet_canned">Wet/Canned</option>
+                                    <option value="raw">Raw</option>
+                                    <option value="dehydrated">Dehydrated</option>
+                                    <option value="fresh_frozen">Fresh/Freeze-dried</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Brand</label>
+                                <input type="text" name="diet_brand[]" placeholder="e.g., Royal Canin" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Product Details</label>
+                                <input type="text" name="diet_product[]" placeholder="e.g., Adult Medium Breed" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Amount per day (gm/ml)</label>
+                                <input type="text" name="diet_amount[]" placeholder="e.g., 150gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Meals per day</label>
+                                <input type="number" name="diet_meals[]" placeholder="e.g., 2" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Fed since</label>
+                                <input type="text" name="diet_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(newEntry);
+                }
+                let treatCounter = 1;
+                function addTreatRow() {
+                    treatCounter++;
+                    const container = document.getElementById('treat-table-container');
+                    const newEntry = document.createElement('div');
+                    newEntry.className = 'treat-entry';
+                    newEntry.style.cssText = 'background:#FFF8F0; border:1.5px solid #E8D5B0; border-radius:10px; padding:20px; margin-bottom:16px;';
+                    newEntry.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <strong style="color:#A85E3F;">Treat #${treatCounter}</strong>
+                            <button type="button" onclick="this.closest('.treat-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Ingredient</label>
+                                <input type="text" name="treat_ingredient[]" placeholder="e.g., chicken breast" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Preparation Method</label>
+                                <input type="text" name="treat_preparation[]" placeholder="e.g., boiled" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Quantity per day</label>
+                                <input type="text" name="treat_quantity[]" placeholder="e.g., 50gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Fed since</label>
+                                <input type="text" name="treat_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(newEntry);
+                }
+                </script>
+            <script>
+                let currentStep = 1;
+                
+                function nextStep(step) {
+                    // Hide current step
+                    document.getElementById('step-' + currentStep).classList.remove('active');
+                    
+                    // Mark current as completed
+                    document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('completed');
+                    document.querySelector('.step[data-step="' + currentStep + '"]').classList.remove('active');
+                    
+                    // Show next step
+                    currentStep = step;
+                    document.getElementById('step-' + currentStep).classList.add('active');
+                    
+                    // Update indicator
+                    document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('active');
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                
+                function prevStep(step) {
+                    // Hide current step
+                    document.getElementById('step-' + currentStep).classList.remove('active');
+                    document.querySelector('.step[data-step="' + currentStep + '"]').classList.remove('active');
+                    
+                    // Show previous step
+                    currentStep = step;
+                    document.getElementById('step-' + currentStep).classList.add('active');
+                    document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('active');
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                </script>
+               <!-- Navigation for Step 5 -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(4)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(6)">Next: Medical →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 6: Medical History -->
+                <div class="form-step" id="step-6">
+                    <h2 class="section-title">Medical History</h2>
+                    
+                    <div class="form-group">
+                        <label>Has your pet experienced involuntary weight changes recently?</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="medical_weight_change" value="yes" onclick="document.getElementById('weight_change_details').style.display='block'">
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="medical_weight_change" value="no" onclick="document.getElementById('weight_change_details').style.display='none'">
+                                <span>No</span>
+                            </label>
+                        </div>
+                        <div id="weight_change_details" style="display:none; margin-top:12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                                <div>
+                                    <label style="font-size:0.85rem;">Type</label>
+                                    <select name="medical_weight_type" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                        <option value="">Select...</option>
+                                        <option value="gain">Weight gain</option>
+                                        <option value="loss">Weight loss</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.85rem;">Amount (kg)</label>
+                                    <input type="number" step="0.1" name="medical_weight_amount" placeholder="e.g., 2.5" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.85rem;">Time period</label>
+                                    <input type="text" name="medical_weight_period" placeholder="e.g., last 2 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Check any symptoms your pet is experiencing: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="medical_symptoms" value="difficulty_chewing"><span>Difficulty chewing</span></label>
+                            <label><input type="checkbox" name="medical_symptoms" value="difficulty_swallowing"><span>Difficulty swallowing</span></label>
+                            <label><input type="checkbox" name="medical_symptoms" value="excessive_salivation"><span>Excessive salivation</span></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Is your pet vomiting?</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="medical_vomiting" value="yes" onclick="document.getElementById('vomiting_details').style.display='block'">
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="medical_vomiting" value="no" onclick="document.getElementById('vomiting_details').style.display='none'">
+                                <span>No</span>
+                            </label>
+                        </div>
+                        <div id="vomiting_details" style="display:none; margin-top:12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+                                <div>
+                                    <label style="font-size:0.85rem;">Times per day</label>
+                                    <input type="number" name="medical_vomit_per_day" placeholder="e.g., 2" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.85rem;">Vomit colour</label>
+                                    <input type="text" name="medical_vomit_colour" placeholder="e.g., yellow" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.85rem;">Since when</label>
+                                    <input type="text" name="medical_vomit_since" placeholder="e.g., 1 week" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Has urination changed?</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="medical_urination_changed" value="yes" onclick="document.getElementById('urination_details').style.display='block'">
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="medical_urination_changed" value="no" onclick="document.getElementById('urination_details').style.display='none'">
+                                <span>No</span>
+                            </label>
+                        </div>
+                        <div id="urination_details" style="display:none; margin-top:12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div>
+                                    <label style="font-size:0.85rem;">Change</label>
+                                    <select name="medical_urination_direction" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                        <option value="">Select...</option>
+                                        <option value="increased">Increased</option>
+                                        <option value="decreased">Decreased</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.85rem;">Urine colour (if changed)</label>
+                                    <input type="text" name="medical_urine_colour" placeholder="e.g., dark yellow" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Has drinking changed?</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="medical_drinking_changed" value="yes" onclick="document.getElementById('drinking_details').style.display='block'">
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="medical_drinking_changed" value="no" onclick="document.getElementById('drinking_details').style.display='none'">
+                                <span>No</span>
+                            </label>
+                        </div>
+                        <div id="drinking_details" style="display:none; margin-top:12px;">
+                            <select name="medical_drinking_direction" style="width:100%; max-width:300px; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                <option value="">Select...</option>
+                                <option value="increased">Increased</option>
+                                <option value="decreased">Decreased</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Has stool quality changed?</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="medical_stool_changed" value="yes" onclick="document.getElementById('stool_details').style.display='block'">
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="medical_stool_changed" value="no" onclick="document.getElementById('stool_details').style.display='none'">
+                                <span>No</span>
+                            </label>
+                        </div>
+                        <div id="stool_details" style="display:none; margin-top:12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                                <div>
+                                    <label style="font-size:0.85rem;">Stool colour</label>
+                                    <input type="text" name="medical_stool_colour" placeholder="e.g., dark brown" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.85rem;">Poops per day</label>
+                                    <input type="number" name="medical_poops_per_day" placeholder="e.g., 2" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                </div>
+                            </div>
+                            <label style="font-size:0.85rem; display:block; margin-bottom:8px;">Stool type:</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="medical_stool_types" value="hard"><span>Hard</span></label>
+                                <label><input type="checkbox" name="medical_stool_types" value="soft"><span>Soft</span></label>
+                                <label><input type="checkbox" name="medical_stool_types" value="loose"><span>Loose</span></label>
+                                <label><input type="checkbox" name="medical_stool_types" value="blood"><span>Contains blood</span></label>
+                                <label><input type="checkbox" name="medical_stool_types" value="mucus"><span>Contains mucus</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation for Step 6 -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(5)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(7)">Next: Vaccination →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 7: Vaccination & Primary Vet -->
+                <div class="form-step" id="step-7">
+                    <h2 class="section-title">Vaccination & Prevention Status</h2>
+                    
+                    <div class="form-group">
+                        <label>Yearly vaccinations up to date?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="vacc_yearly" value="yes"><span>Yes</span></label>
+                            <label><input type="radio" name="vacc_yearly" value="no"><span>No</span></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Deworming every 3 months?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="vacc_deworming" value="yes"><span>Yes</span></label>
+                            <label><input type="radio" name="vacc_deworming" value="no"><span>No</span></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Topical tick/flea spot-on treatment:</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="vacc_topical_tick" value="monthly"><span>Every month</span></label>
+                            <label><input type="radio" name="vacc_topical_tick" value="3monthly"><span>Every 3 months</span></label>
+                            <label><input type="radio" name="vacc_topical_tick" value="no"><span>No</span></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Oral tick/flea preventive:</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="vacc_oral_tick" value="monthly"><span>Every month</span></label>
+                            <label><input type="radio" name="vacc_oral_tick" value="6monthly"><span>Every 6 months</span></label>
+                            <label><input type="radio" name="vacc_oral_tick" value="no"><span>No</span></label>
+                        </div>
+                    </div>
+                    
+                    <h2 class="section-title" style="margin-top:40px;">Primary Veterinarian Information</h2>
+                    
+                    <div class="form-group">
+                        <label>Veterinarian Name <span class="required">*</span></label>
+                        <input type="text" name="vet_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Practice Name / Location <span class="required">*</span></label>
+                        <input type="text" name="vet_practice" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Clinic Phone <span class="required">*</span></label>
+                        <input type="tel" name="vet_phone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Clinic Email <span class="required">*</span></label>
+                        <input type="email" name="vet_email" required>
+                    </div>
+                    
+                    <!-- Navigation for Step 7 -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(6)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(8)">Next: Consent →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 8: Consent Form -->
+                <div class="form-step" id="step-8">
+                    <h2 class="section-title">Consultation Consent Form</h2>
+                    
+                    <div style="background:#FFFBF5; border:1.5px solid #E8D5B0; border-radius:12px; padding:24px; margin-bottom:24px; max-height:500px; overflow-y:auto;">
+                        <h3 style="color:#8B6914; font-size:1.1rem; margin-bottom:16px;">Consent for In-Person/Remote Clinical Nutrition Consultations</h3>
+                        <div style="font-size:0.85rem; line-height:1.7; color:#2C2C2C;">
+                            <p style="margin-bottom:12px;"><strong>1. Owner Authorization:</strong> I, the undersigned, do hereby certify that I am the owner (or authorized agent of the owner) of this animal and that I am 18 years of age or older; and have the authorization to consent to treatment if and when it is needed.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>2. Treatment Authorization:</strong> I hereby authorize Poshtik Nutrivet, their doctors(s), to recommend/advise the medical or surgical procedures, sedation, anesthesia, x-ray examination, diagnostic procedures, prescribe drugs, or such treatment which the clinician deems necessary.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>3. No Guarantee Acknowledgment:</strong> I understand that the practice of veterinary medicine and surgery is not an exact science, and I acknowledge that no guarantees have been made to me as to the result of treatments and examination. By signing this agreement, I authorize Poshtik Nutivet's doctor(s) and staff to provide clinical nutritional care they consider reasonable and necessary for my animal, and I consent to any such services. I understand that with any medical recommendation there are always risks involved, including death, and that no warranty or guarantee is being made as to the results or cure.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>4. Primary Care Coordination:</strong> I am aware that Poshtik Nutrivet is committed to working with my primary care/referring veterinarian and providing the best care available to my pet. I understand that Dr. Eunice Thomas will only treat my pet for the condition or for the problems associated with my pet's nutritional needs. I also understand that my pet's medical records will be sent to my primary care/referring veterinarian. I agree to the acknowledgement and disclosure stated above, based on my choice of consultation.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>5. Consultation Method Preference:</strong> I am aware and acknowledge that any consultation for my pet is most preferred as an in-person consult in which the veterinary nutritionist can physically examine my pet. I am aware that only video or phone consults for my pet is not a preferred method to get the best possible clinical outcome for my pet. I am still willing to opt for an online video/phone consult fully aware of possible failure(s) and an unacceptable outcome in my pet's treatment at my own risk.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>6. Educational Activities:</strong> I understand and agree that Poshtik Nutrivet is involved in educational activities and that faculty, residents, interns and students will be involved in my animal's care.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>7. Release of Information:</strong> I authorize the release of medical information to the concerned Insurance Company, their agents or representatives in order to process any claims or applications for insurance. I further authorize the release of medical information to my Primary Veterinarian. I will return to my primary care veterinarian for all routine veterinary care.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>8. Liability Release:</strong> By signing this form, I hereby declare my understanding and accept the guidelines set forth in the care for my pet. I am fully releasing the veterinarian(s) and staff from any liability or damages, should any occur during the period of assessment, treatment and care of my pet.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>9. Photography/Videos/Audio:</strong> If I submit photographs/video/audio recordings of my animal, I hereby authorize Poshtik Nutrivet to take and use or permit other persons assigned to use the images, videos, or sound recordings prepared therefrom for such purposes and in such manner as may be deemed necessary, including but not limited to use on their website, social media platforms, for promotional, educational, research or public informational purposes related to their services and the animal and/or owner will not be identified by name. I understand that no compensation will be provided for the use of these images/videos and that Poshtik Nutrivet/Dr Eunice Thomas may use them without further notice to me.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>10. Defamation:</strong> I agree that circulation of defamatory comments about the Veterinarian/Poshtik Nutrivet on any social media platform(s)/WhatsApp group(s) amounts to the offence of defamation, warranting the Veterinarian to take legal action.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>11. Payment Terms:</strong> I agree to accept responsibility for the payment of all consultations/services rendered. I understand that the professional services are to be paid at the time of booking of appointment. I understand that I will be financially responsible for all the services provided by Poshtik Nutrivet, including all nutrition plan(s) provided to me for my pet at in-person consults or over the phone/online consult(s). Should it become necessary to collect this account through an attorney, the undersigned agrees to pay all costs of collections, including reasonable attorney fee, payment required when services rendered, service charge levied for all returned checks, interest may be charged at a rate of 1.5% per month (10% per annum) for all accounts with outstanding balances.</p>
+                            
+                            <p style="margin-bottom:12px;"><strong>12. Understanding and Acceptance:</strong> The undersigned certifies that he/she has read the foregoing or has had the foregoing read to him/her, and that he/she understands and fully accepts its terms.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div style="background:#F5F8F5; border:1.5px solid #7A9E7E; border-radius:10px; padding:20px;">
+                            <label style="display:flex; align-items:flex-start; gap:12px; cursor:pointer; margin-bottom:0;">
+                                <input type="checkbox" name="consent_agreed" value="yes" required style="width:20px; height:20px; margin-top:2px; flex-shrink:0;">
+                                <span style="font-size:0.9rem; line-height:1.5;">
+                                    <strong>I have read and agree to the above terms and conditions.</strong><br>
+                                    <span style="color:#6B6B6B; font-size:0.8rem;">By checking this box, you are providing your digital consent to proceed with the consultation.</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Full Name (for consent) <span class="required">*</span></label>
+                        <input type="text" name="consent_name" required placeholder="Type your full name to confirm">
+                    </div>
+                    
+                    <div style="background:#E8F4F8; border:1px solid #B8D4E8; border-radius:10px; padding:16px; margin:24px 0;">
+                        <p style="font-size:0.85rem; color:#2C2C2C; margin-bottom:8px;"><strong>📋 Important Reminders:</strong></p>
+                        <ul style="font-size:0.82rem; color:#6B6B6B; margin-left:20px; line-height:1.6;">
+                            <li>Blood reports (CBC, biochemistry) must be from Veterinary Diagnostic Laboratories only</li>
+                            <li>Blood test reports are valid for 1 month</li>
+                            <li>Stool and urine reports are valid for 7 days only</li>
+                            <li>You will receive a confirmation email with your Case ID after submission</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Final Navigation -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(7)">← Previous</button>
+                        <button type="submit" class="btn-next">Submit Form ✓</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
