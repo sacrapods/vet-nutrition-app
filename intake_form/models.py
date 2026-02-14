@@ -617,10 +617,10 @@ class DiagnosticImaging(models.Model):
 class ConsentForm(models.Model):
     """Consultation consent"""
     pet_parent = models.OneToOneField(PetParent, on_delete=models.CASCADE, related_name='consent')
-    
+
     agreed = models.BooleanField(default=False)
     date_signed = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"Consent - {self.pet_parent.name}"
 
@@ -628,11 +628,58 @@ class ConsentForm(models.Model):
 class DietPlanPreferences(models.Model):
     """Preferred diet plan type"""
     pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='diet_preferences')
-    
+
     preferences = models.TextField(blank=True, help_text="Comma-separated: dry_kibble, wet_only, combination, homecooked, etc.")
-    
+
     def __str__(self):
         return f"Diet Preferences - {self.pet.name}"
+
+
+class AdviceSource(models.Model):
+    """Q20 - Who is your go-to source of advice for pet care"""
+    pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='advice_source')
+
+    sources = models.TextField(blank=True, help_text="Comma-separated: veterinarian, breeder, pet_store, friend_family, book_magazine, internet")
+    other_source = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"Advice Source - {self.pet.name}"
+
+
+class ChronicCondition(models.Model):
+    """Q43 - Chronic conditions diagnosed"""
+    pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='chronic_condition')
+
+    has_chronic = models.BooleanField(default=False)
+    details = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Chronic Condition - {self.pet.name}"
+
+
+class BrandToAvoid(models.Model):
+    """Q17 - Pet food brands to avoid (dynamic table)"""
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='brands_to_avoid')
+
+    brand_name = models.CharField(max_length=200)
+    reason = models.CharField(max_length=300, blank=True)
+
+    def __str__(self):
+        return f"{self.brand_name} - {self.pet.name}"
+
+    class Meta:
+        verbose_name = "Brand To Avoid"
+        verbose_name_plural = "Brands To Avoid"
+
+
+class TreatPreferenceInPlan(models.Model):
+    """Q16 - Treats preferred in diet plan"""
+    pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='treat_plan_preferences')
+
+    preferences = models.TextField(blank=True, help_text="Comma-separated: commercial_store, dehydrated, raw_bone, homemade_cooked")
+
+    def __str__(self):
+        return f"Treat Plan Preferences - {self.pet.name}"
 
 
 # ═══════════════════════════════════════════════════════

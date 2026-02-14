@@ -317,14 +317,18 @@
                     </div>
                     <div class="step" data-step="6">
                         <div class="step-number">6</div>
-                        <div class="step-label">Medical</div>
+                        <div class="step-label">Fitness</div>
                     </div>
                     <div class="step" data-step="7">
                         <div class="step-number">7</div>
-                        <div class="step-label">Vaccination</div>
+                        <div class="step-label">Medical</div>
                     </div>
                     <div class="step" data-step="8">
                         <div class="step-number">8</div>
+                        <div class="step-label">Vaccination</div>
+                    </div>
+                    <div class="step" data-step="9">
+                        <div class="step-number">9</div>
                         <div class="step-label">Consent</div>
                     </div>
                 </div>
@@ -765,10 +769,36 @@
                     <textarea name="preferred_treats_in_plan" placeholder="e.g., chicken jerky, carrot sticks, etc."></textarea>
                 </div>
 
+                <!-- Q16: Treats preferred in diet plan -->
                 <div class="form-group">
-                    <label>Brands you wish to avoid (if any):</label>
-                    <textarea name="brands_to_avoid" placeholder="List brands and reasons (e.g., Royal Canin - caused digestive issues)..." style="min-height:80px;"></textarea>
+                    <label>Which treats would you prefer to be included in this plan? <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="treat_plan_preferences" value="commercial_store"><span>Commercial/Store bought treats</span></label>
+                        <label><input type="checkbox" name="treat_plan_preferences" value="dehydrated"><span>Dehydrated treats</span></label>
+                        <label><input type="checkbox" name="treat_plan_preferences" value="raw_bone"><span>Raw bone/meats</span></label>
+                        <label><input type="checkbox" name="treat_plan_preferences" value="homemade_cooked"><span>Homemade cooked treats</span></label>
+                    </div>
                 </div>
+
+                <!-- Q17: Brands to avoid (dynamic table) -->
+                <h2 class="section-title" style="margin-top: 40px;">Brands to Avoid</h2>
+                <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">Mention pet food brands you would wish to avoid in your pet's customized diet plan.</p>
+                <div id="brand-avoid-container">
+                    <div class="brand-avoid-entry" style="background:#FFF5F5; border:1.5px solid #E8C0B0; border-radius:10px; padding:16px; margin-bottom:12px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:12px; align-items:end;">
+                            <div>
+                                <label style="font-size:0.85rem;">Brand Name</label>
+                                <input type="text" name="avoid_brand_name[]" placeholder="e.g., Brand X" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.85rem;">Reason</label>
+                                <input type="text" name="avoid_brand_reason[]" placeholder="e.g., digestive issues" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <button type="button" onclick="this.closest('.brand-avoid-entry').remove()" style="background:#C0392B; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; height:38px;">X</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="addBrandAvoidRow()" style="background:none; border:1.5px dashed #C17A5A; color:#A85E3F; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:24px;">+ Add Another Brand</button>
                 
                 <div class="form-group">
                     <label>What is important for you when choosing your pet's food? <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
@@ -782,6 +812,21 @@
                         <label><input type="checkbox" name="food_factors" value="palatability"><span>Palatability</span></label>
                         <label><input type="checkbox" name="food_factors" value="allergies"><span>Food sensitivity/allergies</span></label>
                     </div>
+                </div>
+
+                <!-- Q20: Advice Source -->
+                <h2 class="section-title" style="margin-top: 40px;">Source of Advice</h2>
+                <div class="form-group">
+                    <label>Who is your go-to source of advice for your pet's care? <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="advice_sources" value="veterinarian"><span>Veterinarian</span></label>
+                        <label><input type="checkbox" name="advice_sources" value="breeder"><span>Breeder</span></label>
+                        <label><input type="checkbox" name="advice_sources" value="pet_store"><span>Pet store</span></label>
+                        <label><input type="checkbox" name="advice_sources" value="friend_family"><span>Friend/family</span></label>
+                        <label><input type="checkbox" name="advice_sources" value="book_magazine"><span>Book/magazine</span></label>
+                        <label><input type="checkbox" name="advice_sources" value="internet"><span>Internet</span></label>
+                    </div>
+                    <input type="text" name="advice_source_other" placeholder="Other, specify..." style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px; margin-top:8px;">
                 </div>
 
                 <h2 class="section-title" style="margin-top: 40px;">Food Storage</h2>
@@ -878,17 +923,108 @@
                             </div>
                             
                             <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Food Topper Details (if any)</label>
+                                <input type="text" name="diet_topper[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Topper Amount per meal (gm/ml)</label>
+                                <input type="text" name="diet_topper_amount[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
                                 <label style="font-size:0.85rem;">Fed since</label>
                                 <input type="text" name="diet_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Reason (if stopped)</label>
+                                <input type="text" name="diet_reason_stopped[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <button type="button" onclick="addDietRow()" style="background:none; border:1.5px dashed #7A9E7E; color:#4A7A4F; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:24px;">+ Add Another Food</button>
+
+                <!-- HOMEMADE DIET HISTORY (dynamic table) -->
+                <h2 class="section-title" style="margin-top: 40px;">Homemade Diet History</h2>
+                <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">If your pet is eating a homemade diet, specify ingredients, cooking method, and amounts.</p>
+                <div id="hd-table-container">
+                    <div class="hd-entry" style="background:#F5F0FF; border:1.5px solid #C8B8E8; border-radius:10px; padding:20px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <strong style="color:#6B4FA0;">Homemade Item #1</strong>
+                            <button type="button" onclick="this.closest('.hd-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Ingredient/Food Item</label>
+                                <input type="text" name="hd_ingredient[]" placeholder="e.g., chicken breast" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Raw Quantity per day (gm/ml)</label>
+                                <input type="text" name="hd_quantity[]" placeholder="e.g., 200gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Preparation Method</label>
+                                <input type="text" name="hd_preparation[]" placeholder="e.g., boiled, baked" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Feed Frequency (per day)</label>
+                                <input type="number" name="hd_frequency[]" placeholder="e.g., 2" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Fed Since</label>
+                                <input type="text" name="hd_since[]" placeholder="e.g., 3 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Reason (if stopped)</label>
+                                <input type="text" name="hd_reason_stopped[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="addHomemadeDietRow()" style="background:none; border:1.5px dashed #6B4FA0; color:#6B4FA0; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:24px;">+ Add Another Homemade Item</button>
+
+                <!-- COMMERCIAL TREAT HISTORY (dynamic table) -->
+                <h2 class="section-title" style="margin-top: 40px;">Commercial Treat History</h2>
+                <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">List all commercial treats being fed.</p>
+                <div id="ct-table-container">
+                    <div class="ct-entry" style="background:#FFF8E8; border:1.5px solid #E8D090; border-radius:10px; padding:20px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <strong style="color:#A08020;">Commercial Treat #1</strong>
+                            <button type="button" onclick="this.closest('.ct-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Treat Type</label>
+                                <input type="text" name="ct_type[]" placeholder="e.g., dental chew" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Brand</label>
+                                <input type="text" name="ct_brand[]" placeholder="e.g., Pedigree" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Product Details</label>
+                                <input type="text" name="ct_product[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Quantity per day (g/ml)</label>
+                                <input type="text" name="ct_quantity[]" placeholder="e.g., 30g" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Fed Since</label>
+                                <input type="text" name="ct_since[]" placeholder="e.g., 1 year" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Reason (if stopped)</label>
+                                <input type="text" name="ct_reason_stopped[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="addCommercialTreatRow()" style="background:none; border:1.5px dashed #A08020; color:#A08020; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:24px;">+ Add Another Commercial Treat</button>
+
                 <h2 class="section-title" style="margin-top: 40px;">Homemade Treat History</h2>
                 <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">List any homemade/human food treats given to your pet.</p>
-                
+
                 <div id="treat-table-container">
                     <div class="treat-entry" style="background:#FFF8F0; border:1.5px solid #E8D5B0; border-radius:10px; padding:20px; margin-bottom:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -897,23 +1033,28 @@
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                             <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Treat Type/Form</label>
+                                <input type="text" name="treat_type_form[]" placeholder="e.g., biscuit, chunk" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
                                 <label style="font-size:0.85rem;">Ingredient</label>
                                 <input type="text" name="treat_ingredient[]" placeholder="e.g., chicken breast" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
-                            
                             <div class="form-group" style="margin-bottom:12px;">
                                 <label style="font-size:0.85rem;">Preparation Method</label>
                                 <input type="text" name="treat_preparation[]" placeholder="e.g., boiled" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
-                            
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Quantity per day</label>
+                                <label style="font-size:0.85rem;">Quantity per day (g/ml)</label>
                                 <input type="text" name="treat_quantity[]" placeholder="e.g., 50gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
-                            
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Fed since</label>
+                                <label style="font-size:0.85rem;">Fed Since</label>
                                 <input type="text" name="treat_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Reason (if stopped)</label>
+                                <input type="text" name="treat_reason_stopped[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                         </div>
                     </div>
@@ -922,7 +1063,7 @@
                 <button type="button" onclick="addTreatRow()" style="background:none; border:1.5px dashed #C17A5A; color:#A85E3F; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:24px;">+ Add Another Treat</button>
                 
                 <h2 class="section-title" style="margin-top: 40px;">Supplements</h2>
-                
+
                 <div class="form-group">
                     <label>Do you give any dietary supplements? (vitamins, minerals, herbal products, oils, etc.)</label>
                     <div class="radio-group">
@@ -935,26 +1076,43 @@
                             <span>No</span>
                         </label>
                     </div>
-                    <div id="supplement_details" style="display:none; margin-top:16px; background:#F5F8F5; padding:20px; border-radius:10px;">
-                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-                            <div>
-                                <label style="font-size:0.85rem;">Brand name</label>
-                                <input type="text" name="supplement_brand" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
-                            </div>
-                            <div>
-                                <label style="font-size:0.85rem;">Form</label>
-                                <input type="text" name="supplement_form" placeholder="tablet/powder/liquid" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
-                            </div>
-                            <div>
-                                <label style="font-size:0.85rem;">Amount per day</label>
-                                <input type="text" name="supplement_amount" placeholder="e.g., 1 tablet" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                    <div id="supplement_details" style="display:none; margin-top:16px;">
+                        <div id="supplement-table-container">
+                            <div class="supp-entry" style="background:#F5F8F5; border:1.5px solid #B8D4B8; border-radius:10px; padding:16px; margin-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <strong style="color:#4A7A4F;">Supplement #1</strong>
+                                    <button type="button" onclick="this.closest('.supp-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+                                    <div>
+                                        <label style="font-size:0.85rem;">Brand name</label>
+                                        <input type="text" name="supplement_brand[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.85rem;">Form</label>
+                                        <input type="text" name="supplement_form[]" placeholder="tablet/powder/liquid" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.85rem;">Amount</label>
+                                        <input type="text" name="supplement_amount[]" placeholder="e.g., 500mg" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.85rem;"># per day</label>
+                                        <input type="number" name="supplement_per_day[]" placeholder="e.g., 1" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.85rem;">Fed Since</label>
+                                        <input type="text" name="supplement_since[]" placeholder="e.g., 2 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <button type="button" onclick="addSupplementRow()" style="background:none; border:1.5px dashed #7A9E7E; color:#4A7A4F; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; margin-bottom:12px;">+ Add Another Supplement</button>
                     </div>
                 </div>
                 
                 <h2 class="section-title" style="margin-top: 40px;">Recent Diet Changes (Last 2-3 Months)</h2>
-                
+
                 <div class="form-group">
                     <label>Has your pet's diet changed in the last 2-3 months?</label>
                     <div class="radio-group">
@@ -968,7 +1126,26 @@
                         </label>
                     </div>
                     <div id="diet_changes_2_3" style="display:none; margin-top:16px;">
-                        <textarea name="diet_changes_2_3_details" placeholder="Please list all commercial, home prepared diets including all food, snacks, treats and supplements your pet has received in the last 2-3 months..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:100px;"></textarea>
+                        <p style="color:#6B6B6B; font-size:0.85rem; margin-bottom:12px;">List all food, snacks, treats and supplements received in the last 2-3 months.</p>
+                        <div id="rdc-table-container">
+                            <div class="rdc-entry" style="background:#F0F5FF; border:1.5px solid #B0C4E8; border-radius:10px; padding:16px; margin-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <strong style="color:#2060A0;">Change #1</strong>
+                                    <button type="button" onclick="this.closest('.rdc-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                    <div><label style="font-size:0.85rem;">Brand</label><input type="text" name="rdc_brand[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;">Product / Food Ingredient</label><input type="text" name="rdc_product[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;">Form / Type</label><input type="text" name="rdc_form[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;">Amount per day (gm/ml)</label><input type="text" name="rdc_amount[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;"># of meals per day</label><input type="number" name="rdc_meals[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;">Start date</label><input type="text" name="rdc_start[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;">Stop date</label><input type="text" name="rdc_stop[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;">Reason stopped</label><input type="text" name="rdc_reason[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addRdcRow()" style="background:none; border:1.5px dashed #2060A0; color:#2060A0; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; width:100%;">+ Add Another Change</button>
                     </div>
                 </div>
 
@@ -1023,13 +1200,89 @@
                             </div>
                             
                             <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Food Topper Details (if any)</label>
+                                <input type="text" name="diet_topper[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Topper Amount per meal (gm/ml)</label>
+                                <input type="text" name="diet_topper_amount[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
                                 <label style="font-size:0.85rem;">Fed since</label>
                                 <input type="text" name="diet_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Reason (if stopped)</label>
+                                <input type="text" name="diet_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                         </div>
                     `;
                     container.appendChild(newEntry);
                 }
+                let hdCounter = 1;
+                function addHomemadeDietRow() {
+                    hdCounter++;
+                    const container = document.getElementById('hd-table-container');
+                    const e = document.createElement('div');
+                    e.className = 'hd-entry';
+                    e.style.cssText = 'background:#F5F0FF; border:1.5px solid #C8B8E8; border-radius:10px; padding:20px; margin-bottom:16px;';
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><strong style="color:#6B4FA0;">Homemade Item #${hdCounter}</strong><button type="button" onclick="this.closest('.hd-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Ingredient/Food Item</label><input type="text" name="hd_ingredient[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Raw Quantity per day (gm/ml)</label><input type="text" name="hd_quantity[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Preparation Method</label><input type="text" name="hd_preparation[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Feed Frequency (per day)</label><input type="number" name="hd_frequency[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="hd_since[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Reason (if stopped)</label><input type="text" name="hd_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
+                    container.appendChild(e);
+                }
+
+                let ctCounter = 1;
+                function addCommercialTreatRow() {
+                    ctCounter++;
+                    const container = document.getElementById('ct-table-container');
+                    const e = document.createElement('div');
+                    e.className = 'ct-entry';
+                    e.style.cssText = 'background:#FFF8E8; border:1.5px solid #E8D090; border-radius:10px; padding:20px; margin-bottom:16px;';
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><strong style="color:#A08020;">Commercial Treat #${ctCounter}</strong><button type="button" onclick="this.closest('.ct-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Treat Type</label><input type="text" name="ct_type[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Brand</label><input type="text" name="ct_brand[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Product Details</label><input type="text" name="ct_product[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Quantity per day (g/ml)</label><input type="text" name="ct_quantity[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="ct_since[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Reason (if stopped)</label><input type="text" name="ct_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
+                    container.appendChild(e);
+                }
+
+                let suppCounter = 1;
+                function addSupplementRow() {
+                    suppCounter++;
+                    const container = document.getElementById('supplement-table-container');
+                    const e = document.createElement('div');
+                    e.className = 'supp-entry';
+                    e.style.cssText = 'background:#F5F8F5; border:1.5px solid #B8D4B8; border-radius:10px; padding:16px; margin-bottom:12px;';
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><strong style="color:#4A7A4F;">Supplement #${suppCounter}</strong><button type="button" onclick="this.closest('.supp-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;"><div><label style="font-size:0.85rem;">Brand name</label><input type="text" name="supplement_brand[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Form</label><input type="text" name="supplement_form[]" placeholder="tablet/powder/liquid" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Amount</label><input type="text" name="supplement_amount[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;"># per day</label><input type="number" name="supplement_per_day[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="supplement_since[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
+                    container.appendChild(e);
+                }
+
+                let rdcCounter = 1;
+                function addRdcRow() {
+                    rdcCounter++;
+                    const container = document.getElementById('rdc-table-container');
+                    const e = document.createElement('div');
+                    e.className = 'rdc-entry';
+                    e.style.cssText = 'background:#F0F5FF; border:1.5px solid #B0C4E8; border-radius:10px; padding:16px; margin-bottom:12px;';
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><strong style="color:#2060A0;">Change #${rdcCounter}</strong><button type="button" onclick="this.closest('.rdc-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"><div><label style="font-size:0.85rem;">Brand</label><input type="text" name="rdc_brand[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Product / Food Ingredient</label><input type="text" name="rdc_product[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Form / Type</label><input type="text" name="rdc_form[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Amount per day (gm/ml)</label><input type="text" name="rdc_amount[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;"># of meals per day</label><input type="number" name="rdc_meals[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Start date</label><input type="text" name="rdc_start[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Stop date</label><input type="text" name="rdc_stop[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Reason stopped</label><input type="text" name="rdc_reason[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
+                    container.appendChild(e);
+                }
+
+                function addBrandAvoidRow() {
+                    const container = document.getElementById('brand-avoid-container');
+                    const e = document.createElement('div');
+                    e.className = 'brand-avoid-entry';
+                    e.style.cssText = 'background:#FFF5F5; border:1.5px solid #E8C0B0; border-radius:10px; padding:16px; margin-bottom:12px;';
+                    e.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr auto; gap:12px; align-items:end;"><div><label style="font-size:0.85rem;">Brand Name</label><input type="text" name="avoid_brand_name[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Reason</label><input type="text" name="avoid_brand_reason[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><button type="button" onclick="this.closest('.brand-avoid-entry').remove()" style="background:#C0392B; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; height:38px;">X</button></div>`;
+                    container.appendChild(e);
+                }
+
+                let arCounter = 1;
+                function addAdverseReactionRow() {
+                    arCounter++;
+                    const container = document.getElementById('ar-table-container');
+                    const e = document.createElement('div');
+                    e.className = 'ar-entry';
+                    e.style.cssText = 'background:#FFF0F0; border:1.5px solid #E8B0B0; border-radius:10px; padding:16px; margin-bottom:12px;';
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><strong style="color:#A02020;">Reaction #${arCounter}</strong><button type="button" onclick="this.closest('.ar-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"><div><label style="font-size:0.85rem;">Brand</label><input type="text" name="ar_brand[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Product/Food Ingredient/Medication</label><input type="text" name="ar_product[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Form/Type</label><input type="text" name="ar_form[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="ar_since[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div style="grid-column:span 2;"><label style="font-size:0.85rem;">Details of reaction/Symptoms</label><textarea name="ar_symptoms[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:60px;"></textarea></div></div>`;
+                    container.appendChild(e);
+                }
+
                 let treatCounter = 1;
                 function addTreatRow() {
                     treatCounter++;
@@ -1044,23 +1297,28 @@
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                             <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Treat Type/Form</label>
+                                <input type="text" name="treat_type_form[]" placeholder="e.g., biscuit, chunk" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
                                 <label style="font-size:0.85rem;">Ingredient</label>
                                 <input type="text" name="treat_ingredient[]" placeholder="e.g., chicken breast" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
-                            
                             <div class="form-group" style="margin-bottom:12px;">
                                 <label style="font-size:0.85rem;">Preparation Method</label>
                                 <input type="text" name="treat_preparation[]" placeholder="e.g., boiled" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
-                            
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Quantity per day</label>
+                                <label style="font-size:0.85rem;">Quantity per day (g/ml)</label>
                                 <input type="text" name="treat_quantity[]" placeholder="e.g., 50gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
-                            
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Fed since</label>
+                                <label style="font-size:0.85rem;">Fed Since</label>
                                 <input type="text" name="treat_since[]" placeholder="e.g., 6 months" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.85rem;">Reason (if stopped)</label>
+                                <input type="text" name="treat_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                         </div>
                     `;
@@ -1103,15 +1361,207 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
                 </script>
+                <!-- Diet Plan Preferences -->
+                <h2 class="section-title" style="margin-top: 40px;">Diet Plan Preferences</h2>
+                <p style="color:#6B6B6B; font-size:0.9rem; margin-bottom:16px;">If you are requesting a diet plan, please select your preference(s):</p>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="diet_plan_preferences" value="dry_kibble_only"><span>Dry Kibble only</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="wet_canned_only"><span>Wet/canned only</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="combo_dry_wet"><span>A combination of both commercial dry (kibble) and wet (canned) food</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="combo_wet_homecooked"><span>A combination of commercial diet (wet) and homecooked food</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="combo_dry_homecooked"><span>A combination of commercial diet (dry) and homecooked food</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="only_homecooked"><span>Only home-cooked food</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="avoid_commercial"><span>Avoid commercial diets</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="include_commercial_treats"><span>Include commercial treats</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="avoid_commercial_treats"><span>Avoid commercial treats</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="include_homecooked_treats"><span>Include home cooked treats</span></label>
+                        <label><input type="checkbox" name="diet_plan_preferences" value="unsure"><span>Unsure</span></label>
+                    </div>
+                </div>
+
                <!-- Navigation for Step 5 -->
                     <div class="form-navigation">
                         <button type="button" class="btn-prev" onclick="prevStep(4)">← Previous</button>
-                        <button type="button" class="btn-next" onclick="nextStep(6)">Next: Medical →</button>
+                        <button type="button" class="btn-next" onclick="nextStep(6)">Next: Fitness →</button>
                     </div>
                 </div>
                 
-                <!-- Step 6: Medical History -->
+                <!-- Step 6: Fitness & Activity -->
                 <div class="form-step" id="step-6">
+                    <h2 class="section-title">Fitness & Activity</h2>
+
+                    <div class="form-group">
+                        <label>How active is your pet?</label>
+                        <div class="radio-group" style="flex-direction:column;">
+                            <label><input type="radio" name="activity_level" value="very_active"><span>Very active/athlete (daily hikes, training, sports, working dog)</span></label>
+                            <label><input type="radio" name="activity_level" value="high"><span>High (back yard play, daily long walks or dog park)</span></label>
+                            <label><input type="radio" name="activity_level" value="moderate"><span>Moderate (short daily walks, regular back yard play)</span></label>
+                            <label><input type="radio" name="activity_level" value="average"><span>Average walks occasionally, no strenuous exercise</span></label>
+                            <label><input type="radio" name="activity_level" value="hardly_moves"><span>Hardly moves (unable to tolerate any strenuous activity)</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>How much exercise does your pet get each day?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="exercise_duration" value="never"><span>Never</span></label>
+                            <label><input type="radio" name="exercise_duration" value="not_every_day"><span>Not every day</span></label>
+                            <label><input type="radio" name="exercise_duration" value="lt_15min"><span>&lt;15mins</span></label>
+                            <label><input type="radio" name="exercise_duration" value="lt_30min"><span>&lt;30mins</span></label>
+                            <label><input type="radio" name="exercise_duration" value="lt_45min"><span>&lt;45mins</span></label>
+                            <label><input type="radio" name="exercise_duration" value="lt_1hr"><span>&lt;1 hour</span></label>
+                            <label><input type="radio" name="exercise_duration" value="gt_1hr"><span>&gt;1 hour</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>How often is your pet leash walked on average?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="leash_walk_frequency" value="never"><span>Never</span></label>
+                            <label><input type="radio" name="leash_walk_frequency" value="lt_1x"><span>&lt;1x/day</span></label>
+                            <label><input type="radio" name="leash_walk_frequency" value="1_2x"><span>1-2x/day</span></label>
+                            <label><input type="radio" name="leash_walk_frequency" value="gt_3x"><span>&gt;3x/day</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Does your pet have free access to a fenced yard/garden?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="fenced_yard" value="yes"><span>Yes</span></label>
+                            <label><input type="radio" name="fenced_yard" value="no"><span>No</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>My pet is a:</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="urban_rural" value="urban"><span>Urban based pet</span></label>
+                            <label><input type="radio" name="urban_rural" value="rural"><span>Rural based</span></label>
+                            <label><input type="radio" name="urban_rural" value="both"><span>Mix of both</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>My pet is my travel buddy:</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="travel_buddy" value="yes" onclick="document.getElementById('travel_modes_div').style.display='block'"><span>Yes</span></label>
+                            <label><input type="radio" name="travel_buddy" value="no" onclick="document.getElementById('travel_modes_div').style.display='none'"><span>No</span></label>
+                            <label><input type="radio" name="travel_buddy" value="sometimes" onclick="document.getElementById('travel_modes_div').style.display='block'"><span>Sometimes</span></label>
+                        </div>
+                        <div id="travel_modes_div" style="display:none; margin-top:12px;">
+                            <input type="text" name="travel_modes" placeholder="Modes of transport used..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Describe the exercise: <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="exercise_types" value="run"><span>Run</span></label>
+                            <label><input type="checkbox" name="exercise_types" value="walk"><span>Walk</span></label>
+                            <label><input type="checkbox" name="exercise_types" value="fetch"><span>Fetch</span></label>
+                            <label><input type="checkbox" name="exercise_types" value="pulling"><span>Pulling</span></label>
+                            <label><input type="checkbox" name="exercise_types" value="agility"><span>Agility</span></label>
+                            <label><input type="checkbox" name="exercise_types" value="swimming"><span>Swimming</span></label>
+                        </div>
+                    </div>
+
+                    <!-- Activity Details Table (Q28) -->
+                    <h2 class="section-title" style="margin-top: 30px;">Daily Activity Details</h2>
+                    <div style="background:#F5F8F5; border:1.5px solid #D9D4CC; border-radius:10px; padding:24px; margin-bottom:24px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:12px; font-weight:600; font-size:0.9rem; color:#4A7A4F;">
+                            <div>Activity Type</div><div>Time (mins) / Distance</div><div>Frequency / week</div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:10px; align-items:center;">
+                            <div style="font-weight:500;">Run</div>
+                            <input type="text" name="activity_run_duration" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                            <input type="text" name="activity_run_frequency" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:10px; align-items:center;">
+                            <div style="font-weight:500;">Walk</div>
+                            <input type="text" name="activity_walk_duration" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                            <input type="text" name="activity_walk_frequency" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:10px; align-items:center;">
+                            <div style="font-weight:500;">Fetch</div>
+                            <input type="text" name="activity_fetch_duration" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                            <input type="text" name="activity_fetch_frequency" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:10px; align-items:center;">
+                            <div style="font-weight:500;">Pulling/Tugging</div>
+                            <input type="text" name="activity_pulling_duration" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                            <input type="text" name="activity_pulling_frequency" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:10px; align-items:center;">
+                            <div style="font-weight:500;">Agility</div>
+                            <input type="text" name="activity_agility_duration" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                            <input type="text" name="activity_agility_frequency" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; align-items:center;">
+                            <div style="font-weight:500;">Swimming</div>
+                            <input type="text" name="activity_swimming_duration" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                            <input type="text" name="activity_swimming_frequency" placeholder="" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:6px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Is your pet currently training/a show dog?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="training_show_dog" value="yes" onclick="document.getElementById('training_details_div').style.display='block'"><span>Yes</span></label>
+                            <label><input type="radio" name="training_show_dog" value="no" onclick="document.getElementById('training_details_div').style.display='none'"><span>No</span></label>
+                        </div>
+                        <div id="training_details_div" style="display:none; margin-top:12px;">
+                            <input type="text" name="training_details" placeholder="Please specify..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Has there been any recent changes in activity?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="recent_activity_changes" value="yes" onclick="document.getElementById('activity_change_div').style.display='block'"><span>Yes</span></label>
+                            <label><input type="radio" name="recent_activity_changes" value="no" onclick="document.getElementById('activity_change_div').style.display='none'"><span>No</span></label>
+                        </div>
+                        <div id="activity_change_div" style="display:none; margin-top:12px;">
+                            <input type="text" name="activity_change_details" placeholder="Please specify..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Would increasing exercise duration be feasible?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="increase_exercise" value="yes"><span>Yes</span></label>
+                            <label><input type="radio" name="increase_exercise" value="no"><span>No</span></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Does your pet receive Physical Rehabilitation Therapy?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="receives_rehab" value="yes" onclick="document.getElementById('rehab_details').style.display='block'"><span>Yes</span></label>
+                            <label><input type="radio" name="receives_rehab" value="no" onclick="document.getElementById('rehab_details').style.display='none'"><span>No</span></label>
+                        </div>
+                        <div id="rehab_details" style="display:none; margin-top:12px;">
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="rehab_therapies" value="exercise_based"><span>Exercise based therapies</span></label>
+                                <label><input type="checkbox" name="rehab_therapies" value="hydrotherapy"><span>Hydrotherapy</span></label>
+                                <label><input type="checkbox" name="rehab_therapies" value="massage"><span>Massage Therapy</span></label>
+                                <label><input type="checkbox" name="rehab_therapies" value="electro_thermo"><span>Electro and Thermotherapy (Cryotherapy, heat, laser, ultrasound, NMES, TENS)</span></label>
+                                <label><input type="checkbox" name="rehab_therapies" value="assistive_devices"><span>Assistive and Supportive devices (Orthotics, prosthetics, wheelchairs etc.)</span></label>
+                                <label><input type="checkbox" name="rehab_therapies" value="alternate"><span>Alternate therapy (Acupuncture/Chiropractic/Shockwave)</span></label>
+                                <label><input type="checkbox" name="rehab_therapies" value="home_exercise"><span>Home exercise plans</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation for Step 6 -->
+                    <div class="form-navigation">
+                        <button type="button" class="btn-prev" onclick="prevStep(5)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(7)">Next: Medical →</button>
+                    </div>
+                </div>
+
+                <!-- Step 7: Medical History -->
+                <div class="form-step" id="step-7">
                     <h2 class="section-title">Medical History</h2>
                     
                     <div class="form-group">
@@ -1272,15 +1722,71 @@
                         </div>
                     </div>
                     
-                    <!-- Navigation for Step 6 -->
+                    <!-- Q40: Medication Administration -->
+                    <h2 class="section-title" style="margin-top: 30px;">Medication Administration</h2>
+                    <div class="form-group">
+                        <label>How do you administer pills/medications/supplements to your pet? <span style="font-size:0.85rem;color:#888;">(select all that apply)</span></label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="medication_admin" value="none_orally"><span>I do not give any medications/supplements/pills to my pet orally</span></label>
+                            <label><input type="checkbox" name="medication_admin" value="directly_mouth"><span>I put them directly in my pet's mouth without food</span></label>
+                            <label><input type="checkbox" name="medication_admin" value="in_food"><span>I put them in my pet's food</span></label>
+                            <label><input type="checkbox" name="medication_admin" value="pill_pocket"><span>I put them in a Pill Pocket</span></label>
+                            <label><input type="checkbox" name="medication_admin" value="in_treats"><span>I put them in foods/treats</span></label>
+                        </div>
+                        <input type="text" name="pill_pocket_details" placeholder="Pill Pocket: Product name, size, number..." style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px; margin-top:8px;">
+                        <input type="text" name="med_food_treat_details" placeholder="Foods/treats used: list item(s) and amounts..." style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px; margin-top:8px;">
+                    </div>
+
+                    <!-- Q41: Adverse Reactions (dynamic table) -->
+                    <h2 class="section-title" style="margin-top: 30px;">Adverse Reactions</h2>
+                    <div class="form-group">
+                        <label>Does your pet have any specific adverse reactions to foods/medication?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="has_adverse_reactions" value="yes" onclick="document.getElementById('adverse_reactions_div').style.display='block'"><span>Yes</span></label>
+                            <label><input type="radio" name="has_adverse_reactions" value="no" onclick="document.getElementById('adverse_reactions_div').style.display='none'"><span>No</span></label>
+                        </div>
+                        <div id="adverse_reactions_div" style="display:none; margin-top:16px;">
+                            <div id="ar-table-container">
+                                <div class="ar-entry" style="background:#FFF0F0; border:1.5px solid #E8B0B0; border-radius:10px; padding:16px; margin-bottom:12px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                        <strong style="color:#A02020;">Reaction #1</strong>
+                                        <button type="button" onclick="this.closest('.ar-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button>
+                                    </div>
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                        <div><label style="font-size:0.85rem;">Brand</label><input type="text" name="ar_brand[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                        <div><label style="font-size:0.85rem;">Product/Food Ingredient/Medication</label><input type="text" name="ar_product[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                        <div><label style="font-size:0.85rem;">Form/Type</label><input type="text" name="ar_form[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                        <div><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="ar_since[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                        <div style="grid-column:span 2;"><label style="font-size:0.85rem;">Details of reaction/Symptoms</label><textarea name="ar_symptoms[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:60px;"></textarea></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addAdverseReactionRow()" style="background:none; border:1.5px dashed #A02020; color:#A02020; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; width:100%;">+ Add Another Reaction</button>
+                        </div>
+                    </div>
+
+                    <!-- Q43: Chronic Conditions -->
+                    <h2 class="section-title" style="margin-top: 30px;">Chronic Conditions</h2>
+                    <div class="form-group">
+                        <label>Has your pet been diagnosed with any chronic condition(s)?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="has_chronic_condition" value="yes" onclick="document.getElementById('chronic_details_div').style.display='block'"><span>Yes</span></label>
+                            <label><input type="radio" name="has_chronic_condition" value="no" onclick="document.getElementById('chronic_details_div').style.display='none'"><span>No</span></label>
+                        </div>
+                        <div id="chronic_details_div" style="display:none; margin-top:12px;">
+                            <textarea name="chronic_condition_details" placeholder="Please specify chronic conditions..." style="width:100%; padding:12px; border:1.5px solid #D9D4CC; border-radius:8px; min-height:80px;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Navigation for Step 7 -->
                     <div class="form-navigation">
-                        <button type="button" class="btn-prev" onclick="prevStep(5)">← Previous</button>
-                        <button type="button" class="btn-next" onclick="nextStep(7)">Next: Vaccination →</button>
+                        <button type="button" class="btn-prev" onclick="prevStep(6)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(8)">Next: Vaccination →</button>
                     </div>
                 </div>
-                
-                <!-- Step 7: Vaccination & Primary Vet -->
-                <div class="form-step" id="step-7">
+
+                <!-- Step 8: Vaccination & Primary Vet -->
+                <div class="form-step" id="step-8">
                     <h2 class="section-title">Vaccination & Prevention Status</h2>
                     
                     <div class="form-group">
@@ -1339,15 +1845,15 @@
                         <input type="email" name="vet_email" required>
                     </div>
                     
-                    <!-- Navigation for Step 7 -->
+                    <!-- Navigation for Step 8 -->
                     <div class="form-navigation">
-                        <button type="button" class="btn-prev" onclick="prevStep(6)">← Previous</button>
-                        <button type="button" class="btn-next" onclick="nextStep(8)">Next: Consent →</button>
+                        <button type="button" class="btn-prev" onclick="prevStep(7)">← Previous</button>
+                        <button type="button" class="btn-next" onclick="nextStep(9)">Next: Consent →</button>
                     </div>
                 </div>
-                
-                <!-- Step 8: Consent Form -->
-                <div class="form-step" id="step-8">
+
+                <!-- Step 9: Consent Form -->
+                <div class="form-step" id="step-9">
                     <h2 class="section-title">Consultation Consent Form</h2>
                     
                     <div style="background:#FFFBF5; border:1.5px solid #E8D5B0; border-radius:12px; padding:24px; margin-bottom:24px; max-height:500px; overflow-y:auto;">
@@ -1408,8 +1914,8 @@
                     
                     <!-- Final Navigation -->
                     <div class="form-navigation">
-                        <button type="button" class="btn-prev" onclick="prevStep(7)">← Previous</button>
-                        <button type="submit" class="btn-next">Submit Form ✓</button>
+                        <button type="button" class="btn-prev" onclick="prevStep(8)">← Previous</button>
+                        <button type="submit" class="btn-next">Submit Form</button>
                     </div>
                 </div>
             </form>

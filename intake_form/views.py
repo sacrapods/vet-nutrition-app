@@ -1,310 +1,423 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import (
-    PetParent, Pet, HouseholdDetails, FeedingBehavior, 
-    FoodPreferences, CommercialDietHistory, MedicalHistory,
+    PetParent, Pet, HouseholdDetails, FeedingBehavior,
+    FoodPreferences, CommercialDietHistory, HomemadeDietHistory,
+    CommercialTreatHistory, HomemadeTreatHistory, Supplement,
+    RecentDietChange, FoodStorage, FitnessActivity, ActivityDetail,
+    RehabilitationTherapy, MedicalHistory, AdverseReaction,
     VaccinationStatus, PrimaryVetInfo, ConsentForm,
-    HomemadeTreatHistory, Supplement
+    DietPlanPreferences, AdviceSource, ChronicCondition,
+    BrandToAvoid, TreatPreferenceInPlan
 )
+
 
 def intake_form_view(request):
     """Display and process the intake form"""
-    
+
     if request.method == 'POST':
-        # Pet Parent data
-        parent_name = request.POST.get('parent_name')
-        parent_email = request.POST.get('parent_email')
-        parent_phone = request.POST.get('parent_phone')
-        parent_location = request.POST.get('parent_location', '')
-        
-        # Pet data
-        pet_name = request.POST.get('pet_name')
-        pet_age = request.POST.get('pet_age')
-        pet_species = request.POST.get('pet_species')
-        pet_breed = request.POST.get('pet_breed')
-        pet_colour = request.POST.get('pet_colour', '')
-        pet_sex = request.POST.get('pet_sex')
-        pet_neutered = request.POST.get('pet_neutered') == 'yes'
-        pet_weight = request.POST.get('pet_weight')
-        pet_body_condition = request.POST.get('pet_body_condition')
-        pet_consultation_goals = request.POST.get('pet_consultation_goals')
-        
-        # Create Pet Parent
+        # ── Pet Parent ──
         pet_parent = PetParent.objects.create(
-            name=parent_name,
-            email=parent_email,
-            phone=parent_phone,
-            location_primary_vet=parent_location
+            name=request.POST.get('parent_name'),
+            email=request.POST.get('parent_email'),
+            phone=request.POST.get('parent_phone'),
+            location_primary_vet=request.POST.get('parent_location', '')
         )
-        
-        # Create Pet
+
+        # ── Pet ──
         pet = Pet.objects.create(
             owner=pet_parent,
-            name=pet_name,
-            dob_age=pet_age,
-            species=pet_species,
-            breed=pet_breed,
-            colour=pet_colour,
-            sex=pet_sex,
-            neutered=pet_neutered,
-            current_weight_kg=pet_weight,
-            body_condition=pet_body_condition,
-            consultation_goals=pet_consultation_goals
+            name=request.POST.get('pet_name'),
+            dob_age=request.POST.get('pet_age'),
+            species=request.POST.get('pet_species'),
+            breed=request.POST.get('pet_breed'),
+            colour=request.POST.get('pet_colour', ''),
+            sex=request.POST.get('pet_sex'),
+            neutered=request.POST.get('pet_neutered') == 'yes',
+            current_weight_kg=request.POST.get('pet_weight'),
+            body_condition=request.POST.get('pet_body_condition'),
+            consultation_goals=request.POST.get('pet_consultation_goals')
         )
-        
-        # Household Details
-        household_avoid = request.POST.get('household_avoid_ingredients', '')
-        household_arrange = request.POST.get('household_arrange_food', 'no')
-        household_who_feeds = request.POST.get('household_who_feeds', 'varies')
-        household_feeder_name = request.POST.get('household_feeder_name', '')
-        household_other_pets = request.POST.get('household_other_pets') == 'yes'
-        household_other_pets_details = request.POST.get('household_other_pets_details', '')
-        household_housed = request.POST.get('household_pet_housed', 'indoors')
-        
+
+        # ── Household Details ──
         HouseholdDetails.objects.create(
             pet=pet,
-            food_ingredients_to_avoid=household_avoid,
-            can_arrange_special_food=household_arrange,
-            who_feeds=household_who_feeds,
-            feeder_name=household_feeder_name,
-            other_pets=household_other_pets,
-            other_pets_details=household_other_pets_details,
-            pet_housed=household_housed
+            food_ingredients_to_avoid=request.POST.get('household_avoid_ingredients', ''),
+            can_arrange_special_food=request.POST.get('household_arrange_food', 'no'),
+            who_feeds=request.POST.get('household_who_feeds', 'varies'),
+            feeder_name=request.POST.get('household_feeder_name', ''),
+            other_pets=request.POST.get('household_other_pets') == 'yes',
+            other_pets_details=request.POST.get('household_other_pets_details', ''),
+            pet_housed=request.POST.get('household_pet_housed', 'indoors')
         )
-        
-        # Feeding Behavior
-        food_availability = request.POST.get('feeding_food_availability', 'always')
-        food_times = request.POST.get('feeding_food_times', '')
-        meals_per_day = request.POST.get('feeding_meals_per_day')
-        
-        # Get all checked behaviors
+
+        # ── Feeding Behavior ──
         feeding_behaviors = request.POST.getlist('feeding_behaviors')
-        behaviors_str = ','.join(feeding_behaviors)
-        
-        attitude_changed = request.POST.get('feeding_attitude_changed') == 'yes'
-        attitude_details = request.POST.get('feeding_attitude_details', '')
-        good_appetite = request.POST.get('feeding_good_appetite', '')
-        appetite_recently = request.POST.get('feeding_appetite_recently', '')
-        
-        # Unmonitored food sources
-        unmonitored_access = request.POST.get('feeding_unmonitored') == 'yes'
         unmonitored_sources_list = request.POST.getlist('unmonitored_sources')
         unmonitored_other = request.POST.get('unmonitored_other', '')
         unmonitored_str = ','.join(unmonitored_sources_list)
         if unmonitored_other:
             unmonitored_str += ',' + unmonitored_other
-        
-        # Bowl types
-        # Bowl types
-        bowl_types_list = request.POST.getlist('bowl_types')
-        bowl_types_str = ','.join(bowl_types_list)
-        bowl_type_other = request.POST.get('bowl_type_other', '')
-        
-        bowl_material_list = request.POST.getlist('bowl_material')
-        bowl_material_str = ','.join(bowl_material_list)
-        bowl_material_other = request.POST.get('bowl_material_other', '')
-        
-        water_bowl_types_list = request.POST.getlist('water_bowl_types')
-        water_bowl_types_str = ','.join(water_bowl_types_list)
-        
-        water_bowl_material_list = request.POST.getlist('water_bowl_material')
-        water_bowl_material_str = ','.join(water_bowl_material_list)
-        water_bowl_material_other = request.POST.get('water_bowl_material_other', '')
-        
-        # Recent changes (4 weeks)
-        recent_4wks = request.POST.get('recent_diet_change_4wks') == 'yes'
-        recent_4wks_details = request.POST.get('recent_change_4wks_details', '')
-        
+
+        bowl_types_str = ','.join(request.POST.getlist('bowl_types'))
+        bowl_material_str = ','.join(request.POST.getlist('bowl_material'))
+        water_bowl_types_str = ','.join(request.POST.getlist('water_bowl_types'))
+        water_bowl_material_str = ','.join(request.POST.getlist('water_bowl_material'))
+
+        meals_per_day = request.POST.get('feeding_meals_per_day')
+
         FeedingBehavior.objects.create(
             pet=pet,
-            food_availability=food_availability,
-            food_availability_times=food_times,
+            food_availability=request.POST.get('feeding_food_availability', 'always'),
+            food_availability_times=request.POST.get('feeding_food_times', ''),
             meals_per_day=int(meals_per_day) if meals_per_day else None,
-            eating_behaviors=behaviors_str,
-            attitude_changed=attitude_changed,
-            attitude_change_details=attitude_details,
-            unmonitored_food_access=unmonitored_access,
+            eating_behaviors=','.join(feeding_behaviors),
+            attitude_changed=request.POST.get('feeding_attitude_changed') == 'yes',
+            attitude_change_details=request.POST.get('feeding_attitude_details', ''),
+            unmonitored_food_access=request.POST.get('feeding_unmonitored') == 'yes',
             unmonitored_sources=unmonitored_str,
-            good_appetite=good_appetite,
-            appetite_recently=appetite_recently,
+            good_appetite=request.POST.get('feeding_good_appetite', ''),
+            appetite_recently=request.POST.get('feeding_appetite_recently', ''),
             bowl_type=bowl_types_str,
-            bowl_type_other=bowl_type_other,
+            bowl_type_other=request.POST.get('bowl_type_other', ''),
             bowl_material=bowl_material_str,
-            bowl_material_other=bowl_material_other,
+            bowl_material_other=request.POST.get('bowl_material_other', ''),
             water_bowl_type=water_bowl_types_str,
             water_bowl_material=water_bowl_material_str,
-            water_bowl_material_other=water_bowl_material_other,
-            recent_change_4_weeks=recent_4wks,
-            recent_change_4_weeks_details=recent_4wks_details
+            water_bowl_material_other=request.POST.get('water_bowl_material_other', ''),
+            recent_change_4_weeks=request.POST.get('recent_diet_change_4wks') == 'yes',
+            recent_change_4_weeks_details=request.POST.get('recent_change_4wks_details', '')
         )
-        
-        # Food Preferences
-        food_prefs = request.POST.getlist('food_preferences')
-        food_prefs_str = ','.join(food_prefs)
-        
-        treat_prefs = request.POST.getlist('treat_preferences')
-        treat_prefs_str = ','.join(treat_prefs)
-        
-        refuses = request.POST.get('food_refuses') == 'yes'
-        refuses_details = request.POST.get('food_refuses_details', '')
-        preferred_treats = request.POST.get('preferred_treats_in_plan', '')
-        
-        # Brands to avoid and food factors
-        brands_to_avoid = request.POST.get('brands_to_avoid', '')
-        food_factors_list = request.POST.getlist('food_factors')
-        food_factors_str = ','.join(food_factors_list)
-        
+
+        # ── Food Preferences ──
+        food_prefs_str = ','.join(request.POST.getlist('food_preferences'))
+        treat_prefs_str = ','.join(request.POST.getlist('treat_preferences'))
+        food_factors_str = ','.join(request.POST.getlist('food_factors'))
+
         FoodPreferences.objects.create(
             pet=pet,
             current_food_preferences=food_prefs_str,
             current_treat_preferences=treat_prefs_str,
-            refuses_food=refuses,
-            refused_food_details=refuses_details,
-            preferred_treats_in_plan=preferred_treats,
-            food_brands_to_avoid=brands_to_avoid,
+            refuses_food=request.POST.get('food_refuses') == 'yes',
+            refused_food_details=request.POST.get('food_refuses_details', ''),
+            preferred_treats_in_plan=request.POST.get('preferred_treats_in_plan', ''),
+            food_brands_to_avoid=request.POST.get('brands_to_avoid', ''),
             important_food_factors=food_factors_str
         )
-        
-        # Commercial Diet History (Dynamic - multiple rows)
+
+        # ── Q16: Treat Preferences in Plan (checkboxes) ──
+        treat_plan_prefs = request.POST.getlist('treat_plan_preferences')
+        TreatPreferenceInPlan.objects.create(
+            pet=pet,
+            preferences=','.join(treat_plan_prefs)
+        )
+
+        # ── Q17: Brands to Avoid (dynamic table) ──
+        brand_names = request.POST.getlist('avoid_brand_name[]')
+        brand_reasons = request.POST.getlist('avoid_brand_reason[]')
+        for i in range(len(brand_names)):
+            if brand_names[i].strip():
+                BrandToAvoid.objects.create(
+                    pet=pet,
+                    brand_name=brand_names[i],
+                    reason=brand_reasons[i] if i < len(brand_reasons) else ''
+                )
+
+        # ── Food Storage ──
+        storage_types = ['dry', 'wet', 'raw', 'homecooked', 'dehydrated']
+        for st in storage_types:
+            loc = request.POST.get(f'storage_{st}_location', '')
+            period = request.POST.get(f'storage_{st}_period', '')
+            if loc or period:
+                FoodStorage.objects.create(
+                    pet=pet,
+                    food_type=st,
+                    storage_location=loc,
+                    time_period=period
+                )
+
+        # ── Q20: Advice Source ──
+        advice_sources = request.POST.getlist('advice_sources')
+        AdviceSource.objects.create(
+            pet=pet,
+            sources=','.join(advice_sources),
+            other_source=request.POST.get('advice_source_other', '')
+        )
+
+        # ── Commercial Diet History (dynamic table) ──
         diet_types = request.POST.getlist('diet_type[]')
         diet_brands = request.POST.getlist('diet_brand[]')
         diet_products = request.POST.getlist('diet_product[]')
         diet_amounts = request.POST.getlist('diet_amount[]')
+        diet_toppers = request.POST.getlist('diet_topper[]')
+        diet_topper_amts = request.POST.getlist('diet_topper_amount[]')
         diet_meals = request.POST.getlist('diet_meals[]')
         diet_since = request.POST.getlist('diet_since[]')
-        
-        # Create a diet entry for each row
+        diet_reason = request.POST.getlist('diet_reason_stopped[]')
+
         for i in range(len(diet_types)):
-            if diet_types[i] and diet_brands[i]:  # Only save if type and brand filled
+            if diet_types[i] and diet_brands[i]:
                 CommercialDietHistory.objects.create(
                     pet=pet,
                     diet_type=diet_types[i],
                     brand=diet_brands[i],
                     product_details=diet_products[i] if i < len(diet_products) else '',
                     amount_per_day=diet_amounts[i] if i < len(diet_amounts) else '',
+                    food_topper_details=diet_toppers[i] if i < len(diet_toppers) else '',
+                    topper_amount_per_meal=diet_topper_amts[i] if i < len(diet_topper_amts) else '',
                     meals_per_day=int(diet_meals[i]) if i < len(diet_meals) and diet_meals[i] else 1,
-                    fed_since=diet_since[i] if i < len(diet_since) else ''
+                    fed_since=diet_since[i] if i < len(diet_since) else '',
+                    reason_stopped=diet_reason[i] if i < len(diet_reason) else ''
                 )
-        # Medical History
-        weight_change = request.POST.get('medical_weight_change') == 'yes'
-        weight_type = request.POST.get('medical_weight_type', '')
-        weight_amount = request.POST.get('medical_weight_amount')
-        weight_period = request.POST.get('medical_weight_period', '')
-        
-        symptoms = request.POST.getlist('medical_symptoms')
-        
-        vomiting = request.POST.get('medical_vomiting') == 'yes'
-        vomit_per_day = request.POST.get('medical_vomit_per_day')
-        vomit_colour = request.POST.get('medical_vomit_colour', '')
-        vomit_since = request.POST.get('medical_vomit_since', '')
-        
-        urination_changed = request.POST.get('medical_urination_changed') == 'yes'
-        urination_direction = request.POST.get('medical_urination_direction', '')
-        urine_colour = request.POST.get('medical_urine_colour', '')
-        
-        drinking_changed = request.POST.get('medical_drinking_changed') == 'yes'
-        drinking_direction = request.POST.get('medical_drinking_direction', '')
-        
-        stool_changed = request.POST.get('medical_stool_changed') == 'yes'
-        stool_colour = request.POST.get('medical_stool_colour', '')
-        poops_per_day = request.POST.get('medical_poops_per_day')
-        stool_types = request.POST.getlist('medical_stool_types')
-        stool_types_str = ','.join(stool_types)
-        
-        MedicalHistory.objects.create(
-            pet=pet,
-            weight_change=weight_change,
-            weight_change_type=weight_type,
-            weight_change_amount_kg=float(weight_amount) if weight_amount else None,
-            weight_change_period=weight_period,
-            difficulty_chewing='difficulty_chewing' in symptoms,
-            difficulty_swallowing='difficulty_swallowing' in symptoms,
-            excessive_salivation='excessive_salivation' in symptoms,
-            vomiting_per_day=int(vomit_per_day) if vomit_per_day else None,
-            vomiting_colour=vomit_colour,
-            vomiting_since=vomit_since,
-            urination_changed=urination_changed,
-            urination_direction=urination_direction,
-            urine_colour=urine_colour,
-            drinking_changed=drinking_changed,
-            drinking_direction=drinking_direction,
-            stool_quality_changed=stool_changed,
-            stool_colour=stool_colour,
-            poops_per_day=int(poops_per_day) if poops_per_day else None,
-            stool_types=stool_types_str
-        )
-        
-        # Vaccination Status
-        vacc_yearly = request.POST.get('vacc_yearly') == 'yes'
-        vacc_deworming = request.POST.get('vacc_deworming') == 'yes'
-        vacc_topical = request.POST.get('vacc_topical_tick', 'no')
-        vacc_oral = request.POST.get('vacc_oral_tick', 'no')
-        
-        VaccinationStatus.objects.create(
-            pet=pet,
-            yearly_vaccinations=vacc_yearly,
-            deworming=vacc_deworming,
-            topical_tick_flea=vacc_topical,
-            oral_tick_flea=vacc_oral
-        )
-        
-        # Primary Vet Info
-        vet_name = request.POST.get('vet_name')
-        vet_practice = request.POST.get('vet_practice')
-        vet_phone = request.POST.get('vet_phone')
-        vet_email = request.POST.get('vet_email')
-        
-        PrimaryVetInfo.objects.create(
-            pet=pet,
-            vet_name=vet_name,
-            practice_name_location=vet_practice,
-            clinic_phone=vet_phone,
-            email=vet_email
-        )
-        
-        # Consent Form
-        consent_agreed = request.POST.get('consent_agreed') == 'yes'
-        consent_name = request.POST.get('consent_name')
-        
-        ConsentForm.objects.create(
-            pet_parent=pet_parent,
-            agreed=consent_agreed
-        )
-        # Homemade Treats
+
+        # ── Homemade Diet History (dynamic table) ──
+        hd_ingredients = request.POST.getlist('hd_ingredient[]')
+        hd_quantities = request.POST.getlist('hd_quantity[]')
+        hd_preparations = request.POST.getlist('hd_preparation[]')
+        hd_frequencies = request.POST.getlist('hd_frequency[]')
+        hd_since = request.POST.getlist('hd_since[]')
+        hd_reason = request.POST.getlist('hd_reason_stopped[]')
+
+        for i in range(len(hd_ingredients)):
+            if hd_ingredients[i].strip():
+                HomemadeDietHistory.objects.create(
+                    pet=pet,
+                    ingredient_food_item=hd_ingredients[i],
+                    raw_quantity_per_day=hd_quantities[i] if i < len(hd_quantities) else '',
+                    preparation_method=hd_preparations[i] if i < len(hd_preparations) else '',
+                    feed_frequency_per_day=int(hd_frequencies[i]) if i < len(hd_frequencies) and hd_frequencies[i] else 1,
+                    fed_since=hd_since[i] if i < len(hd_since) else '',
+                    reason_stopped=hd_reason[i] if i < len(hd_reason) else ''
+                )
+
+        # ── Commercial Treat History (dynamic table) ──
+        ct_types = request.POST.getlist('ct_type[]')
+        ct_brands = request.POST.getlist('ct_brand[]')
+        ct_products = request.POST.getlist('ct_product[]')
+        ct_quantities = request.POST.getlist('ct_quantity[]')
+        ct_since = request.POST.getlist('ct_since[]')
+        ct_reason = request.POST.getlist('ct_reason_stopped[]')
+
+        for i in range(len(ct_types)):
+            if ct_types[i].strip():
+                CommercialTreatHistory.objects.create(
+                    pet=pet,
+                    treat_type=ct_types[i],
+                    brand=ct_brands[i] if i < len(ct_brands) else '',
+                    product_details=ct_products[i] if i < len(ct_products) else '',
+                    quantity_per_day=ct_quantities[i] if i < len(ct_quantities) else '',
+                    fed_since=ct_since[i] if i < len(ct_since) else '',
+                    reason_stopped=ct_reason[i] if i < len(ct_reason) else ''
+                )
+
+        # ── Homemade Treat History (dynamic table) ──
+        treat_type_forms = request.POST.getlist('treat_type_form[]')
         treat_ingredients = request.POST.getlist('treat_ingredient[]')
         treat_preparations = request.POST.getlist('treat_preparation[]')
         treat_quantities = request.POST.getlist('treat_quantity[]')
         treat_since_list = request.POST.getlist('treat_since[]')
-        
+        treat_reason = request.POST.getlist('treat_reason_stopped[]')
+
         for i in range(len(treat_ingredients)):
-            if treat_ingredients[i]:
+            if treat_ingredients[i].strip():
                 HomemadeTreatHistory.objects.create(
                     pet=pet,
-                    treat_type_form='homemade',
+                    treat_type_form=treat_type_forms[i] if i < len(treat_type_forms) else '',
                     ingredient=treat_ingredients[i],
                     preparation_method=treat_preparations[i] if i < len(treat_preparations) else '',
                     quantity_per_day=treat_quantities[i] if i < len(treat_quantities) else '',
-                    fed_since=treat_since_list[i] if i < len(treat_since_list) else ''
+                    fed_since=treat_since_list[i] if i < len(treat_since_list) else '',
+                    reason_stopped=treat_reason[i] if i < len(treat_reason) else ''
                 )
-        
-        # Supplements
+
+        # ── Supplements (dynamic table) ──
+        supp_brands = request.POST.getlist('supplement_brand[]')
+        supp_forms = request.POST.getlist('supplement_form[]')
+        supp_amounts = request.POST.getlist('supplement_amount[]')
+        supp_per_day = request.POST.getlist('supplement_per_day[]')
+        supp_since = request.POST.getlist('supplement_since[]')
+
         if request.POST.get('supplements_given') == 'yes':
-            supplement_brand = request.POST.get('supplement_brand', '')
-            supplement_form = request.POST.get('supplement_form', '')
-            supplement_amount = request.POST.get('supplement_amount', '')
-            
-            if supplement_brand:
-                Supplement.objects.create(
+            for i in range(len(supp_brands)):
+                if supp_brands[i].strip():
+                    Supplement.objects.create(
+                        pet=pet,
+                        brand_name=supp_brands[i],
+                        form=supp_forms[i] if i < len(supp_forms) else '',
+                        amount=supp_amounts[i] if i < len(supp_amounts) else '',
+                        per_day=int(supp_per_day[i]) if i < len(supp_per_day) and supp_per_day[i] else 1,
+                        fed_since=supp_since[i] if i < len(supp_since) else ''
+                    )
+
+        # ── Recent Diet Changes (dynamic table) ──
+        if request.POST.get('diet_changed_2_3_months') == 'yes':
+            rdc_brands = request.POST.getlist('rdc_brand[]')
+            rdc_products = request.POST.getlist('rdc_product[]')
+            rdc_forms = request.POST.getlist('rdc_form[]')
+            rdc_amounts = request.POST.getlist('rdc_amount[]')
+            rdc_meals = request.POST.getlist('rdc_meals[]')
+            rdc_start = request.POST.getlist('rdc_start[]')
+            rdc_stop = request.POST.getlist('rdc_stop[]')
+            rdc_reason = request.POST.getlist('rdc_reason[]')
+
+            for i in range(len(rdc_products)):
+                if rdc_products[i].strip():
+                    RecentDietChange.objects.create(
+                        pet=pet,
+                        brand=rdc_brands[i] if i < len(rdc_brands) else '',
+                        product_food_ingredient=rdc_products[i],
+                        form_type=rdc_forms[i] if i < len(rdc_forms) else '',
+                        amount_per_day=rdc_amounts[i] if i < len(rdc_amounts) else '',
+                        meals_per_day=int(rdc_meals[i]) if i < len(rdc_meals) and rdc_meals[i] else 1,
+                        start_date=rdc_start[i] if i < len(rdc_start) else '',
+                        stop_date=rdc_stop[i] if i < len(rdc_stop) else '',
+                        reason_stopped=rdc_reason[i] if i < len(rdc_reason) else ''
+                    )
+
+        # ── Diet Plan Preferences ──
+        diet_plan_prefs = request.POST.getlist('diet_plan_preferences')
+        DietPlanPreferences.objects.create(
+            pet=pet,
+            preferences=','.join(diet_plan_prefs)
+        )
+
+        # ── Fitness & Activity ──
+        FitnessActivity.objects.create(
+            pet=pet,
+            activity_level=request.POST.get('activity_level', 'moderate'),
+            exercise_duration=request.POST.get('exercise_duration', ''),
+            leash_walk_frequency=request.POST.get('leash_walk_frequency', ''),
+            fenced_yard_access=request.POST.get('fenced_yard') == 'yes',
+            urban_rural=request.POST.get('urban_rural', ''),
+            travel_buddy=request.POST.get('travel_buddy', ''),
+            travel_modes=request.POST.get('travel_modes', ''),
+            exercise_types=','.join(request.POST.getlist('exercise_types')),
+            training_show_dog=request.POST.get('training_show_dog') == 'yes',
+            training_details=request.POST.get('training_details', ''),
+            recent_activity_changes=request.POST.get('recent_activity_changes') == 'yes',
+            activity_change_details=request.POST.get('activity_change_details', ''),
+            increase_exercise_feasible=request.POST.get('increase_exercise') == 'yes'
+        )
+
+        # ── Activity Details (table Q28) ──
+        act_types = ['run', 'walk', 'fetch', 'pulling', 'agility', 'swimming']
+        for act in act_types:
+            duration = request.POST.get(f'activity_{act}_duration', '')
+            freq = request.POST.get(f'activity_{act}_frequency', '')
+            if duration or freq:
+                ActivityDetail.objects.create(
                     pet=pet,
-                    brand_name=supplement_brand,
-                    form=supplement_form,
-                    amount=supplement_amount,
-                    per_day=1
+                    activity_type=act,
+                    duration_distance=duration,
+                    frequency_per_week=freq
                 )
-        # Success!
+
+        # ── Rehabilitation Therapy ──
+        rehab_therapies = request.POST.getlist('rehab_therapies')
+        RehabilitationTherapy.objects.create(
+            pet=pet,
+            receives_therapy=request.POST.get('receives_rehab') == 'yes',
+            therapy_types=','.join(rehab_therapies)
+        )
+
+        # ── Medical History ──
+        weight_amount = request.POST.get('medical_weight_amount')
+        vomit_per_day = request.POST.get('medical_vomit_per_day')
+        poops_per_day = request.POST.get('medical_poops_per_day')
+        stool_types = request.POST.getlist('medical_stool_types')
+
+        # Q40: Medication admin method
+        med_admin = request.POST.getlist('medication_admin')
+        pill_pocket_details = request.POST.get('pill_pocket_details', '')
+        food_treat_details = request.POST.get('med_food_treat_details', '')
+        med_admin_str = ','.join(med_admin)
+        if pill_pocket_details:
+            med_admin_str += '|pill_pocket:' + pill_pocket_details
+        if food_treat_details:
+            med_admin_str += '|food_treat:' + food_treat_details
+
+        MedicalHistory.objects.create(
+            pet=pet,
+            weight_change=request.POST.get('medical_weight_change') == 'yes',
+            weight_change_type=request.POST.get('medical_weight_type', ''),
+            weight_change_amount_kg=float(weight_amount) if weight_amount else None,
+            weight_change_period=request.POST.get('medical_weight_period', ''),
+            difficulty_chewing='difficulty_chewing' in request.POST.getlist('medical_symptoms'),
+            difficulty_swallowing='difficulty_swallowing' in request.POST.getlist('medical_symptoms'),
+            excessive_salivation='excessive_salivation' in request.POST.getlist('medical_symptoms'),
+            symptom_details=request.POST.get('symptom_details', ''),
+            vomiting_per_day=int(vomit_per_day) if vomit_per_day else None,
+            vomiting_per_week=int(request.POST.get('medical_vomit_per_week', '') or 0) if request.POST.get('medical_vomit_per_week') else None,
+            vomiting_colour=request.POST.get('medical_vomit_colour', ''),
+            vomiting_since=request.POST.get('medical_vomit_since', ''),
+            urination_changed=request.POST.get('medical_urination_changed') == 'yes',
+            urination_direction=request.POST.get('medical_urination_direction', ''),
+            urine_colour=request.POST.get('medical_urine_colour', ''),
+            urine_change_since=request.POST.get('medical_urine_since', ''),
+            drinking_changed=request.POST.get('medical_drinking_changed') == 'yes',
+            drinking_direction=request.POST.get('medical_drinking_direction', ''),
+            drinking_change_since=request.POST.get('medical_drinking_since', ''),
+            stool_quality_changed=request.POST.get('medical_stool_changed') == 'yes',
+            stool_colour=request.POST.get('medical_stool_colour', ''),
+            poops_per_day=int(poops_per_day) if poops_per_day else None,
+            stool_types=','.join(stool_types),
+            stool_change_since=request.POST.get('medical_stool_since', ''),
+            medication_admin_method=med_admin_str
+        )
+
+        # ── Q41: Adverse Reactions (dynamic table) ──
+        if request.POST.get('has_adverse_reactions') == 'yes':
+            ar_brands = request.POST.getlist('ar_brand[]')
+            ar_products = request.POST.getlist('ar_product[]')
+            ar_forms = request.POST.getlist('ar_form[]')
+            ar_since = request.POST.getlist('ar_since[]')
+            ar_symptoms = request.POST.getlist('ar_symptoms[]')
+
+            for i in range(len(ar_products)):
+                if ar_products[i].strip():
+                    AdverseReaction.objects.create(
+                        pet=pet,
+                        brand=ar_brands[i] if i < len(ar_brands) else '',
+                        product_ingredient_medication=ar_products[i],
+                        form_type=ar_forms[i] if i < len(ar_forms) else '',
+                        fed_since=ar_since[i] if i < len(ar_since) else '',
+                        reaction_symptoms=ar_symptoms[i] if i < len(ar_symptoms) else ''
+                    )
+
+        # ── Q43: Chronic Condition ──
+        ChronicCondition.objects.create(
+            pet=pet,
+            has_chronic=request.POST.get('has_chronic_condition') == 'yes',
+            details=request.POST.get('chronic_condition_details', '')
+        )
+
+        # ── Vaccination Status ──
+        VaccinationStatus.objects.create(
+            pet=pet,
+            yearly_vaccinations=request.POST.get('vacc_yearly') == 'yes',
+            deworming=request.POST.get('vacc_deworming') == 'yes',
+            topical_tick_flea=request.POST.get('vacc_topical_tick', 'no'),
+            oral_tick_flea=request.POST.get('vacc_oral_tick', 'no')
+        )
+
+        # ── Primary Vet Info ──
+        PrimaryVetInfo.objects.create(
+            pet=pet,
+            vet_name=request.POST.get('vet_name'),
+            practice_name_location=request.POST.get('vet_practice'),
+            clinic_phone=request.POST.get('vet_phone'),
+            email=request.POST.get('vet_email')
+        )
+
+        # ── Consent Form ──
+        ConsentForm.objects.create(
+            pet_parent=pet_parent,
+            agreed=request.POST.get('consent_agreed') == 'yes'
+        )
+
         messages.success(request, f'Form submitted successfully! Your Case ID is: {pet_parent.case_id}')
         return redirect('success')
-    
+
     # GET request - show the form
     return render(request, 'intake_form/form.html')
 

@@ -7,7 +7,8 @@ from .models import (
     MedicalHistory, AdverseReaction, VaccinationStatus, PrimaryVetInfo,
     ClinicalHistory, ClinicalCondition, LongTermMedication,
     SurgicalHistory, DiagnosticImaging, ConsentForm,
-    DietPlanPreferences, DoctorNote
+    DietPlanPreferences, DoctorNote,
+    AdviceSource, ChronicCondition, BrandToAvoid, TreatPreferenceInPlan
 )
 
 # Register all models in admin
@@ -38,3 +39,7 @@ admin.site.register(DiagnosticImaging)
 admin.site.register(ConsentForm)
 admin.site.register(DietPlanPreferences)
 admin.site.register(DoctorNote)
+admin.site.register(AdviceSource)
+admin.site.register(ChronicCondition)
+admin.site.register(BrandToAvoid)
+admin.site.register(TreatPreferenceInPlan)
