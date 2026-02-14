@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pet.owner.case_id }} - {{ pet.name }}</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Georgia,'Times New Roman',serif;color:#222;line-height:1.5;padding:24px;max-width:800px;margin:0 auto;font-size:11pt}
+        @media print{body{padding:0}  .no-print{display:none!important}}
+        .print-btn{position:fixed;top:16px;right:16px;padding:10px 24px;background:#4A7A4F;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-family:sans-serif}
+        h1{text-align:center;font-size:16pt;margin-bottom:4px}
+        .subtitle{text-align:center;color:#666;margin-bottom:20px;font-size:10pt}
+        h2{font-size:12pt;color:#4A7A4F;border-bottom:2px solid #4A7A4F;padding-bottom:4px;margin:20px 0 10px}
+        .row{display:flex;padding:3px 0;border-bottom:1px dotted #ddd}
+        .lbl{width:180px;color:#666;font-size:10pt;flex-shrink:0}
+        .val{flex:1;font-size:10pt}
+        table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9.5pt}
+        th{text-align:left;padding:4px 6px;background:#f0f0f0;border:1px solid #ccc;font-size:9pt}
+        td{padding:4px 6px;border:1px solid #ddd}
+        .case-header{display:flex;justify-content:space-between;align-items:center;border:2px solid #4A7A4F;padding:12px 16px;border-radius:8px;margin-bottom:16px}
+        .case-header .id{font-family:monospace;font-size:14pt;color:#C17A5A;font-weight:bold}
+        .case-header .date{font-size:9pt;color:#888}
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+
+    <h1>Poshtik NutriVet - Diet History Form</h1>
+    <p class="subtitle">Canine Clinical Nutrition Service</p>
+
+    <div class="case-header">
+        <div><strong>{{ pet.name }}</strong> ({{ pet.get_species_display }}) &mdash; {{ pet.breed }}, {{ pet.dob_age }}</div>
+        <div style="text-align:right"><span class="id">{{ pet.owner.case_id }}</span><br><span class="date">{{ pet.owner.created_at|date:"d M Y" }}</span></div>
+    </div>
+
+    <h2>1. Owner & Pet</h2>
+    <div class="row"><span class="lbl">Owner</span><span class="val">{{ pet.owner.name }} | {{ pet.owner.email }} | {{ pet.owner.phone }}</span></div>
+    <div class="row"><span class="lbl">Sex / Neutered</span><span class="val">{{ pet.get_sex_display }}{% if pet.neutered %} (Neutered){% endif %}</span></div>
+    <div class="row"><span class="lbl">Weight</span><span class="val">{% if pet.current_weight_kg %}{{ pet.current_weight_kg }} kg{% else %}-{% endif %} | Body: {{ pet.get_body_condition_display }}</span></div>
+    <div class="row"><span class="lbl">Goals</span><span class="val">{{ pet.consultation_goals }}</span></div>
+
+    <h2>2. Household</h2>
+    {% with h=pet.household %}{% if h %}
+    <div class="row"><span class="lbl">Avoid</span><span class="val">{{ h.food_ingredients_to_avoid|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Special Food</span><span class="val">{{ h.can_arrange_special_food }}</span></div>
+    <div class="row"><span class="lbl">Feeds</span><span class="val">{{ h.who_feeds }}{% if h.feeder_name %} ({{ h.feeder_name }}){% endif %}</span></div>
+    <div class="row"><span class="lbl">Other Pets</span><span class="val">{% if h.other_pets %}Yes: {{ h.other_pets_details }}{% else %}No{% endif %}</span></div>
+    <div class="row"><span class="lbl">Housing</span><span class="val">{{ h.pet_housed }}</span></div>
+    {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
+
+    <h2>3. Feeding</h2>
+    {% with f=pet.feeding %}{% if f %}
+    <div class="row"><span class="lbl">Availability</span><span class="val">{{ f.food_availability }} | {{ f.meals_per_day|default:"-" }} meals/day</span></div>
+    <div class="row"><span class="lbl">Appetite</span><span class="val">{{ f.good_appetite|default:"-" }} | Recently: {{ f.appetite_recently|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Unmonitored</span><span class="val">{% if f.unmonitored_food_access %}Yes: {{ f.unmonitored_sources }}{% else %}No{% endif %}</span></div>
+    {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
+
+    <h2>4. Preferences</h2>
+    {% with fp=pet.food_preferences %}{% if fp %}
+    <div class="row"><span class="lbl">Food Prefs</span><span class="val">{{ fp.current_food_preferences|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Treat Prefs</span><span class="val">{{ fp.current_treat_preferences|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Refuses</span><span class="val">{% if fp.refuses_food %}Yes: {{ fp.refused_food_details }}{% else %}No{% endif %}</span></div>
+    {% endif %}{% endwith %}
+
+    <h2>5. Diet History</h2>
+    {% if pet.commercial_diet.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px">Commercial Diet</p>
+    <table><thead><tr><th>Type</th><th>Brand</th><th>Product</th><th>Amt/Day</th><th>Since</th></tr></thead>
+    <tbody>{% for d in pet.commercial_diet.all %}<tr><td>{{ d.diet_type }}</td><td>{{ d.brand }}</td><td>{{ d.product_details }}</td><td>{{ d.amount_per_day }}</td><td>{{ d.fed_since }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+    {% if pet.homemade_diet.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px">Homemade Diet</p>
+    <table><thead><tr><th>Ingredient</th><th>Qty</th><th>Prep</th><th>Freq</th><th>Since</th></tr></thead>
+    <tbody>{% for d in pet.homemade_diet.all %}<tr><td>{{ d.ingredient_food_item }}</td><td>{{ d.raw_quantity_per_day }}</td><td>{{ d.preparation_method }}</td><td>{{ d.feed_frequency_per_day }}</td><td>{{ d.fed_since }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+    {% if pet.supplements.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px">Supplements</p>
+    <table><thead><tr><th>Brand</th><th>Form</th><th>Amount</th><th>Per Day</th><th>Since</th></tr></thead>
+    <tbody>{% for s in pet.supplements.all %}<tr><td>{{ s.brand_name }}</td><td>{{ s.form }}</td><td>{{ s.amount }}</td><td>{{ s.per_day }}</td><td>{{ s.fed_since }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+
+    <h2>6. Fitness</h2>
+    {% with fa=pet.fitness %}{% if fa %}
+    <div class="row"><span class="lbl">Activity Level</span><span class="val">{{ fa.get_activity_level_display }}</span></div>
+    <div class="row"><span class="lbl">Exercise</span><span class="val">{{ fa.exercise_duration|default:"-" }} | Types: {{ fa.exercise_types|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Fenced Yard</span><span class="val">{% if fa.fenced_yard_access %}Yes{% else %}No{% endif %} | {{ fa.urban_rural|default:"-" }}</span></div>
+    {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
+    {% if pet.activity_details.exists %}
+    <table><thead><tr><th>Activity</th><th>Duration</th><th>Freq/Week</th></tr></thead>
+    <tbody>{% for a in pet.activity_details.all %}<tr><td>{{ a.get_activity_type_display }}</td><td>{{ a.duration_distance }}</td><td>{{ a.frequency_per_week }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+
+    <h2>7. Medical</h2>
+    {% with m=pet.medical_history %}{% if m %}
+    <div class="row"><span class="lbl">Weight Change</span><span class="val">{% if m.weight_change %}{{ m.weight_change_type }} {{ m.weight_change_amount_kg }}kg / {{ m.weight_change_period }}{% else %}No{% endif %}</span></div>
+    <div class="row"><span class="lbl">Vomiting</span><span class="val">{% if m.vomiting_per_day %}{{ m.vomiting_per_day }}/day{% endif %} {% if m.vomiting_colour %}({{ m.vomiting_colour }}){% endif %}{% if not m.vomiting_per_day %}None{% endif %}</span></div>
+    <div class="row"><span class="lbl">Urination</span><span class="val">{% if m.urination_changed %}{{ m.urination_direction }}{% else %}Normal{% endif %}</span></div>
+    <div class="row"><span class="lbl">Drinking</span><span class="val">{% if m.drinking_changed %}{{ m.drinking_direction }}{% else %}Normal{% endif %}</span></div>
+    <div class="row"><span class="lbl">Stool</span><span class="val">{% if m.stool_quality_changed %}Changed{% if m.poops_per_day %}, {{ m.poops_per_day }}/day{% endif %}{% else %}Normal{% endif %}</span></div>
+    {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
+    {% if pet.adverse_reactions.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px;color:#c00">Adverse Reactions</p>
+    <table><thead><tr><th>Brand</th><th>Product</th><th>Since</th><th>Symptoms</th></tr></thead>
+    <tbody>{% for ar in pet.adverse_reactions.all %}<tr><td>{{ ar.brand }}</td><td>{{ ar.product_ingredient_medication }}</td><td>{{ ar.fed_since }}</td><td>{{ ar.reaction_symptoms }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+    {% with c=pet.chronic_condition %}{% if c and c.has_chronic %}
+    <div class="row"><span class="lbl">Chronic Conditions</span><span class="val">{{ c.details }}</span></div>
+    {% endif %}{% endwith %}
+
+    <h2>8. Vaccination</h2>
+    {% with v=pet.vaccination_status %}{% if v %}
+    <div class="row"><span class="lbl">Yearly Vaccines</span><span class="val">{% if v.yearly_vaccinations %}Yes{% else %}No{% endif %}</span></div>
+    <div class="row"><span class="lbl">Deworming</span><span class="val">{% if v.deworming %}Yes{% else %}No{% endif %}</span></div>
+    <div class="row"><span class="lbl">Tick/Flea</span><span class="val">Topical: {{ v.topical_tick_flea|default:"-" }} | Oral: {{ v.oral_tick_flea|default:"-" }}</span></div>
+    {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
+    {% with pv=pet.primary_vet %}{% if pv %}
+    <div class="row"><span class="lbl">Primary Vet</span><span class="val">{{ pv.vet_name }} | {{ pv.practice_name_location }} | {{ pv.clinic_phone }}</span></div>
+    {% endif %}{% endwith %}
+
+    <h2>9. Consent</h2>
+    {% with c=pet.owner.consent %}{% if c %}
+    <div class="row"><span class="lbl">Agreed</span><span class="val">{% if c.agreed %}Yes{% else %}No{% endif %} &mdash; {{ c.date_signed|date:"d M Y H:i" }}</span></div>
+    {% endif %}{% endwith %}
+
+    <div style="margin-top:30px;text-align:center;color:#999;font-size:9pt;border-top:1px solid #ddd;padding-top:12px">
+        Poshtik NutriVet &mdash; Case {{ pet.owner.case_id }} &mdash; Generated {{ "now"|date:"d M Y H:i" }}
+    </div>
+</body>
+</html>

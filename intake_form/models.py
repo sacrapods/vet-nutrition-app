@@ -74,7 +74,7 @@ class Pet(models.Model):
     neutered = models.BooleanField(default=False, verbose_name="Neutered/Spayed")
     
     # Physical attributes
-    current_weight_kg = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Current Weight (kg)")
+    current_weight_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Current Weight (kg)")
     body_condition = models.CharField(max_length=20, choices=BODY_CONDITION_CHOICES)
     
     # Consultation details

@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.db import models as db_models
 from .models import (
     PetParent, Pet, HouseholdDetails, FeedingBehavior,
     FoodPreferences, CommercialDietHistory, HomemadeDietHistory,
@@ -25,18 +26,19 @@ def intake_form_view(request):
         )
 
         # ── Pet ──
+        pet_weight = request.POST.get('pet_weight', '')
         pet = Pet.objects.create(
             owner=pet_parent,
-            name=request.POST.get('pet_name'),
-            dob_age=request.POST.get('pet_age'),
-            species=request.POST.get('pet_species'),
-            breed=request.POST.get('pet_breed'),
+            name=request.POST.get('pet_name', ''),
+            dob_age=request.POST.get('pet_age', ''),
+            species=request.POST.get('pet_species', 'dog'),
+            breed=request.POST.get('pet_breed', ''),
             colour=request.POST.get('pet_colour', ''),
-            sex=request.POST.get('pet_sex'),
+            sex=request.POST.get('pet_sex', 'male'),
             neutered=request.POST.get('pet_neutered') == 'yes',
-            current_weight_kg=request.POST.get('pet_weight'),
-            body_condition=request.POST.get('pet_body_condition'),
-            consultation_goals=request.POST.get('pet_consultation_goals')
+            current_weight_kg=pet_weight if pet_weight else None,
+            body_condition=request.POST.get('pet_body_condition', 'ideal'),
+            consultation_goals=request.POST.get('pet_consultation_goals', '')
         )
 
         # ── Household Details ──
@@ -425,3 +427,28 @@ def intake_form_view(request):
 def success_view(request):
     """Success page after form submission"""
     return render(request, 'intake_form/success.html')
+
+
+def case_list_view(request):
+    """Dashboard: list of all submitted cases"""
+    q = request.GET.get('q', '')
+    parents = PetParent.objects.prefetch_related('pets').order_by('-created_at')
+    if q:
+        parents = parents.filter(
+            db_models.Q(name__icontains=q) |
+            db_models.Q(case_id__icontains=q) |
+            db_models.Q(pets__name__icontains=q)
+        ).distinct()
+    return render(request, 'intake_form/case_list.html', {'parents': parents, 'q': q})
+
+
+def case_detail_view(request, pk):
+    """Detail view: all info for one pet"""
+    pet = get_object_or_404(Pet.objects.select_related('owner'), pk=pk)
+    return render(request, 'intake_form/case_detail.html', {'pet': pet})
+
+
+def case_pdf_view(request, pk):
+    """Simple printable/PDF view"""
+    pet = get_object_or_404(Pet.objects.select_related('owner'), pk=pk)
+    return render(request, 'intake_form/case_pdf.html', {'pet': pet})

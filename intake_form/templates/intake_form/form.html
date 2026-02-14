@@ -1351,14 +1351,46 @@
                     // Hide current step
                     document.getElementById('step-' + currentStep).classList.remove('active');
                     document.querySelector('.step[data-step="' + currentStep + '"]').classList.remove('active');
-                    
+
                     // Show previous step
                     currentStep = step;
                     document.getElementById('step-' + currentStep).classList.add('active');
                     document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('active');
-                    
+
                     // Scroll to top
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+                // Submit handler: strip 'required' from hidden steps so browser
+                // validation doesn't block on invisible fields, then submit.
+                function submitForm() {
+                    // Validate visible step 9 fields first
+                    var activeStep = document.querySelector('.form-step.active');
+                    var requiredFields = activeStep.querySelectorAll('[required]');
+                    for (var i = 0; i < requiredFields.length; i++) {
+                        var field = requiredFields[i];
+                        if (field.type === 'checkbox' && !field.checked) {
+                            alert('Please check the consent checkbox to proceed.');
+                            field.focus();
+                            return;
+                        }
+                        if (field.type !== 'checkbox' && !field.value.trim()) {
+                            alert('Please fill in all required fields.');
+                            field.focus();
+                            return;
+                        }
+                    }
+
+                    // Remove required from ALL hidden-step fields
+                    var hiddenSteps = document.querySelectorAll('.form-step:not(.active)');
+                    hiddenSteps.forEach(function(step) {
+                        step.querySelectorAll('[required]').forEach(function(el) {
+                            el.removeAttribute('required');
+                        });
+                    });
+
+                    // Now submit the form
+                    document.querySelector('form').submit();
                 }
                 </script>
                 <!-- Diet Plan Preferences -->
@@ -1915,7 +1947,7 @@
                     <!-- Final Navigation -->
                     <div class="form-navigation">
                         <button type="button" class="btn-prev" onclick="prevStep(8)">← Previous</button>
-                        <button type="submit" class="btn-next">Submit Form</button>
+                        <button type="button" class="btn-next" onclick="submitForm()">Submit Form</button>
                     </div>
                 </div>
             </form>
