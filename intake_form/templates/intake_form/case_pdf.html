@@ -122,6 +122,58 @@
     <div class="row"><span class="lbl">Agreed</span><span class="val">{% if c.agreed %}Yes{% else %}No{% endif %} &mdash; {{ c.date_signed|date:"d M Y H:i" }}</span></div>
     {% endif %}{% endwith %}
 
+    <h2>10. Clinical History (Vet)</h2>
+    {% with ch=pet.clinical_history %}
+    {% if ch %}
+    {% if ch.conditions.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px">Clinical Conditions</p>
+    <table><thead><tr><th>Condition</th><th>Symptoms</th><th>Medication</th><th>Dose &amp; Freq</th><th>Length</th></tr></thead>
+    <tbody>{% for c in ch.conditions.all %}<tr><td>{{ c.condition_disease }}</td><td>{{ c.clinical_symptoms }}</td><td>{{ c.medication_name }}</td><td>{{ c.dose_frequency }}</td><td>{{ c.treatment_length }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+    {% if ch.additional_notes %}
+    <div class="row"><span class="lbl">Additional Notes</span><span class="val">{{ ch.additional_notes }}</span></div>
+    {% endif %}
+    {% else %}<p style="color:#999;font-style:italic">No clinical history data from vet</p>{% endif %}
+    {% endwith %}
+
+    {% if pet.long_term_medications.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px">Long-term Medications</p>
+    <table><thead><tr><th>Medication</th><th>Dose</th><th>Frequency</th></tr></thead>
+    <tbody>{% for m in pet.long_term_medications.all %}<tr><td>{{ m.medication_name }}</td><td>{{ m.dose }}</td><td>{{ m.frequency }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+
+    {% if pet.surgical_history.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px">Surgical History</p>
+    <table><thead><tr><th>Surgery / Procedure</th><th>Date</th></tr></thead>
+    <tbody>{% for s in pet.surgical_history.all %}<tr><td>{{ s.surgery_name }}</td><td>{{ s.date_performed }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+
+    {% if pet.diagnostic_imaging.exists %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:8px">Diagnostic Imaging</p>
+    <table><thead><tr><th>Type</th><th>Date</th></tr></thead>
+    <tbody>{% for im in pet.diagnostic_imaging.all %}<tr><td>{{ im.imaging_type }}</td><td>{{ im.date_performed }}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+
+    {% if blood_work_uploads %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:14px">Blood Work / Lab Reports</p>
+    {% for upload in blood_work_uploads %}
+    <div style="padding:6px 0;border-bottom:1px dotted #ddd">
+        <a href="{{ upload.file.url }}" target="_blank" style="color:#2C5A8C;font-size:9pt;text-decoration:none">&#x1F4CE; {{ upload.original_filename }}</a>
+        <span style="color:#999;font-size:8pt;margin-left:8px">{{ upload.uploaded_at|date:"d M Y" }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if imaging_uploads %}
+    <p style="font-weight:bold;font-size:10pt;margin-top:14px">Diagnostic Imaging Reports</p>
+    {% for upload in imaging_uploads %}
+    <div style="padding:6px 0;border-bottom:1px dotted #ddd">
+        <a href="{{ upload.file.url }}" target="_blank" style="color:#2C5A8C;font-size:9pt;text-decoration:none">&#x1F4CE; {{ upload.original_filename }}</a>
+        <span style="color:#999;font-size:8pt;margin-left:8px">{{ upload.uploaded_at|date:"d M Y" }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
     <div style="margin-top:30px;text-align:center;color:#999;font-size:9pt;border-top:1px solid #ddd;padding-top:12px">
         Poshtik NutriVet &mdash; Case {{ pet.owner.case_id }} &mdash; Generated {{ "now"|date:"d M Y H:i" }}
     </div>

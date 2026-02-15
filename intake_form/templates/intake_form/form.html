@@ -87,7 +87,8 @@
         
         .form-group textarea {
             min-height: 100px;
-            resize: vertical;
+            resize: both;
+            overflow: auto;
         }
         
         .radio-group {
@@ -174,6 +175,7 @@
             flex: 1;
             text-align: center;
             position: relative;
+            cursor: pointer;
         }
         
         .step::after {
@@ -280,6 +282,177 @@
             font-size: 0.85rem;
             margin-top: 4px;
         }
+
+        /* ── Mobile step indicator (hidden by default, shown on phones) ── */
+        .step-indicator-mobile { display: none; }
+
+        /* ── Validation error styles ── */
+        .validation-errors {
+            background: #FFF5F5;
+            border: 1.5px solid #E8B0B0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .validation-errors h4 {
+            color: #C0392B;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .validation-errors ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .validation-errors li {
+            font-size: 0.85rem;
+            color: #6B3030;
+            padding: 4px 0 4px 16px;
+            position: relative;
+        }
+        .validation-errors li::before {
+            content: '\2022';
+            position: absolute;
+            left: 0;
+            color: #C0392B;
+        }
+        .field-error {
+            border-color: #C0392B !important;
+            box-shadow: 0 0 0 3px rgba(192,57,43,0.1) !important;
+        }
+
+        /* Submit validation modal */
+        .submit-validation-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        .submit-validation-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+        }
+        .submit-validation-modal h3 {
+            color: #C0392B;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+        .submit-validation-modal .step-group { margin-bottom: 16px; }
+        .submit-validation-modal .step-group-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            color: #C17A5A;
+            margin-bottom: 6px;
+        }
+        .submit-validation-modal .step-group-title:hover { color: #A85E3F; }
+        .submit-validation-modal ul {
+            list-style: disc;
+            padding-left: 20px;
+            margin: 0;
+        }
+        .submit-validation-modal li {
+            font-size: 0.85rem;
+            color: #6B3030;
+            padding: 2px 0;
+        }
+        .submit-validation-modal .modal-close {
+            display: block; width: 100%; padding: 12px;
+            background: linear-gradient(135deg, #C17A5A, #A85E3F);
+            color: white; border: none; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 16px;
+        }
+
+        /* ── Responsive: Tablet ≤768px ── */
+        @media (max-width: 768px) {
+            .header { padding: 24px 16px; }
+            .header h1 { font-size: 1.4rem; }
+            .form-card { padding: 24px 16px; }
+            .step-indicator { padding: 0 8px; margin-bottom: 24px; }
+            .step-label { display: none; }
+            .step-number { width: 28px; height: 28px; font-size: 0.8rem; }
+            .step::after { top: 13px; }
+            .form-step [style*="repeat(3, 1fr)"],
+            .form-step [style*="1fr 1fr 1fr"] {
+                grid-template-columns: 1fr 1fr !important;
+            }
+        }
+
+        /* ── Responsive: Phone ≤480px ── */
+        @media (max-width: 480px) {
+            .container { padding: 8px; }
+            .header { padding: 20px 12px; border-radius: 8px 8px 0 0; }
+            .header h1 { font-size: 1.2rem; }
+            .header p { font-size: 0.8rem; }
+            .form-card { padding: 16px 12px; border-radius: 0 0 8px 8px; }
+            .section-title { font-size: 1.1rem; margin-bottom: 16px; }
+            .radio-group { gap: 8px; }
+            .radio-group label { padding: 8px 12px; font-size: 0.85rem; }
+            .step-indicator { display: none !important; }
+            .step-indicator-mobile {
+                display: block;
+                text-align: center;
+                margin-bottom: 20px;
+                padding: 12px 0;
+            }
+            .step-mobile-text {
+                font-size: 0.85rem;
+                color: #6B6B6B;
+            }
+            .step-mobile-text strong {
+                color: #C17A5A;
+                font-size: 1rem;
+            }
+            .step-mobile-dots {
+                display: flex;
+                justify-content: center;
+                gap: 6px;
+                margin-top: 8px;
+            }
+            .step-mobile-dot {
+                width: 8px; height: 8px;
+                border-radius: 50%;
+                background: #E8E4DE;
+                transition: all 0.2s;
+            }
+            .step-mobile-dot.completed { background: #7A9E7E; }
+            .step-mobile-dot.active {
+                background: #C17A5A;
+                width: 20px;
+                border-radius: 4px;
+            }
+            .form-navigation {
+                flex-direction: column-reverse;
+                gap: 12px;
+            }
+            .btn-next, .btn-prev {
+                width: 100%;
+                text-align: center;
+            }
+            .form-step [style*="1fr 1fr"],
+            .form-step [style*="repeat(3, 1fr)"],
+            .form-step [style*="1fr 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+            .brand-avoid-entry [style*="grid-template-columns"] {
+                grid-template-columns: 1fr auto !important;
+            }
+            .diet-entry, .hd-entry, .ct-entry, .treat-entry,
+            .supp-entry, .rdc-entry, .ar-entry, .brand-avoid-entry {
+                padding: 12px !important;
+            }
+            .submit-validation-modal { padding: 20px; border-radius: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -295,44 +468,50 @@
                 
                 <!-- Step Indicator -->
                 <div class="step-indicator">
-                    <div class="step active" data-step="1">
+                    <div class="step active" data-step="1" onclick="goToStep(1)">
                         <div class="step-number">1</div>
                         <div class="step-label">Owner & Pet</div>
                     </div>
-                    <div class="step" data-step="2">
+                    <div class="step" data-step="2" onclick="goToStep(2)">
                         <div class="step-number">2</div>
                         <div class="step-label">Household</div>
                     </div>
-                    <div class="step" data-step="3">
+                    <div class="step" data-step="3" onclick="goToStep(3)">
                         <div class="step-number">3</div>
                         <div class="step-label">Feeding</div>
                     </div>
-                    <div class="step" data-step="4">
+                    <div class="step" data-step="4" onclick="goToStep(4)">
                         <div class="step-number">4</div>
                         <div class="step-label">Preferences</div>
                     </div>
-                    <div class="step" data-step="5">
+                    <div class="step" data-step="5" onclick="goToStep(5)">
                         <div class="step-number">5</div>
                         <div class="step-label">Diet History</div>
                     </div>
-                    <div class="step" data-step="6">
+                    <div class="step" data-step="6" onclick="goToStep(6)">
                         <div class="step-number">6</div>
                         <div class="step-label">Fitness</div>
                     </div>
-                    <div class="step" data-step="7">
+                    <div class="step" data-step="7" onclick="goToStep(7)">
                         <div class="step-number">7</div>
                         <div class="step-label">Medical</div>
                     </div>
-                    <div class="step" data-step="8">
+                    <div class="step" data-step="8" onclick="goToStep(8)">
                         <div class="step-number">8</div>
                         <div class="step-label">Vaccination</div>
                     </div>
-                    <div class="step" data-step="9">
+                    <div class="step" data-step="9" onclick="goToStep(9)">
                         <div class="step-number">9</div>
                         <div class="step-label">Consent</div>
                     </div>
                 </div>
-                
+
+                <!-- Mobile step indicator (visible only on phones ≤480px) -->
+                <div class="step-indicator-mobile" id="step-indicator-mobile">
+                    <span class="step-mobile-text">Step <strong id="mobile-step-num">1</strong> of 9 &mdash; <span id="mobile-step-label">Owner & Pet</span></span>
+                    <div class="step-mobile-dots" id="mobile-step-dots"></div>
+                </div>
+
                 <!-- Step 1: Owner & Pet Info -->
                 <div class="form-step active" id="step-1">
                 
@@ -913,7 +1092,7 @@
                             </div>
                             
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Amount per day (gm/ml)</label>
+                                <label style="font-size:0.85rem;">Amount per day (gm)</label>
                                 <input type="text" name="diet_amount[]" placeholder="e.g., 150gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             
@@ -927,7 +1106,7 @@
                                 <input type="text" name="diet_topper[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Topper Amount per meal (gm/ml)</label>
+                                <label style="font-size:0.85rem;">Topper Amount per meal (gm)</label>
                                 <input type="text" name="diet_topper_amount[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
@@ -959,7 +1138,7 @@
                                 <input type="text" name="hd_ingredient[]" placeholder="e.g., chicken breast" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Raw Quantity per day (gm/ml)</label>
+                                <label style="font-size:0.85rem;">Raw Quantity per day (gm)</label>
                                 <input type="text" name="hd_quantity[]" placeholder="e.g., 200gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
@@ -1006,7 +1185,7 @@
                                 <input type="text" name="ct_product[]" placeholder="" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Quantity per day (g/ml)</label>
+                                <label style="font-size:0.85rem;">Quantity per day (gm)</label>
                                 <input type="text" name="ct_quantity[]" placeholder="e.g., 30g" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
@@ -1045,7 +1224,7 @@
                                 <input type="text" name="treat_preparation[]" placeholder="e.g., boiled" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Quantity per day (g/ml)</label>
+                                <label style="font-size:0.85rem;">Quantity per day (gm)</label>
                                 <input type="text" name="treat_quantity[]" placeholder="e.g., 50gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
@@ -1137,7 +1316,7 @@
                                     <div><label style="font-size:0.85rem;">Brand</label><input type="text" name="rdc_brand[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
                                     <div><label style="font-size:0.85rem;">Product / Food Ingredient</label><input type="text" name="rdc_product[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
                                     <div><label style="font-size:0.85rem;">Form / Type</label><input type="text" name="rdc_form[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
-                                    <div><label style="font-size:0.85rem;">Amount per day (gm/ml)</label><input type="text" name="rdc_amount[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
+                                    <div><label style="font-size:0.85rem;">Amount per day (gm)</label><input type="text" name="rdc_amount[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
                                     <div><label style="font-size:0.85rem;"># of meals per day</label><input type="number" name="rdc_meals[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
                                     <div><label style="font-size:0.85rem;">Start date</label><input type="text" name="rdc_start[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
                                     <div><label style="font-size:0.85rem;">Stop date</label><input type="text" name="rdc_stop[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div>
@@ -1190,7 +1369,7 @@
                             </div>
                             
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Amount per day (gm/ml)</label>
+                                <label style="font-size:0.85rem;">Amount per day (gm)</label>
                                 <input type="text" name="diet_amount[]" placeholder="e.g., 150gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             
@@ -1204,7 +1383,7 @@
                                 <input type="text" name="diet_topper[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Topper Amount per meal (gm/ml)</label>
+                                <label style="font-size:0.85rem;">Topper Amount per meal (gm)</label>
                                 <input type="text" name="diet_topper_amount[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
@@ -1226,7 +1405,7 @@
                     const e = document.createElement('div');
                     e.className = 'hd-entry';
                     e.style.cssText = 'background:#F5F0FF; border:1.5px solid #C8B8E8; border-radius:10px; padding:20px; margin-bottom:16px;';
-                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><strong style="color:#6B4FA0;">Homemade Item #${hdCounter}</strong><button type="button" onclick="this.closest('.hd-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Ingredient/Food Item</label><input type="text" name="hd_ingredient[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Raw Quantity per day (gm/ml)</label><input type="text" name="hd_quantity[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Preparation Method</label><input type="text" name="hd_preparation[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Feed Frequency (per day)</label><input type="number" name="hd_frequency[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="hd_since[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Reason (if stopped)</label><input type="text" name="hd_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><strong style="color:#6B4FA0;">Homemade Item #${hdCounter}</strong><button type="button" onclick="this.closest('.hd-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Ingredient/Food Item</label><input type="text" name="hd_ingredient[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Raw Quantity per day (gm)</label><input type="text" name="hd_quantity[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Preparation Method</label><input type="text" name="hd_preparation[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Feed Frequency (per day)</label><input type="number" name="hd_frequency[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="hd_since[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Reason (if stopped)</label><input type="text" name="hd_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
                     container.appendChild(e);
                 }
 
@@ -1237,7 +1416,7 @@
                     const e = document.createElement('div');
                     e.className = 'ct-entry';
                     e.style.cssText = 'background:#FFF8E8; border:1.5px solid #E8D090; border-radius:10px; padding:20px; margin-bottom:16px;';
-                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><strong style="color:#A08020;">Commercial Treat #${ctCounter}</strong><button type="button" onclick="this.closest('.ct-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Treat Type</label><input type="text" name="ct_type[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Brand</label><input type="text" name="ct_brand[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Product Details</label><input type="text" name="ct_product[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Quantity per day (g/ml)</label><input type="text" name="ct_quantity[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="ct_since[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Reason (if stopped)</label><input type="text" name="ct_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;"><strong style="color:#A08020;">Commercial Treat #${ctCounter}</strong><button type="button" onclick="this.closest('.ct-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;"><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Treat Type</label><input type="text" name="ct_type[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Brand</label><input type="text" name="ct_brand[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Product Details</label><input type="text" name="ct_product[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Quantity per day (gm)</label><input type="text" name="ct_quantity[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Fed Since</label><input type="text" name="ct_since[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:0.85rem;">Reason (if stopped)</label><input type="text" name="ct_reason_stopped[]" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
                     container.appendChild(e);
                 }
 
@@ -1259,7 +1438,7 @@
                     const e = document.createElement('div');
                     e.className = 'rdc-entry';
                     e.style.cssText = 'background:#F0F5FF; border:1.5px solid #B0C4E8; border-radius:10px; padding:16px; margin-bottom:12px;';
-                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><strong style="color:#2060A0;">Change #${rdcCounter}</strong><button type="button" onclick="this.closest('.rdc-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"><div><label style="font-size:0.85rem;">Brand</label><input type="text" name="rdc_brand[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Product / Food Ingredient</label><input type="text" name="rdc_product[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Form / Type</label><input type="text" name="rdc_form[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Amount per day (gm/ml)</label><input type="text" name="rdc_amount[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;"># of meals per day</label><input type="number" name="rdc_meals[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Start date</label><input type="text" name="rdc_start[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Stop date</label><input type="text" name="rdc_stop[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Reason stopped</label><input type="text" name="rdc_reason[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
+                    e.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><strong style="color:#2060A0;">Change #${rdcCounter}</strong><button type="button" onclick="this.closest('.rdc-entry').remove()" style="background:#C0392B; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">Remove</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"><div><label style="font-size:0.85rem;">Brand</label><input type="text" name="rdc_brand[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Product / Food Ingredient</label><input type="text" name="rdc_product[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Form / Type</label><input type="text" name="rdc_form[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Amount per day (gm)</label><input type="text" name="rdc_amount[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;"># of meals per day</label><input type="number" name="rdc_meals[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Start date</label><input type="text" name="rdc_start[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Stop date</label><input type="text" name="rdc_stop[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div><div><label style="font-size:0.85rem;">Reason stopped</label><input type="text" name="rdc_reason[]" style="width:100%; padding:8px; border:1.5px solid #D9D4CC; border-radius:8px;"></div></div>`;
                     container.appendChild(e);
                 }
 
@@ -1309,7 +1488,7 @@
                                 <input type="text" name="treat_preparation[]" placeholder="e.g., boiled" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:0.85rem;">Quantity per day (g/ml)</label>
+                                <label style="font-size:0.85rem;">Quantity per day (gm)</label>
                                 <input type="text" name="treat_quantity[]" placeholder="e.g., 50gm" style="width:100%; padding:10px; border:1.5px solid #D9D4CC; border-radius:8px;">
                             </div>
                             <div class="form-group" style="margin-bottom:12px;">
@@ -1327,61 +1506,303 @@
                 </script>
             <script>
                 let currentStep = 1;
-                
+
+                // ── Validation Toggle ──────────────────────────────────
+                var VALIDATION_ENABLED = !new URLSearchParams(window.location.search).has('novalidate');
+
+                // Dev-tools floating toggle (add ?devtools to URL)
+                if (new URLSearchParams(window.location.search).has('devtools')) {
+                    var devBtn = document.createElement('button');
+                    devBtn.textContent = 'Validation: ON';
+                    devBtn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:99999;padding:8px 16px;border-radius:8px;border:2px solid #5B8C5A;background:#fff;color:#5B8C5A;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);';
+                    devBtn.onclick = function() {
+                        VALIDATION_ENABLED = !VALIDATION_ENABLED;
+                        devBtn.textContent = 'Validation: ' + (VALIDATION_ENABLED ? 'ON' : 'OFF');
+                        devBtn.style.borderColor = VALIDATION_ENABLED ? '#5B8C5A' : '#c0392b';
+                        devBtn.style.color = VALIDATION_ENABLED ? '#5B8C5A' : '#c0392b';
+                    };
+                    document.body.appendChild(devBtn);
+                }
+
+                // ── Step Labels ────────────────────────────────────────
+                var STEP_LABELS = [
+                    '', 'Owner & Pet', 'Health & Diet', 'Diet Details',
+                    'Homemade Diet', 'Treats & Supplements', 'Brands to Avoid',
+                    'Additional Info', 'Veterinarian', 'Consent & Submit'
+                ];
+
+                // ── Required Fields Map ────────────────────────────────
+                var STEP_REQUIRED_FIELDS = {
+                    1: [
+                        { name: 'parent_name', label: 'Parent/Owner Name', type: 'text' },
+                        { name: 'parent_email', label: 'Email Address', type: 'email' },
+                        { name: 'parent_phone', label: 'Phone Number', type: 'text' },
+                        { name: 'pet_name', label: 'Pet Name', type: 'text' },
+                        { name: 'pet_age', label: 'Pet Age', type: 'text' },
+                        { name: 'pet_species', label: 'Species', type: 'select' },
+                        { name: 'pet_breed', label: 'Breed', type: 'text' },
+                        { name: 'pet_sex', label: 'Pet Sex', type: 'radio' },
+                        { name: 'pet_weight', label: 'Body Weight', type: 'text' },
+                        { name: 'pet_body_condition', label: 'Body Condition Score', type: 'radio' },
+                        { name: 'pet_consultation_goals', label: 'Consultation Goals', type: 'text' }
+                    ],
+                    2: [], 3: [], 4: [], 5: [], 6: [], 7: [],
+                    8: [
+                        { name: 'vet_name', label: 'Veterinarian Name', type: 'text' },
+                        { name: 'vet_practice', label: 'Practice / Clinic Name', type: 'text' },
+                        { name: 'vet_phone', label: 'Vet Phone Number', type: 'text' },
+                        { name: 'vet_email', label: 'Vet Email Address', type: 'email' }
+                    ],
+                    9: [
+                        { name: 'consent_agreed', label: 'Consent Checkbox', type: 'checkbox' },
+                        { name: 'consent_name', label: 'Full Name (Consent)', type: 'text' }
+                    ]
+                };
+
+                // ── Mobile Step Indicator ──────────────────────────────
+                function updateMobileStepIndicator(step) {
+                    var numEl = document.getElementById('mobile-step-num');
+                    var labelEl = document.getElementById('mobile-step-label');
+                    var dotsEl = document.getElementById('mobile-step-dots');
+                    if (!numEl || !labelEl || !dotsEl) return;
+
+                    numEl.textContent = step;
+                    labelEl.textContent = STEP_LABELS[step] || '';
+
+                    dotsEl.innerHTML = '';
+                    for (var i = 1; i <= 9; i++) {
+                        var dot = document.createElement('span');
+                        dot.className = 'step-mobile-dot' + (i === step ? ' active' : '') + (i < step ? ' completed' : '');
+                        dotsEl.appendChild(dot);
+                    }
+                }
+
+                // ── Validate Step ──────────────────────────────────────
+                function validateStep(stepNum) {
+                    var fields = STEP_REQUIRED_FIELDS[stepNum];
+                    if (!fields || fields.length === 0) return [];
+
+                    var missing = [];
+                    var stepEl = document.getElementById('step-' + stepNum);
+
+                    for (var i = 0; i < fields.length; i++) {
+                        var f = fields[i];
+                        var valid = false;
+
+                        if (f.type === 'radio') {
+                            var radios = stepEl.querySelectorAll('input[name="' + f.name + '"]');
+                            for (var r = 0; r < radios.length; r++) {
+                                if (radios[r].checked) { valid = true; break; }
+                            }
+                        } else if (f.type === 'checkbox') {
+                            var cb = stepEl.querySelector('input[name="' + f.name + '"]');
+                            valid = cb && cb.checked;
+                        } else if (f.type === 'select') {
+                            var sel = stepEl.querySelector('select[name="' + f.name + '"]');
+                            valid = sel && sel.value && sel.value.trim() !== '';
+                        } else {
+                            var inp = stepEl.querySelector('[name="' + f.name + '"]');
+                            valid = inp && inp.value && inp.value.trim() !== '';
+                        }
+
+                        if (!valid) {
+                            var fieldEl = stepEl.querySelector('[name="' + f.name + '"]');
+                            missing.push({ label: f.label, step: stepNum, fieldEl: fieldEl, name: f.name, type: f.type });
+                        }
+                    }
+                    return missing;
+                }
+
+                // ── Show Step Errors ───────────────────────────────────
+                function showStepErrors(stepNum, missingFields) {
+                    clearStepErrors(stepNum);
+
+                    var stepEl = document.getElementById('step-' + stepNum);
+                    if (!stepEl) return;
+
+                    // Create error banner
+                    var banner = document.createElement('div');
+                    banner.className = 'validation-errors';
+                    banner.id = 'validation-errors-' + stepNum;
+                    var title = document.createElement('strong');
+                    title.textContent = 'Please fill in the following required fields:';
+                    banner.appendChild(title);
+                    var ul = document.createElement('ul');
+                    ul.style.cssText = 'margin:8px 0 0 0; padding-left:20px;';
+                    for (var i = 0; i < missingFields.length; i++) {
+                        var li = document.createElement('li');
+                        li.textContent = missingFields[i].label;
+                        li.style.marginBottom = '2px';
+                        ul.appendChild(li);
+                    }
+                    banner.appendChild(ul);
+
+                    // Insert at top of step content
+                    stepEl.insertBefore(banner, stepEl.firstChild);
+
+                    // Highlight fields
+                    for (var j = 0; j < missingFields.length; j++) {
+                        var mf = missingFields[j];
+                        if (mf.type === 'radio') {
+                            // Highlight the radio group container
+                            var radios = stepEl.querySelectorAll('input[name="' + mf.name + '"]');
+                            for (var r = 0; r < radios.length; r++) {
+                                var radioLabel = radios[r].closest('label') || radios[r].closest('.radio-group');
+                                if (radioLabel) radioLabel.classList.add('field-error');
+                            }
+                        } else if (mf.fieldEl) {
+                            mf.fieldEl.classList.add('field-error');
+                        }
+                    }
+
+                    // Scroll to banner
+                    banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                // ── Clear Step Errors ──────────────────────────────────
+                function clearStepErrors(stepNum) {
+                    var banner = document.getElementById('validation-errors-' + stepNum);
+                    if (banner) banner.remove();
+
+                    var stepEl = document.getElementById('step-' + stepNum);
+                    if (!stepEl) return;
+                    var highlighted = stepEl.querySelectorAll('.field-error');
+                    for (var i = 0; i < highlighted.length; i++) {
+                        highlighted[i].classList.remove('field-error');
+                    }
+                }
+
+                // ── Auto-clear field errors on input ───────────────────
+                function setupFieldErrorClearListeners() {
+                    document.addEventListener('input', function(e) {
+                        if (e.target.classList.contains('field-error')) {
+                            e.target.classList.remove('field-error');
+                        }
+                    });
+                    document.addEventListener('change', function(e) {
+                        var el = e.target;
+                        if (el.classList.contains('field-error')) {
+                            el.classList.remove('field-error');
+                        }
+                        // For radios, clear from all labels in the group
+                        if (el.type === 'radio') {
+                            var groupLabels = document.querySelectorAll('input[name="' + el.name + '"]');
+                            for (var i = 0; i < groupLabels.length; i++) {
+                                var lbl = groupLabels[i].closest('label') || groupLabels[i].closest('.radio-group');
+                                if (lbl) lbl.classList.remove('field-error');
+                            }
+                        }
+                        // For checkboxes
+                        if (el.type === 'checkbox' && el.classList.contains('field-error')) {
+                            el.classList.remove('field-error');
+                        }
+                    });
+                }
+                setupFieldErrorClearListeners();
+
+                // ── Navigation Functions ───────────────────────────────
                 function nextStep(step) {
+                    // Validate current step before moving forward
+                    if (VALIDATION_ENABLED) {
+                        var missing = validateStep(currentStep);
+                        if (missing.length > 0) {
+                            showStepErrors(currentStep, missing);
+                            return;
+                        }
+                        clearStepErrors(currentStep);
+                    }
+
                     // Hide current step
                     document.getElementById('step-' + currentStep).classList.remove('active');
-                    
+
                     // Mark current as completed
                     document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('completed');
                     document.querySelector('.step[data-step="' + currentStep + '"]').classList.remove('active');
-                    
+
                     // Show next step
                     currentStep = step;
                     document.getElementById('step-' + currentStep).classList.add('active');
-                    
-                    // Update indicator
                     document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('active');
-                    
-                    // Scroll to top
+
+                    updateMobileStepIndicator(currentStep);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-                
+
                 function prevStep(step) {
-                    // Hide current step
+                    // Going back never blocks — no validation
                     document.getElementById('step-' + currentStep).classList.remove('active');
                     document.querySelector('.step[data-step="' + currentStep + '"]').classList.remove('active');
 
-                    // Show previous step
                     currentStep = step;
                     document.getElementById('step-' + currentStep).classList.add('active');
                     document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('active');
 
-                    // Scroll to top
+                    updateMobileStepIndicator(currentStep);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
 
-                // Submit handler: strip 'required' from hidden steps so browser
-                // validation doesn't block on invisible fields, then submit.
-                function submitForm() {
-                    // Validate visible step 9 fields first
-                    var activeStep = document.querySelector('.form-step.active');
-                    var requiredFields = activeStep.querySelectorAll('[required]');
-                    for (var i = 0; i < requiredFields.length; i++) {
-                        var field = requiredFields[i];
-                        if (field.type === 'checkbox' && !field.checked) {
-                            alert('Please check the consent checkbox to proceed.');
-                            field.focus();
-                            return;
+                function goToStep(step) {
+                    if (step === currentStep) return;
+
+                    // Going backward — always allowed
+                    if (step < currentStep) {
+                        goToStepDirect(step);
+                        return;
+                    }
+
+                    // Going forward — validate each intermediate step
+                    if (VALIDATION_ENABLED) {
+                        for (var s = currentStep; s < step; s++) {
+                            var missing = validateStep(s);
+                            if (missing.length > 0) {
+                                // Navigate to the failing step and show errors
+                                goToStepDirect(s);
+                                showStepErrors(s, missing);
+                                return;
+                            }
                         }
-                        if (field.type !== 'checkbox' && !field.value.trim()) {
-                            alert('Please fill in all required fields.');
-                            field.focus();
+                    }
+
+                    goToStepDirect(step);
+                }
+
+                // Non-validating direct navigation (used by modal + backward nav)
+                function goToStepDirect(step) {
+                    if (step === currentStep) return;
+
+                    document.getElementById('step-' + currentStep).classList.remove('active');
+
+                    for (var i = 1; i <= 9; i++) {
+                        var indicator = document.querySelector('.step[data-step="' + i + '"]');
+                        indicator.classList.remove('active', 'completed');
+                        if (i < step) indicator.classList.add('completed');
+                    }
+
+                    currentStep = step;
+                    document.getElementById('step-' + currentStep).classList.add('active');
+                    document.querySelector('.step[data-step="' + currentStep + '"]').classList.add('active');
+
+                    updateMobileStepIndicator(currentStep);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+                // ── Submit Handler ─────────────────────────────────────
+                function submitForm() {
+                    if (VALIDATION_ENABLED) {
+                        var allMissing = [];
+                        for (var s = 1; s <= 9; s++) {
+                            var missing = validateStep(s);
+                            for (var m = 0; m < missing.length; m++) {
+                                allMissing.push(missing[m]);
+                            }
+                        }
+                        if (allMissing.length > 0) {
+                            showSubmitValidationModal(allMissing);
                             return;
                         }
                     }
 
-                    // Remove required from ALL hidden-step fields
+                    // Strip required from hidden steps so browser doesn't block
                     var hiddenSteps = document.querySelectorAll('.form-step:not(.active)');
                     hiddenSteps.forEach(function(step) {
                         step.querySelectorAll('[required]').forEach(function(el) {
@@ -1389,9 +1810,106 @@
                         });
                     });
 
-                    // Now submit the form
                     document.querySelector('form').submit();
                 }
+
+                // ── Submit Validation Modal ────────────────────────────
+                function showSubmitValidationModal(allMissing) {
+                    // Remove existing modal if any
+                    var existing = document.getElementById('submit-validation-overlay');
+                    if (existing) existing.remove();
+
+                    // Group by step
+                    var grouped = {};
+                    for (var i = 0; i < allMissing.length; i++) {
+                        var s = allMissing[i].step;
+                        if (!grouped[s]) grouped[s] = [];
+                        grouped[s].push(allMissing[i]);
+                    }
+
+                    // Build modal
+                    var overlay = document.createElement('div');
+                    overlay.className = 'submit-validation-overlay';
+                    overlay.id = 'submit-validation-overlay';
+
+                    var modal = document.createElement('div');
+                    modal.className = 'submit-validation-modal';
+
+                    var title = document.createElement('h3');
+                    title.style.cssText = 'margin:0 0 8px 0; color:#c0392b; font-size:1.15rem;';
+                    title.textContent = 'Required Fields Missing';
+                    modal.appendChild(title);
+
+                    var subtitle = document.createElement('p');
+                    subtitle.style.cssText = 'margin:0 0 16px 0; color:#6B6B6B; font-size:0.9rem;';
+                    subtitle.textContent = 'Please fill in all required fields before submitting. Click a step name to go there.';
+                    modal.appendChild(subtitle);
+
+                    var stepNums = Object.keys(grouped).sort(function(a, b) { return a - b; });
+                    for (var si = 0; si < stepNums.length; si++) {
+                        var stepNum = parseInt(stepNums[si]);
+                        var fields = grouped[stepNum];
+
+                        var stepLink = document.createElement('div');
+                        stepLink.style.cssText = 'cursor:pointer; padding:6px 10px; margin:4px 0; background:#fdf2f2; border-radius:6px; border-left:3px solid #c0392b;';
+                        stepLink.setAttribute('data-goto-step', stepNum);
+                        stepLink.onmouseover = function() { this.style.background = '#fbe5e5'; };
+                        stepLink.onmouseout = function() { this.style.background = '#fdf2f2'; };
+
+                        var stepTitle = document.createElement('strong');
+                        stepTitle.style.cssText = 'color:#5B8C5A; font-size:0.95rem;';
+                        stepTitle.textContent = 'Step ' + stepNum + ' — ' + STEP_LABELS[stepNum];
+                        stepLink.appendChild(stepTitle);
+
+                        var fieldList = document.createElement('ul');
+                        fieldList.style.cssText = 'margin:4px 0 0 0; padding-left:18px; font-size:0.88rem; color:#444;';
+                        for (var fi = 0; fi < fields.length; fi++) {
+                            var li = document.createElement('li');
+                            li.textContent = fields[fi].label;
+                            li.style.marginBottom = '1px';
+                            fieldList.appendChild(li);
+                        }
+                        stepLink.appendChild(fieldList);
+
+                        // Closure for click handler
+                        (function(sn) {
+                            stepLink.addEventListener('click', function() {
+                                overlay.remove();
+                                goToStepDirect(sn);
+                                var stepMissing = validateStep(sn);
+                                if (stepMissing.length > 0) showStepErrors(sn, stepMissing);
+                            });
+                        })(stepNum);
+
+                        modal.appendChild(stepLink);
+                    }
+
+                    // Close button
+                    var closeBtn = document.createElement('button');
+                    closeBtn.type = 'button';
+                    closeBtn.style.cssText = 'margin-top:16px; width:100%; padding:12px; border:none; border-radius:8px; background:#5B8C5A; color:#fff; font-size:1rem; font-weight:600; cursor:pointer;';
+                    closeBtn.textContent = 'Close & Fix Fields';
+                    closeBtn.onclick = function() {
+                        overlay.remove();
+                        var firstStep = parseInt(stepNums[0]);
+                        goToStepDirect(firstStep);
+                        var stepMissing = validateStep(firstStep);
+                        if (stepMissing.length > 0) showStepErrors(firstStep, stepMissing);
+                    };
+                    modal.appendChild(closeBtn);
+
+                    overlay.appendChild(modal);
+
+                    // Click outside to close
+                    overlay.addEventListener('click', function(e) {
+                        if (e.target === overlay) overlay.remove();
+                    });
+
+                    document.body.appendChild(overlay);
+                }
+
+                // Initialize mobile indicator on page load
+                updateMobileStepIndicator(1);
                 </script>
                 <!-- Diet Plan Preferences -->
                 <h2 class="section-title" style="margin-top: 40px;">Diet Plan Preferences</h2>
@@ -1890,7 +2408,7 @@
                     
                     <div style="background:#FFFBF5; border:1.5px solid #E8D5B0; border-radius:12px; padding:24px; margin-bottom:24px; max-height:500px; overflow-y:auto;">
                         <h3 style="color:#8B6914; font-size:1.1rem; margin-bottom:16px;">Consent for In-Person/Remote Clinical Nutrition Consultations</h3>
-                        <div style="font-size:0.85rem; line-height:1.7; color:#2C2C2C;">
+                        <div style="font-size:0.85rem; line-height:1.7; color:#2C2C2C; text-align:justify;">
                             <p style="margin-bottom:12px;"><strong>1. Owner Authorization:</strong> I, the undersigned, do hereby certify that I am the owner (or authorized agent of the owner) of this animal and that I am 18 years of age or older; and have the authorization to consent to treatment if and when it is needed.</p>
                             
                             <p style="margin-bottom:12px;"><strong>2. Treatment Authorization:</strong> I hereby authorize Poshtik Nutrivet, their doctors(s), to recommend/advise the medical or surgical procedures, sedation, anesthesia, x-ray examination, diagnostic procedures, prescribe drugs, or such treatment which the clinician deems necessary.</p>

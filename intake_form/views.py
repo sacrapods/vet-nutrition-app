@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import models as db_models
+from django.views.decorators.http import require_POST
 from .models import (
     PetParent, Pet, HouseholdDetails, FeedingBehavior,
     FoodPreferences, CommercialDietHistory, HomemadeDietHistory,
@@ -9,7 +10,9 @@ from .models import (
     RehabilitationTherapy, MedicalHistory, AdverseReaction,
     VaccinationStatus, PrimaryVetInfo, ConsentForm,
     DietPlanPreferences, AdviceSource, ChronicCondition,
-    BrandToAvoid, TreatPreferenceInPlan
+    BrandToAvoid, TreatPreferenceInPlan,
+    ClinicalHistory, ClinicalCondition, LongTermMedication,
+    SurgicalHistory, DiagnosticImaging, VetUpload
 )
 
 
@@ -451,4 +454,119 @@ def case_detail_view(request, pk):
 def case_pdf_view(request, pk):
     """Simple printable/PDF view"""
     pet = get_object_or_404(Pet.objects.select_related('owner'), pk=pk)
-    return render(request, 'intake_form/case_pdf.html', {'pet': pet})
+    context = {
+        'pet': pet,
+        'blood_work_uploads': pet.vet_uploads.filter(category='blood_work'),
+        'imaging_uploads': pet.vet_uploads.filter(category='diagnostic_imaging'),
+    }
+    return render(request, 'intake_form/case_pdf.html', context)
+
+
+def vet_form_view(request, pk):
+    """Clinical history form filled by the referring vet"""
+    pet = get_object_or_404(Pet.objects.select_related('owner'), pk=pk)
+
+    if request.method == 'POST':
+        # Clinical History
+        clinical, _ = ClinicalHistory.objects.get_or_create(pet=pet)
+        clinical.additional_notes = request.POST.get('additional_notes', '')
+        clinical.save()
+
+        # Clear old rows and re-save (simple approach for dynamic tables)
+        ClinicalCondition.objects.filter(clinical_history=clinical).delete()
+        cond_diseases = request.POST.getlist('cond_disease[]')
+        cond_symptoms = request.POST.getlist('cond_symptoms[]')
+        cond_meds = request.POST.getlist('cond_medication[]')
+        cond_doses = request.POST.getlist('cond_dose[]')
+        cond_lengths = request.POST.getlist('cond_length[]')
+        for i in range(len(cond_diseases)):
+            if cond_diseases[i].strip():
+                ClinicalCondition.objects.create(
+                    clinical_history=clinical,
+                    condition_disease=cond_diseases[i],
+                    clinical_symptoms=cond_symptoms[i] if i < len(cond_symptoms) else '',
+                    medication_name=cond_meds[i] if i < len(cond_meds) else '',
+                    dose_frequency=cond_doses[i] if i < len(cond_doses) else '',
+                    treatment_length=cond_lengths[i] if i < len(cond_lengths) else ''
+                )
+
+        # Long-term Medications
+        LongTermMedication.objects.filter(pet=pet).delete()
+        med_names = request.POST.getlist('med_name[]')
+        med_doses = request.POST.getlist('med_dose[]')
+        med_freqs = request.POST.getlist('med_frequency[]')
+        for i in range(len(med_names)):
+            if med_names[i].strip():
+                LongTermMedication.objects.create(
+                    pet=pet,
+                    medication_name=med_names[i],
+                    dose=med_doses[i] if i < len(med_doses) else '',
+                    frequency=med_freqs[i] if i < len(med_freqs) else ''
+                )
+
+        # Surgical History
+        SurgicalHistory.objects.filter(pet=pet).delete()
+        surg_names = request.POST.getlist('surg_name[]')
+        surg_dates = request.POST.getlist('surg_date[]')
+        for i in range(len(surg_names)):
+            if surg_names[i].strip():
+                SurgicalHistory.objects.create(
+                    pet=pet,
+                    surgery_name=surg_names[i],
+                    date_performed=surg_dates[i] if i < len(surg_dates) else ''
+                )
+
+        # Diagnostic Imaging
+        DiagnosticImaging.objects.filter(pet=pet).delete()
+        img_types = request.POST.getlist('img_type[]')
+        img_dates = request.POST.getlist('img_date[]')
+        for i in range(len(img_types)):
+            if img_types[i].strip():
+                DiagnosticImaging.objects.create(
+                    pet=pet,
+                    imaging_type=img_types[i],
+                    date_performed=img_dates[i] if i < len(img_dates) else ''
+                )
+
+        # Vet File Uploads (additive — NOT delete-and-recreate)
+        for category in ['blood_work', 'diagnostic_imaging']:
+            files = request.FILES.getlist(f'vet_files_{category}')
+            for f in files:
+                VetUpload.objects.create(
+                    pet=pet,
+                    category=category,
+                    file=f,
+                    original_filename=f.name,
+                )
+
+        messages.success(request, 'Clinical history saved successfully.')
+        return redirect('case_detail', pk=pet.pk)
+
+    # GET - load existing data
+    clinical = getattr(pet, 'clinical_history', None)
+    try:
+        clinical = pet.clinical_history
+    except ClinicalHistory.DoesNotExist:
+        clinical = None
+
+    context = {
+        'pet': pet,
+        'clinical': clinical,
+        'conditions': clinical.conditions.all() if clinical else [],
+        'medications': pet.long_term_medications.all(),
+        'surgeries': pet.surgical_history.all(),
+        'imaging': pet.diagnostic_imaging.all(),
+        'blood_work_uploads': pet.vet_uploads.filter(category='blood_work'),
+        'imaging_uploads': pet.vet_uploads.filter(category='diagnostic_imaging'),
+    }
+    return render(request, 'intake_form/vet_form.html', context)
+
+
+@require_POST
+def delete_vet_upload(request, upload_id):
+    """Delete an individual vet upload file"""
+    upload = get_object_or_404(VetUpload, pk=upload_id)
+    pet_pk = upload.pet.pk
+    upload.delete()
+    messages.success(request, 'File removed successfully.')
+    return redirect('vet_form', pk=pet_pk)

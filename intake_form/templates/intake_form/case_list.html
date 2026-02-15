@@ -9,62 +9,39 @@
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#FAF7F2;color:#2C2C2C;line-height:1.6}
         .container{max-width:1000px;margin:0 auto;padding:24px}
 
-        /* Header */
         .header{background:linear-gradient(135deg,#3D6B42,#5A9E60,#7AB87F);padding:32px 32px 28px;border-radius:16px;color:white;margin-bottom:28px;position:relative;overflow:hidden}
         .header::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.06);border-radius:50%}
-        .header::after{content:'';position:absolute;bottom:-60px;left:30%;width:250px;height:250px;background:rgba(255,255,255,0.04);border-radius:50%}
         .header-row{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
         .header h1{font-size:1.6rem;font-weight:700;letter-spacing:-0.3px}
         .header p{font-size:0.85rem;opacity:0.8;margin-top:4px}
-        .btn-new{background:rgba(255,255,255,0.15);backdrop-filter:blur(4px);color:white;padding:10px 20px;border-radius:10px;font-weight:600;font-size:0.85rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.3);transition:all 0.2s}
-        .btn-new:hover{background:rgba(255,255,255,0.25);text-decoration:none;transform:translateY(-1px)}
+        .btn-new{background:rgba(255,255,255,0.15);color:white;padding:10px 20px;border-radius:10px;font-weight:600;font-size:0.85rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.3);transition:all 0.2s}
+        .btn-new:hover{background:rgba(255,255,255,0.25);text-decoration:none}
 
-        /* Stats */
-        .stats{display:flex;gap:16px;margin-bottom:24px}
-        .stat-card{background:white;border-radius:12px;padding:18px 22px;flex:1;box-shadow:0 2px 8px rgba(0,0,0,0.04);border:1px solid #f0ede8}
-        .stat-card .num{font-size:1.8rem;font-weight:700;color:#3D6B42}
-        .stat-card .label{font-size:0.78rem;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+        .stats{display:flex;gap:12px;margin-bottom:20px}
+        .stat-card{background:white;border-radius:8px;padding:8px 16px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);border:1px solid #f0ede8}
+        .stat-card .num{font-size:1rem;font-weight:700;color:#3D6B42}
+        .stat-card .label{font-size:0.75rem;color:#999;text-transform:uppercase;letter-spacing:0.4px}
 
-        /* Search */
         .search{display:flex;gap:10px;margin-bottom:24px}
         .search input{flex:1;padding:12px 18px;border:1.5px solid #D9D4CC;border-radius:10px;font-size:0.95rem;background:white;transition:border 0.2s}
         .search input:focus{outline:none;border-color:#5A9E60;box-shadow:0 0 0 3px rgba(90,158,96,0.1)}
         .search button{padding:12px 24px;background:#3D6B42;color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.9rem;font-weight:600;transition:background 0.2s}
         .search button:hover{background:#2C5432}
 
-        /* Cards */
-        .case-grid{display:flex;flex-direction:column;gap:12px}
-        .case-card{background:white;border-radius:14px;padding:20px 24px;box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1.5px solid #f0ede8;display:flex;align-items:center;gap:20px;transition:all 0.2s;cursor:pointer;text-decoration:none;color:inherit}
-        .case-card:hover{border-color:#7AB87F;box-shadow:0 4px 20px rgba(74,122,79,0.1);transform:translateY(-1px);text-decoration:none}
+        .case-list{background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.04);border:1px solid #f0ede8;overflow:hidden}
+        .case-row{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #f5f2ed;text-decoration:none;color:inherit;transition:background 0.15s;cursor:pointer;gap:16px}
+        .case-row:last-child{border-bottom:none}
+        .case-row:hover{background:#FAFEF8}
 
-        .pet-avatar{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#E8F4E8,#D0E8D2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
-        .case-main{flex:1;min-width:0}
-        .case-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-        .pet-name{font-size:1.05rem;font-weight:700;color:#2C2C2C}
-        .breed-tag{font-size:0.72rem;padding:3px 10px;border-radius:20px;background:#F0F6F1;color:#3D6B42;font-weight:500}
-        .species-tag{font-size:0.72rem;padding:3px 10px;border-radius:20px;background:#FFF5EB;color:#C17A5A;font-weight:500}
-        .case-bottom{display:flex;align-items:center;gap:16px;font-size:0.82rem;color:#999}
-        .case-bottom span{display:flex;align-items:center;gap:4px}
+        .case-id{font-family:'SF Mono',SFMono-Regular,Menlo,monospace;font-size:0.8rem;color:#C17A5A;font-weight:700;white-space:nowrap;width:130px;flex-shrink:0}
+        .case-pet{font-weight:600;font-size:0.9rem;width:120px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .case-breed{font-size:0.8rem;color:#888;width:100px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .case-owner{font-size:0.85rem;color:#666;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .case-date{font-size:0.78rem;color:#bbb;white-space:nowrap;width:90px;flex-shrink:0;text-align:right}
+        .print-btn{padding:5px 14px;border-radius:6px;font-size:0.75rem;font-weight:600;text-decoration:none;background:#F8F4F0;color:#8B7355;border:1px solid #E8DDD0;transition:background 0.15s;white-space:nowrap;flex-shrink:0}
+        .print-btn:hover{background:#E8DDD0;text-decoration:none}
 
-        .case-right{display:flex;align-items:center;gap:16px;flex-shrink:0}
-        .case-id{font-family:'SF Mono',SFMono-Regular,Menlo,monospace;font-size:0.82rem;color:#C17A5A;font-weight:700;background:#FFF8F3;padding:6px 14px;border-radius:8px;border:1px solid #F0DDD0}
-        .case-date{text-align:right;font-size:0.78rem;color:#bbb;line-height:1.4}
-        .case-actions{display:flex;gap:6px}
-        .action-btn{padding:7px 14px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;transition:all 0.15s;border:1.5px solid transparent}
-        .action-btn.view{background:#F0F6F1;color:#3D6B42;border-color:#D0E8D2}
-        .action-btn.view:hover{background:#D0E8D2;text-decoration:none}
-        .action-btn.print{background:#F8F4F0;color:#8B7355;border-color:#E8DDD0}
-        .action-btn.print:hover{background:#E8DDD0;text-decoration:none}
-
-        .empty{text-align:center;padding:60px 20px;color:#bbb}
-        .empty-icon{font-size:3rem;margin-bottom:12px;opacity:0.4}
-        .empty p{font-size:0.95rem}
-
-        @media(max-width:640px){
-            .stats{flex-direction:column;gap:10px}
-            .case-card{flex-direction:column;align-items:flex-start;gap:12px}
-            .case-right{width:100%;justify-content:space-between}
-        }
+        .empty{text-align:center;padding:40px 20px;color:#bbb;font-size:0.9rem}
     </style>
 </head>
 <body>
@@ -81,12 +58,12 @@
 
         <div class="stats">
             <div class="stat-card">
-                <div class="num">{{ parents|length }}</div>
-                <div class="label">Total Cases</div>
+                <span class="num">{{ parents|length }}</span>
+                <span class="label">Total Cases</span>
             </div>
             <div class="stat-card">
-                <div class="num">{% now "d M" %}</div>
-                <div class="label">Today</div>
+                <span class="num">{% now "d M" %}</span>
+                <span class="label">Today</span>
             </div>
         </div>
 
@@ -95,38 +72,20 @@
             <button type="submit">Search</button>
         </form>
 
-        <div class="case-grid">
+        <div class="case-list">
             {% for parent in parents %}
             {% for pet in parent.pets.all %}
-            <a href="{% url 'case_detail' pet.pk %}" class="case-card">
-                <div class="pet-avatar">{% if pet.species == 'dog' %}🐕{% elif pet.species == 'cat' %}🐈{% else %}🐾{% endif %}</div>
-                <div class="case-main">
-                    <div class="case-top">
-                        <span class="pet-name">{{ pet.name }}</span>
-                        <span class="breed-tag">{{ pet.breed }}</span>
-                        <span class="species-tag">{{ pet.get_species_display }}</span>
-                    </div>
-                    <div class="case-bottom">
-                        <span>👤 {{ parent.name }}</span>
-                        <span>📧 {{ parent.email }}</span>
-                        {% if pet.current_weight_kg %}<span>⚖ {{ pet.current_weight_kg }}kg</span>{% endif %}
-                    </div>
-                </div>
-                <div class="case-right">
-                    <span class="case-id">{{ parent.case_id }}</span>
-                    <div class="case-date">{{ parent.created_at|date:"d M Y" }}<br>{{ parent.created_at|time:"H:i" }}</div>
-                    <div class="case-actions" onclick="event.stopPropagation()">
-                        <a href="{% url 'case_detail' pet.pk %}" class="action-btn view">View</a>
-                        <a href="{% url 'case_pdf' pet.pk %}" class="action-btn print">Print</a>
-                    </div>
-                </div>
+            <a href="{% url 'case_detail' pet.pk %}" class="case-row">
+                <span class="case-id">{{ parent.case_id }}</span>
+                <span class="case-pet">{{ pet.name }}</span>
+                <span class="case-breed">{{ pet.breed }}</span>
+                <span class="case-owner">{{ parent.name }} &middot; {{ parent.email }}</span>
+                <span class="case-date">{{ parent.created_at|date:"d M Y" }}</span>
+                <span onclick="event.preventDefault();event.stopPropagation();window.location='{% url 'case_pdf' pet.pk %}';" class="print-btn">Print</span>
             </a>
             {% endfor %}
             {% empty %}
-            <div class="empty">
-                <div class="empty-icon">📋</div>
-                <p>No cases found{% if q %} matching "{{ q }}"{% endif %}.</p>
-            </div>
+            <div class="empty">No cases found{% if q %} matching "{{ q }}"{% endif %}.</div>
             {% endfor %}
         </div>
     </div>

@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 import random
 import string
+import os
 
 # ═══════════════════════════════════════════════════════
 # CORE MODELS: Pet Parent & Pet
@@ -608,6 +609,40 @@ class DiagnosticImaging(models.Model):
     
     def __str__(self):
         return f"{self.imaging_type} - {self.pet.name}"
+
+
+class VetUpload(models.Model):
+    """File uploads from the vet clinical form (lab reports, imaging reports)"""
+    CATEGORY_CHOICES = [
+        ('blood_work', 'Blood Work / Lab Reports'),
+        ('diagnostic_imaging', 'Diagnostic Imaging Reports'),
+    ]
+
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='vet_uploads')
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
+    file = models.FileField(upload_to='vet_uploads/%Y/%m/')
+    original_filename = models.CharField(max_length=255)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.original_filename} ({self.pet.name})"
+
+    @property
+    def is_image(self):
+        ext = os.path.splitext(self.original_filename)[1].lower()
+        return ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff']
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            storage = self.file.storage
+            if storage.exists(self.file.name):
+                storage.delete(self.file.name)
+        super().delete(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Vet Upload"
+        verbose_name_plural = "Vet Uploads"
+        ordering = ['category', '-uploaded_at']
 
 
 # ═══════════════════════════════════════════════════════
