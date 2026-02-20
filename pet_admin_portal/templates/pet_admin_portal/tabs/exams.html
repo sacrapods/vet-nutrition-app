@@ -1,0 +1,52 @@
+<div class="grid two-col">
+  <section class="card">
+    <div class="card-head"><h3>Vitals Exam</h3></div>
+    <form method="post" action="{% url 'pet_admin_portal:create_vitals' parent.id pet.id %}" class="form-grid">
+      {% csrf_token %}
+      {{ vitals_form.as_p }}
+      <button class="btn-primary" type="submit">Save Vitals</button>
+    </form>
+  </section>
+  <section class="card">
+    <div class="card-head"><h3>Nutrition Status</h3></div>
+    <form method="post" action="{% url 'pet_admin_portal:create_nutrition' parent.id pet.id %}" class="form-grid">
+      {% csrf_token %}
+      {{ nutrition_form.as_p }}
+      <button class="btn-primary" type="submit">Save Nutrition</button>
+    </form>
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head"><h3>Vitals History</h3></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Weight</th><th>Temp</th><th>HR</th><th>RR</th><th>BP</th></tr></thead>
+      <tbody>
+        {% for v in vitals %}
+          <tr>
+            <td>{{ v.exam_at|date:'d M Y H:i' }}</td>
+            <td>{{ v.weight_kg|default:'-' }}</td>
+            <td>{{ v.temperature_c|default:'-' }}</td>
+            <td>{{ v.heart_rate_bpm|default:'-' }}</td>
+            <td>{{ v.respiratory_rate_bpm|default:'-' }}</td>
+            <td>{{ v.blood_pressure_systolic|default:'-' }}/{{ v.blood_pressure_diastolic|default:'-' }}</td>
+          </tr>
+        {% empty %}<tr><td colspan="6">No vitals yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="grid three-col chart-grid">
+  <article class="card"><h4>Weight Trend</h4><canvas class="chart" data-points="{{ weight_points_json }}"></canvas></article>
+  <article class="card"><h4>Temperature Trend</h4><canvas class="chart" data-points="{{ temp_points_json }}"></canvas></article>
+  <article class="card"><h4>Heart Rate Trend</h4><canvas class="chart" data-points="{{ heart_points_json }}"></canvas></article>
+</section>
+<section class="grid nutrition-chart-grid chart-grid">
+  <article class="card"><h4>BCS</h4><canvas class="chart" data-points="{{ nutrition_points_json.bcs }}"></canvas></article>
+  <article class="card"><h4>MCS</h4><canvas class="chart" data-points="{{ nutrition_points_json.mcs }}"></canvas></article>
+  <article class="card"><h4>WTR</h4><canvas class="chart" data-points="{{ nutrition_points_json.wtr }}"></canvas></article>
+  <article class="card"><h4>Body Fat %</h4><canvas class="chart" data-points="{{ nutrition_points_json.body_fat_percent }}"></canvas></article>
+  <article class="card"><h4>BFI</h4><canvas class="chart" data-points="{{ nutrition_points_json.bfi }}"></canvas></article>
+</section>

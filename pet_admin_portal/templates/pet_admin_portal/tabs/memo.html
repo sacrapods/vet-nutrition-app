@@ -1,0 +1,27 @@
+<section class="card">
+  <div class="card-head"><h3>Create Memo</h3></div>
+  <form method="post" action="{% url 'pet_admin_portal:create_memo' parent.id pet.id %}" class="form-grid">
+    {% csrf_token %}
+    {{ memo_form.as_p }}
+    <button class="btn-primary" type="submit">Save Memo</button>
+  </form>
+</section>
+<section class="card">
+  <div class="card-head"><h3>Memo History</h3></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Source</th><th>Type</th><th>Body</th><th>Assigned</th></tr></thead>
+      <tbody>
+      {% for m in memos %}
+        <tr>
+          <td>{{ m.created_at|date:'d M Y H:i' }}</td>
+          <td>{{ m.get_source_display }}</td>
+          <td>{{ m.get_message_type_display }}</td>
+          <td>{{ m.body|truncatechars:120 }}</td>
+          <td>{% for user in m.assigned_to.all %}{{ user.get_full_name|default:user.username }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+        </tr>
+      {% empty %}<tr><td colspan="5">No memos yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

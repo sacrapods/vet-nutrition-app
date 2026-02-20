@@ -1,0 +1,9 @@
+<section class="card">
+  <div class="card-head"><h3>EMR Export</h3></div>
+  <div class="export-actions">
+    <a class="btn-primary" href="{% url 'pet_admin_portal:emr_export_json' parent.id pet.id %}">Generate Shareable Export File</a>
+    <button class="btn-link" type="button" onclick="window.print()">Generate PDF Summary (Print)</button>
+    <a class="btn-link" href="mailto:{{ parent.email }}?subject=EMR%20Summary%20{{ parent.case_id }}">Email to Pet Owner</a>
+  </div>
+  <p class="hint">This export uses secure server-side authorization and owner-pet scoping.</p>
+</section>

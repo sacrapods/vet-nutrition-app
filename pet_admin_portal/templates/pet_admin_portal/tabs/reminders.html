@@ -1,0 +1,20 @@
+<section class="card">
+  <div class="card-head"><h3>Create Reminder</h3></div>
+  <form method="post" action="{% url 'pet_admin_portal:create_reminder' parent.id pet.id %}" class="form-grid">
+    {% csrf_token %}
+    {{ reminder_form.as_p }}
+    <button class="btn-primary" type="submit">Save Reminder</button>
+  </form>
+</section>
+<section class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Message</th><th>Due</th><th>Recurrence</th><th>Email</th></tr></thead>
+      <tbody>
+      {% for r in reminders %}
+        <tr><td>{{ r.reminder_type }}</td><td>{{ r.message }}</td><td>{{ r.due_date }}</td><td>{{ r.recurrence_rule|default:'-' }}</td><td>{{ r.email_notification|yesno:'Yes,No' }}</td></tr>
+      {% empty %}<tr><td colspan="5">No reminders yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

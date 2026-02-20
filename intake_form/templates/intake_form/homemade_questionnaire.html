@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homemade Diet Questionnaire - Poshtik NutriVet</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#FAF7F2;color:#2C2C2C;line-height:1.6}
+        .container{max-width:900px;margin:0 auto;padding:24px}
+        .nav{margin-bottom:18px}
+        .nav a{color:#4A7A4F;text-decoration:none;font-size:0.9rem}
+        .nav a:hover{text-decoration:underline}
+
+        .header{background:linear-gradient(135deg,#4A7A4F,#7A9E7E);padding:30px 26px;border-radius:14px;color:white;margin-bottom:22px}
+        .header h1{font-size:1.55rem;margin-bottom:6px}
+        .header p{opacity:0.92;font-size:0.9rem}
+
+        .card{background:white;border-radius:14px;box-shadow:0 3px 14px rgba(0,0,0,0.05);border:1px solid #f0ede8;padding:28px}
+        .section-title{font-size:1.05rem;color:#4A7A4F;margin:10px 0 14px;padding-bottom:8px;border-bottom:1px solid #eee7de}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-weight:600;margin-bottom:8px;font-size:0.9rem}
+        input,select,textarea{width:100%;padding:11px 12px;border:1.5px solid #D9D4CC;border-radius:9px;font-size:0.92rem;font-family:inherit;transition:all 0.2s}
+        textarea{min-height:92px;resize:vertical}
+        input:focus,select:focus,textarea:focus{outline:none;border-color:#7A9E7E;box-shadow:0 0 0 3px rgba(122,158,126,0.14)}
+
+        .actions{margin-top:20px;padding-top:16px;border-top:1px solid #eee7de;display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .btn-back{display:inline-block;padding:10px 18px;border:1.5px solid #D9D4CC;border-radius:9px;color:#666;text-decoration:none;font-weight:600;font-size:0.88rem}
+        .btn-back:hover{border-color:#7A9E7E;color:#4A7A4F}
+        .btn-submit{background:#4A7A4F;color:white;border:none;padding:12px 24px;border-radius:9px;font-size:0.9rem;font-weight:600;cursor:pointer}
+        .btn-submit:hover{background:#3D6B42}
+
+        .messages{margin-bottom:18px}
+        .message{padding:12px 14px;background:#E8F8E8;border:1px solid #C0E8C0;color:#2D6A2D;border-radius:10px;font-size:0.88rem}
+
+        @media (max-width: 760px){.grid{grid-template-columns:1fr}.card{padding:20px}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="nav">
+        <a href="{% url 'case_list' %}">← Back to Case Dashboard</a>
+    </div>
+
+    <div class="header">
+        <h1>Homemade Diet Questionnaire</h1>
+        <p>A separate intake page for pets on homemade meals, styled consistently with the existing forms.</p>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="card">
+        {% csrf_token %}
+
+        <h2 class="section-title">Owner & Pet Details</h2>
+        <div class="grid">
+            <div class="form-group">
+                <label>Owner Name</label>
+                <input type="text" name="owner_name" required>
+            </div>
+            <div class="form-group">
+                <label>Owner Email</label>
+                <input type="email" name="owner_email">
+            </div>
+            <div class="form-group">
+                <label>Owner Phone</label>
+                <input type="text" name="owner_phone">
+            </div>
+            <div class="form-group">
+                <label>Pet Name</label>
+                <input type="text" name="pet_name" required>
+            </div>
+            <div class="form-group">
+                <label>Species</label>
+                <select name="species" required>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Breed</label>
+                <input type="text" name="breed">
+            </div>
+            <div class="form-group">
+                <label>Age / DOB</label>
+                <input type="text" name="age">
+            </div>
+            <div class="form-group">
+                <label>Current Weight (kg)</label>
+                <input type="number" step="0.01" min="0" name="current_weight_kg">
+            </div>
+        </div>
+
+        <h2 class="section-title">Homemade Diet Information</h2>
+        <div class="form-group">
+            <label>Describe current diet (all meals/snacks)</label>
+            <textarea name="current_diet_description"></textarea>
+        </div>
+        <div class="grid">
+            <div class="form-group">
+                <label>Homemade meals per day</label>
+                <input type="number" min="0" name="homemade_meals_per_day">
+            </div>
+            <div class="form-group">
+                <label>Supplements / Medications given with food</label>
+                <input type="text" name="supplements_medications">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Main ingredients used in recipes</label>
+            <textarea name="recipe_ingredients"></textarea>
+        </div>
+        <div class="form-group">
+            <label>How food is prepared and stored</label>
+            <textarea name="recipe_preparation"></textarea>
+        </div>
+
+        <h2 class="section-title">Consultation Goals</h2>
+        <div class="form-group">
+            <label>Main concerns or goals</label>
+            <textarea name="concerns_or_goals"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Additional notes</label>
+            <textarea name="additional_notes"></textarea>
+        </div>
+
+        <div class="actions">
+            <a class="btn-back" href="{% url 'case_list' %}">Cancel</a>
+            <button type="submit" class="btn-submit">Submit Homemade Questionnaire</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

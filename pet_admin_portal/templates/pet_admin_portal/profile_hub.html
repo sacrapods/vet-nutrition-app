@@ -1,0 +1,128 @@
+{% extends 'pet_admin_portal/base.html' %}
+{% block title %}{{ parent.name }} | EMR Hub{% endblock %}
+{% block content %}
+<section class="profile-hub" data-parent-id="{{ parent.id }}" data-current-pet-id="{{ selected_pet.id }}" data-tab-url="{% url 'pet_admin_portal:tab_content' parent.id %}">
+  <header class="sticky-profile-header">
+    <div class="profile-left">
+      <button class="link-title" data-open-modal="parent-modal">{{ parent.name }}</button>
+      <div class="meta-line">{{ parent.phone }} · {{ parent.email }}</div>
+      <div class="meta-line">
+        <div class="dropdown pet-switch">
+          <button class="chip pet-switch-trigger" data-toggle-dropdown="pet-dropdown">{{ pet_count }} pet{{ pet_count|pluralize }}</button>
+          <div id="pet-dropdown" class="dropdown-menu">
+            {% for pet in pets %}
+              <a class="pet-option" href="?pet={{ pet.id }}&tab={{ active_tab }}">
+                <span class="pet-option-name">{{ pet.name }}</span>
+                <span class="pet-option-meta">{{ pet.get_species_display }}{% if pet.breed %} · {{ pet.breed }}{% endif %}</span>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+        <span class="badge">Active: {{ status_counts.active }}</span>
+        <span class="badge">Inactive: {{ status_counts.inactive }}</span>
+        <span class="badge danger">Deceased: {{ status_counts.deceased }}</span>
+      </div>
+    </div>
+    <div class="profile-right">
+      {% if selected_pet %}
+        <div class="pet-identity-card">
+          <button class="pet-avatar-wrap pet-avatar-button" type="button" data-open-modal="pet-modal" title="Click to upload or change pet photo">
+            {% if selected_pet_meta.photo %}
+              <img class="pet-avatar" src="{{ selected_pet_meta.photo.url }}" alt="{{ selected_pet.name }}">
+            {% else %}
+              <div class="pet-avatar pet-avatar-fallback">{{ selected_pet.name|slice:":1"|upper }}</div>
+            {% endif %}
+          </button>
+          <div class="pet-identity-text">
+            <button class="link-title" data-open-modal="pet-modal">{{ selected_pet.name }}</button>
+            <div class="meta-line">{{ selected_pet.get_species_display }} / {{ selected_pet.breed }}</div>
+            <div class="meta-line">Age: {{ selected_pet.dob_age }} · Weight: {{ selected_pet.current_weight_kg|default:'-' }} kg</div>
+            <div class="meta-line">
+              <span class="badge">Behavior: {{ selected_pet_meta.get_behavior_badge_display }}</span>
+              <span class="badge {% if selected_pet_meta.status == 'deceased' %}danger{% endif %}">Status: {{ selected_pet_meta.get_status_display }}</span>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="meta-line">No pets available for this parent.</div>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="hub-body">
+    <aside class="hub-sidebar">
+      {% for tab in tabs %}
+        <button
+          class="tab-link {% if active_tab == tab %}active{% endif %}"
+          data-tab="{{ tab }}"
+          data-parent="{{ parent.id }}"
+          data-pet="{{ selected_pet.id }}"
+        >
+          {% if tab == 'medical_notes' %}Medical Notes
+          {% elif tab == 'attach_files' %}Attach Files
+          {% elif tab == 'emr_export' %}EMR Export
+          {% else %}{{ tab|title }}{% endif %}
+        </button>
+      {% endfor %}
+    </aside>
+    <section id="tab-content" class="hub-content" data-active-tab="{{ active_tab }}">
+      {% if selected_pet %}
+        {% include 'pet_admin_portal/tabs/'|add:active_tab|add:'.html' %}
+      {% else %}
+        <section class="card"><p>No pet records are linked to this parent yet.</p></section>
+      {% endif %}
+    </section>
+  </div>
+</section>
+
+<div id="parent-modal" class="modal" aria-hidden="true">
+  <div class="modal-panel">
+    <div class="modal-head"><h3>Edit Pet Parent</h3><button data-close-modal>&times;</button></div>
+    <form method="post" action="{% url 'pet_admin_portal:edit_parent' parent.id %}" class="ajax-form">
+      {% csrf_token %}
+      <label>Name</label><input name="name" value="{{ parent.name }}" required>
+      <label>Phone</label><input name="phone" value="{{ parent.phone }}" required>
+      <label>Email</label><input name="email" value="{{ parent.email }}" required>
+      <label>Location</label><input name="location_primary_vet" value="{{ parent.location_primary_vet }}">
+      <button class="btn-primary" type="submit">Save</button>
+    </form>
+  </div>
+</div>
+
+{% if selected_pet %}
+<div id="pet-modal" class="modal" aria-hidden="true">
+  <div class="modal-panel">
+    <div class="modal-head"><h3>Edit Pet</h3><button data-close-modal>&times;</button></div>
+    <form method="post" enctype="multipart/form-data" action="{% url 'pet_admin_portal:edit_pet' parent.id selected_pet.id %}" class="ajax-form">
+      {% csrf_token %}
+      <label>Pet Photo</label><input type="file" name="meta-photo" accept="image/*">
+      <label>Pet Name</label><input name="pet-name" value="{{ selected_pet.name }}" required>
+      <label>Species</label>
+      <select name="pet-species">
+        {% for value,label in selected_pet.SPECIES_CHOICES %}
+        <option value="{{ value }}" {% if selected_pet.species == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <label>Breed</label><input name="pet-breed" value="{{ selected_pet.breed }}">
+      <label>Age</label><input name="pet-dob_age" value="{{ selected_pet.dob_age }}">
+      <label>Weight (kg)</label><input type="number" step="0.01" name="pet-current_weight_kg" value="{{ selected_pet.current_weight_kg }}">
+
+      <label>Behavior</label>
+      <select name="meta-behavior_badge">
+        {% for value,label in selected_pet_meta.BEHAVIOR_CHOICES %}
+        <option value="{{ value }}" {% if selected_pet_meta.behavior_badge == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <label>Status</label>
+      <select name="meta-status">
+        {% for value,label in selected_pet_meta.STATUS_CHOICES %}
+        <option value="{{ value }}" {% if selected_pet_meta.status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+
+      <button class="btn-primary" type="submit">Save</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

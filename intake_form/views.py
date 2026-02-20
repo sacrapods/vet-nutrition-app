@@ -12,7 +12,7 @@ from .models import (
     DietPlanPreferences, AdviceSource, ChronicCondition,
     BrandToAvoid, TreatPreferenceInPlan,
     ClinicalHistory, ClinicalCondition, LongTermMedication,
-    SurgicalHistory, DiagnosticImaging, VetUpload
+    SurgicalHistory, DiagnosticImaging, VetUpload, HomemadeDietQuestionnaire
 )
 
 
@@ -426,6 +426,35 @@ def intake_form_view(request):
     # GET request - show the form
     return render(request, 'intake_form/form.html')
 
+
+
+def homemade_diet_questionnaire_view(request):
+    """Standalone homemade diet questionnaire form"""
+    if request.method == 'POST':
+        weight = request.POST.get('current_weight_kg', '').strip()
+        meals = request.POST.get('homemade_meals_per_day', '').strip()
+
+        HomemadeDietQuestionnaire.objects.create(
+            owner_name=request.POST.get('owner_name', '').strip(),
+            owner_email=request.POST.get('owner_email', '').strip(),
+            owner_phone=request.POST.get('owner_phone', '').strip(),
+            pet_name=request.POST.get('pet_name', '').strip(),
+            species=request.POST.get('species', 'dog'),
+            breed=request.POST.get('breed', '').strip(),
+            age=request.POST.get('age', '').strip(),
+            current_weight_kg=weight or None,
+            current_diet_description=request.POST.get('current_diet_description', '').strip(),
+            homemade_meals_per_day=int(meals) if meals else None,
+            recipe_ingredients=request.POST.get('recipe_ingredients', '').strip(),
+            recipe_preparation=request.POST.get('recipe_preparation', '').strip(),
+            supplements_medications=request.POST.get('supplements_medications', '').strip(),
+            concerns_or_goals=request.POST.get('concerns_or_goals', '').strip(),
+            additional_notes=request.POST.get('additional_notes', '').strip(),
+        )
+        messages.success(request, 'Homemade diet questionnaire submitted successfully!')
+        return redirect('homemade_diet_questionnaire')
+
+    return render(request, 'intake_form/homemade_questionnaire.html')
 
 def success_view(request):
     """Success page after form submission"""

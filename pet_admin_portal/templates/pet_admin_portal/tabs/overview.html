@@ -1,0 +1,20 @@
+<div class="grid cards-4">
+  <article class="card stat"><h4>Latest Vitals</h4><p>{% if latest_vitals %}{{ latest_vitals.exam_at|date:'d M Y H:i' }}{% else %}No data{% endif %}</p></article>
+  <article class="card stat"><h4>Upcoming Reminders</h4><p>{{ upcoming_reminders|length }}</p></article>
+  <article class="card stat"><h4>Active Prescriptions</h4><p>{{ active_prescriptions|length }}</p></article>
+  <article class="card stat"><h4>Nutrition Snapshot</h4><p>{% if latest_nutrition %}BCS {{ latest_nutrition.bcs|default:'-' }} · MCS {{ latest_nutrition.mcs|default:'-' }}{% else %}No data{% endif %}</p></article>
+</div>
+
+<section class="card">
+  <div class="card-head"><h3>Recent Visits Timeline</h3></div>
+  <ul class="timeline">
+    {% for visit in recent_visits %}
+      <li>
+        <strong>{{ visit.exam_at|date:'d M Y H:i' }}</strong>
+        <span>Weight {{ visit.weight_kg|default:'-' }} kg · Temp {{ visit.temperature_c|default:'-' }} C · HR {{ visit.heart_rate_bpm|default:'-' }}</span>
+      </li>
+    {% empty %}
+      <li>No recent visits.</li>
+    {% endfor %}
+  </ul>
+</section>

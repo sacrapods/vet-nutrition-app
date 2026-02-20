@@ -1,3 +1,4 @@
+{% load intake_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,25 +22,45 @@
         .section-header:hover{background:#F0F6F1}
         .section-header .arrow{transition:transform 0.2s;font-size:0.8rem}
         .section.open .arrow{transform:rotate(90deg)}
-        .section-body{display:none;padding:20px}
+        .section-body{display:none;padding:20px;overflow:auto}
         .section.open .section-body{display:block}
         .field{display:flex;padding:6px 0;border-bottom:1px solid #f8f6f2}
         .field:last-child{border:none}
         .field-label{width:200px;flex-shrink:0;color:#888;font-size:0.85rem}
         .field-value{flex:1;font-size:0.9rem}
-        table{width:100%;border-collapse:collapse;margin:8px 0}
+        .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch}
+        table{width:100%;border-collapse:collapse;margin:8px 0;min-width:680px}
         table th{text-align:left;padding:8px;background:#f8f6f2;font-size:0.8rem;text-transform:uppercase;color:#888}
         table td{padding:8px;border-top:1px solid #f0ede8;font-size:0.85rem}
         .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.75rem;background:#E8F4E8;color:#4A7A4F;margin:2px}
         .empty-msg{color:#ccc;font-style:italic;font-size:0.85rem}
+        @media (max-width: 760px){
+            .container{padding:12px}
+            .header{padding:18px}
+            .header-top{flex-direction:column;align-items:flex-start;gap:8px}
+            .field{flex-direction:column;gap:3px}
+            .field-label{width:100%;font-size:0.78rem}
+            .field-value{font-size:0.88rem}
+            .nav{flex-wrap:wrap}
+        }
     </style>
 </head>
 <body>
 <div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background:#edf8f3;border:1px solid #c9d9d2;color:#205940;padding:10px 12px;border-radius:8px;margin-bottom:12px;">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
     <div class="nav">
-        <a href="{% url 'case_list' %}">← All Cases</a>
+        <a href="{% url back_url_name %}">← Back</a>
         <a href="{% url 'case_pdf' pet.pk %}">Print View</a>
+        {% if show_vet_link %}
+        <a href="{% url 'pet_admin_portal:profile_hub' pet.owner.id %}?pet={{ pet.id }}" style="color:#2C5A8C">EMR Hub</a>
+        {% endif %}
+        {% if show_vet_link %}
         <a href="{% url 'vet_form' pet.pk %}" style="color:#2C5A8C">Vet Form</a>
+        {% endif %}
     </div>
 
     <div class="header">
@@ -49,6 +70,33 @@
         </div>
         <div class="header-meta">Owner: {{ pet.owner.name }} &middot; {{ pet.breed }} &middot; {{ pet.dob_age }} &middot; {{ pet.get_sex_display }}{% if pet.neutered %} (Neutered){% endif %} &middot; {% if pet.current_weight_kg %}{{ pet.current_weight_kg }}kg{% else %}Weight not provided{% endif %}</div>
     </div>
+
+    {% if show_vet_share %}
+    <div class="section open">
+        <div class="section-header">
+            Primary Veterinarian Form Link
+        </div>
+        <div class="section-body" style="display:block">
+            <p style="margin-bottom:10px;color:#666;font-size:0.9rem">Share this only with your primary veterinarian. It opens the vet clinical form for this specific pet.</p>
+            {% if vet_public_url %}
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                    <input id="vet-public-link" type="text" value="{{ vet_public_url }}" readonly style="flex:1;min-width:240px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:0.85rem">
+                    <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('vet-public-link').value)" style="padding:10px 14px;border:none;background:#2C5A8C;color:#fff;border-radius:8px;cursor:pointer;font-size:0.85rem">Copy Link</button>
+                    <form method="post" action="{% url 'generate_vet_link' pet.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="rotate" value="1">
+                        <button type="submit" style="padding:10px 14px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:0.85rem">Regenerate</button>
+                    </form>
+                </div>
+            {% else %}
+                <form method="post" action="{% url 'generate_vet_link' pet.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" style="padding:10px 14px;border:none;background:#2C5A8C;color:#fff;border-radius:8px;cursor:pointer;font-size:0.85rem">Generate Vet Link</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
     <!-- 1. Owner & Pet -->
     <div class="section open">
@@ -75,9 +123,9 @@
             {% if h %}
             <div class="field"><span class="field-label">Food/Ingredients to Avoid</span><span class="field-value">{{ h.food_ingredients_to_avoid|default:"-" }}</span></div>
             <div class="field"><span class="field-label">Can Arrange Special Food</span><span class="field-value">{{ h.can_arrange_special_food }}</span></div>
-            <div class="field"><span class="field-label">Who Feeds</span><span class="field-value">{{ h.who_feeds }}{% if h.feeder_name %} ({{ h.feeder_name }}){% endif %}</span></div>
+            <div class="field"><span class="field-label">Who Feeds</span><span class="field-value">{{ h.who_feeds|pretty_token }}{% if h.feeder_name %} ({{ h.feeder_name }}){% endif %}</span></div>
             <div class="field"><span class="field-label">Other Pets</span><span class="field-value">{% if h.other_pets %}Yes - {{ h.other_pets_details }}{% else %}No{% endif %}</span></div>
-            <div class="field"><span class="field-label">Pet Housed</span><span class="field-value">{{ h.pet_housed }}</span></div>
+            <div class="field"><span class="field-label">Pet Housed</span><span class="field-value">{{ h.pet_housed|pretty_token }}</span></div>
             {% else %}<p class="empty-msg">No household data</p>{% endif %}
             {% endwith %}
         </div>
@@ -91,12 +139,12 @@
         <div class="section-body">
             {% with f=pet.feeding %}
             {% if f %}
-            <div class="field"><span class="field-label">Food Availability</span><span class="field-value">{{ f.food_availability }}{% if f.food_availability_times %} ({{ f.food_availability_times }}){% endif %}</span></div>
+            <div class="field"><span class="field-label">Food Availability</span><span class="field-value">{{ f.food_availability|pretty_token }}{% if f.food_availability_times %} ({{ f.food_availability_times }}){% endif %}</span></div>
             <div class="field"><span class="field-label">Meals/Day</span><span class="field-value">{{ f.meals_per_day|default:"-" }}</span></div>
-            <div class="field"><span class="field-label">Eating Behaviors</span><span class="field-value">{% for b in f.eating_behaviors.split %}<span class="tag">{{ b }}</span>{% empty %}-{% endfor %}</span></div>
+            <div class="field"><span class="field-label">Eating Behaviors</span><span class="field-value">{{ f.eating_behaviors|pretty_csv }}</span></div>
             <div class="field"><span class="field-label">Appetite</span><span class="field-value">{{ f.good_appetite|default:"-" }} / Recently: {{ f.appetite_recently|default:"-" }}</span></div>
             <div class="field"><span class="field-label">Attitude Changed</span><span class="field-value">{% if f.attitude_changed %}Yes - {{ f.attitude_change_details }}{% else %}No{% endif %}</span></div>
-            <div class="field"><span class="field-label">Unmonitored Access</span><span class="field-value">{% if f.unmonitored_food_access %}Yes - {{ f.unmonitored_sources }}{% else %}No{% endif %}</span></div>
+            <div class="field"><span class="field-label">Unmonitored Access</span><span class="field-value">{% if f.unmonitored_food_access %}Yes - {{ f.unmonitored_sources|pretty_csv }}{% else %}No{% endif %}</span></div>
             {% else %}<p class="empty-msg">No feeding data</p>{% endif %}
             {% endwith %}
         </div>
@@ -110,22 +158,22 @@
         <div class="section-body">
             {% with fp=pet.food_preferences %}
             {% if fp %}
-            <div class="field"><span class="field-label">Food Preferences</span><span class="field-value">{{ fp.current_food_preferences|default:"-" }}</span></div>
-            <div class="field"><span class="field-label">Treat Preferences</span><span class="field-value">{{ fp.current_treat_preferences|default:"-" }}</span></div>
+            <div class="field"><span class="field-label">Food Preferences</span><span class="field-value">{{ fp.current_food_preferences|pretty_csv }}</span></div>
+            <div class="field"><span class="field-label">Treat Preferences</span><span class="field-value">{{ fp.current_treat_preferences|pretty_csv }}</span></div>
             <div class="field"><span class="field-label">Refuses Food</span><span class="field-value">{% if fp.refuses_food %}Yes - {{ fp.refused_food_details }}{% else %}No{% endif %}</span></div>
-            <div class="field"><span class="field-label">Important Factors</span><span class="field-value">{{ fp.important_food_factors|default:"-" }}</span></div>
+            <div class="field"><span class="field-label">Important Factors</span><span class="field-value">{{ fp.important_food_factors|pretty_csv }}</span></div>
             {% else %}<p class="empty-msg">No preference data</p>{% endif %}
             {% endwith %}
 
             {% with tp=pet.treat_plan_preferences %}
             {% if tp %}
-            <div class="field"><span class="field-label">Treat Plan Preferences</span><span class="field-value">{{ tp.preferences|default:"-" }}</span></div>
+            <div class="field"><span class="field-label">Treat Plan Preferences</span><span class="field-value">{{ tp.preferences|pretty_csv }}</span></div>
             {% endif %}
             {% endwith %}
 
             {% with a=pet.advice_source %}
             {% if a %}
-            <div class="field"><span class="field-label">Advice Sources</span><span class="field-value">{{ a.sources|default:"-" }}{% if a.other_source %}, {{ a.other_source }}{% endif %}</span></div>
+            <div class="field"><span class="field-label">Advice Sources</span><span class="field-value">{{ a.sources|pretty_csv }}{% if a.other_source %}, {{ a.other_source }}{% endif %}</span></div>
             {% endif %}
             {% endwith %}
 
@@ -196,7 +244,7 @@
 
             {% with dp=pet.diet_preferences %}
             {% if dp %}
-            <div class="field" style="margin-top:12px"><span class="field-label">Diet Plan Preferences</span><span class="field-value">{{ dp.preferences|default:"-" }}</span></div>
+            <div class="field" style="margin-top:12px"><span class="field-label">Diet Plan Preferences</span><span class="field-value">{{ dp.preferences|pretty_csv }}</span></div>
             {% endif %}
             {% endwith %}
 
@@ -219,11 +267,11 @@
             {% with fa=pet.fitness %}
             {% if fa %}
             <div class="field"><span class="field-label">Activity Level</span><span class="field-value">{{ fa.get_activity_level_display }}</span></div>
-            <div class="field"><span class="field-label">Exercise Duration</span><span class="field-value">{{ fa.exercise_duration|default:"-" }}</span></div>
-            <div class="field"><span class="field-label">Leash Walk Freq</span><span class="field-value">{{ fa.leash_walk_frequency|default:"-" }}</span></div>
+            <div class="field"><span class="field-label">Exercise Duration</span><span class="field-value">{{ fa.exercise_duration|pretty_token }}</span></div>
+            <div class="field"><span class="field-label">Leash Walk Freq</span><span class="field-value">{{ fa.leash_walk_frequency|pretty_token }}</span></div>
             <div class="field"><span class="field-label">Fenced Yard</span><span class="field-value">{% if fa.fenced_yard_access %}Yes{% else %}No{% endif %}</span></div>
-            <div class="field"><span class="field-label">Urban/Rural</span><span class="field-value">{{ fa.urban_rural|default:"-" }}</span></div>
-            <div class="field"><span class="field-label">Exercise Types</span><span class="field-value">{{ fa.exercise_types|default:"-" }}</span></div>
+            <div class="field"><span class="field-label">Urban/Rural</span><span class="field-value">{{ fa.urban_rural|pretty_token }}</span></div>
+            <div class="field"><span class="field-label">Exercise Types</span><span class="field-value">{{ fa.exercise_types|pretty_csv }}</span></div>
             <div class="field"><span class="field-label">Training/Show Dog</span><span class="field-value">{% if fa.training_show_dog %}Yes{% if fa.training_details %} - {{ fa.training_details }}{% endif %}{% else %}No{% endif %}</span></div>
             {% else %}<p class="empty-msg">No fitness data</p>{% endif %}
             {% endwith %}
@@ -238,7 +286,7 @@
 
             {% with r=pet.rehabilitation %}
             {% if r %}
-            <div class="field" style="margin-top:12px"><span class="field-label">Rehabilitation</span><span class="field-value">{% if r.receives_therapy %}Yes - {{ r.therapy_types }}{% else %}No{% endif %}</span></div>
+            <div class="field" style="margin-top:12px"><span class="field-label">Rehabilitation</span><span class="field-value">{% if r.receives_therapy %}Yes - {{ r.therapy_types|pretty_csv }}{% else %}No{% endif %}</span></div>
             {% endif %}
             {% endwith %}
         </div>
@@ -257,8 +305,8 @@
             <div class="field"><span class="field-label">Vomiting</span><span class="field-value">{% if m.vomiting_per_day %}{{ m.vomiting_per_day }}/day{% endif %} {% if m.vomiting_per_week %}{{ m.vomiting_per_week }}/week{% endif %} {% if m.vomiting_colour %}colour: {{ m.vomiting_colour }}{% endif %} {% if m.vomiting_since %}since {{ m.vomiting_since }}{% endif %}{% if not m.vomiting_per_day and not m.vomiting_per_week %}None reported{% endif %}</span></div>
             <div class="field"><span class="field-label">Urination</span><span class="field-value">{% if m.urination_changed %}Changed: {{ m.urination_direction }}{% if m.urine_colour %}, colour: {{ m.urine_colour }}{% endif %}{% else %}Normal{% endif %}</span></div>
             <div class="field"><span class="field-label">Drinking</span><span class="field-value">{% if m.drinking_changed %}Changed: {{ m.drinking_direction }}{% else %}Normal{% endif %}</span></div>
-            <div class="field"><span class="field-label">Stool</span><span class="field-value">{% if m.stool_quality_changed %}Changed{% if m.stool_colour %}, colour: {{ m.stool_colour }}{% endif %}{% if m.poops_per_day %}, {{ m.poops_per_day }}/day{% endif %}{% if m.stool_types %}, types: {{ m.stool_types }}{% endif %}{% else %}Normal{% endif %}</span></div>
-            <div class="field"><span class="field-label">Medication Admin</span><span class="field-value">{{ m.medication_admin_method|default:"-" }}</span></div>
+            <div class="field"><span class="field-label">Stool</span><span class="field-value">{% if m.stool_quality_changed %}Changed{% if m.stool_colour %}, colour: {{ m.stool_colour }}{% endif %}{% if m.poops_per_day %}, {{ m.poops_per_day }}/day{% endif %}{% if m.stool_types %}, types: {{ m.stool_types|pretty_csv }}{% endif %}{% else %}Normal{% endif %}</span></div>
+            <div class="field"><span class="field-label">Medication Admin</span><span class="field-value">{{ m.medication_admin_method|pretty_med_admin }}</span></div>
             {% else %}<p class="empty-msg">No medical data</p>{% endif %}
             {% endwith %}
 
@@ -288,12 +336,12 @@
             {% if v %}
             <div class="field"><span class="field-label">Yearly Vaccinations</span><span class="field-value">{% if v.yearly_vaccinations %}Yes{% else %}No{% endif %}</span></div>
             <div class="field"><span class="field-label">Deworming</span><span class="field-value">{% if v.deworming %}Yes{% else %}No{% endif %}</span></div>
-            <div class="field"><span class="field-label">Topical Tick/Flea</span><span class="field-value">{{ v.topical_tick_flea|default:"-" }}</span></div>
-            <div class="field"><span class="field-label">Oral Tick/Flea</span><span class="field-value">{{ v.oral_tick_flea|default:"-" }}</span></div>
+            <div class="field"><span class="field-label">Topical Tick/Flea</span><span class="field-value">{{ v.topical_tick_flea|pretty_token }}</span></div>
+            <div class="field"><span class="field-label">Oral Tick/Flea</span><span class="field-value">{{ v.oral_tick_flea|pretty_token }}</span></div>
             {% else %}<p class="empty-msg">No vaccination data</p>{% endif %}
             {% endwith %}
 
-            {% with pv=pet.primary_vet %}
+            {% with pv=primary_vet %}
             {% if pv %}
             <h4 style="margin:16px 0 8px;font-size:0.9rem;color:#4A7A4F">Primary Vet</h4>
             <div class="field"><span class="field-label">Vet Name</span><span class="field-value">{{ pv.vet_name }}</span></div>

@@ -734,3 +734,33 @@ class DoctorNote(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+
+class HomemadeDietQuestionnaire(models.Model):
+    """Standalone homemade diet questionnaire submissions."""
+
+    owner_name = models.CharField(max_length=200)
+    owner_email = models.EmailField(blank=True)
+    owner_phone = models.CharField(max_length=20, blank=True)
+
+    pet_name = models.CharField(max_length=100)
+    species = models.CharField(max_length=20, choices=Pet.SPECIES_CHOICES)
+    breed = models.CharField(max_length=100, blank=True)
+    age = models.CharField(max_length=100, blank=True)
+    current_weight_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    current_diet_description = models.TextField(blank=True)
+    homemade_meals_per_day = models.IntegerField(null=True, blank=True)
+    recipe_ingredients = models.TextField(blank=True, help_text="Main ingredients currently fed")
+    recipe_preparation = models.TextField(blank=True)
+    supplements_medications = models.TextField(blank=True)
+    concerns_or_goals = models.TextField(blank=True)
+    additional_notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Homemade Diet - {self.pet_name} ({self.owner_name})"
+
+    class Meta:
+        ordering = ['-created_at']

@@ -8,7 +8,8 @@ from .models import (
     ClinicalHistory, ClinicalCondition, LongTermMedication,
     SurgicalHistory, DiagnosticImaging, ConsentForm,
     DietPlanPreferences, DoctorNote,
-    AdviceSource, ChronicCondition, BrandToAvoid, TreatPreferenceInPlan
+    AdviceSource, ChronicCondition, BrandToAvoid, TreatPreferenceInPlan,
+    HomemadeDietQuestionnaire
 )
 
 # Register all models in admin
@@ -43,3 +44,4 @@ admin.site.register(AdviceSource)
 admin.site.register(ChronicCondition)
 admin.site.register(BrandToAvoid)
 admin.site.register(TreatPreferenceInPlan)
+admin.site.register(HomemadeDietQuestionnaire)

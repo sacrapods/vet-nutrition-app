@@ -1,0 +1,44 @@
+{% extends 'pet_admin_portal/base.html' %}
+{% block title %}Pet Parents | Portal{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="card-head card-head-split">
+    <div>
+      <h1>Pet Parent Profile Hub</h1>
+      <p>Admin/Vet/Staff-only clinical records module.</p>
+    </div>
+    <form method="get" class="inline-form">
+      <input name="q" value="{{ q }}" placeholder="Search by name, case ID, phone, email">
+      <button class="btn-primary" type="submit">Search</button>
+    </form>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Pet Parent</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Pets</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for parent in parents %}
+          <tr>
+            <td>{{ parent.case_id }}</td>
+            <td>{{ parent.name }}</td>
+            <td>{{ parent.phone }}</td>
+            <td>{{ parent.email }}</td>
+            <td>{{ parent.pet_count }}</td>
+            <td><a class="btn-link" href="{% url 'pet_admin_portal:profile_hub' parent.id %}">Open Hub</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No pet parents found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

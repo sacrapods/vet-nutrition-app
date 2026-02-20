@@ -1,0 +1,23 @@
+<section class="card">
+  <div class="card-head"><h3>Prescription</h3></div>
+  <form method="post" action="{% url 'pet_admin_portal:create_prescription' parent.id pet.id %}" class="form-grid">
+    {% csrf_token %}
+    {{ prescription_form.as_p }}
+    <button class="btn-primary" type="submit">Save Prescription</button>
+  </form>
+</section>
+<section class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Vet</th><th>Dates</th></tr></thead>
+      <tbody>
+      {% for p in prescriptions %}
+        <tr>
+          <td>{{ p.medication_name }}</td><td>{{ p.dosage }}</td><td>{{ p.frequency }}</td><td>{{ p.duration }}</td>
+          <td>{{ p.prescribing_vet|default:'-' }}</td><td>{{ p.start_date|default:'-' }} - {{ p.end_date|default:'-' }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="6">No prescriptions yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

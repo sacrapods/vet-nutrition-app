@@ -1,0 +1,20 @@
+<section class="card">
+  <div class="card-head"><h3>SOAP Medical Note</h3></div>
+  <form method="post" action="{% url 'pet_admin_portal:create_medical_note' parent.id pet.id %}" class="form-grid">
+    {% csrf_token %}
+    {{ note_form.as_p }}
+    <button class="btn-primary" type="submit">Save Note</button>
+  </form>
+</section>
+<section class="card">
+  <div class="card-head"><h3>Medical Notes History</h3></div>
+  {% for note in medical_notes %}
+    <article class="note">
+      <h4>{{ note.created_at|date:'d M Y H:i' }} · {{ note.created_by|default:'System' }}</h4>
+      <p><strong>S:</strong> {{ note.subjective|default:'-' }}</p>
+      <p><strong>O:</strong> {{ note.objective|default:'-' }}</p>
+      <p><strong>A:</strong> {{ note.assessment|default:'-' }}</p>
+      <p><strong>P:</strong> {{ note.plan|default:'-' }}</p>
+    </article>
+  {% empty %}<p>No notes yet.</p>{% endfor %}
+</section>

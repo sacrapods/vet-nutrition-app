@@ -1,0 +1,21 @@
+<section class="card">
+  <div class="card-head"><h3>Attach Files</h3></div>
+  <form method="post" enctype="multipart/form-data" action="{% url 'pet_admin_portal:create_attachment' parent.id pet.id %}" class="form-grid">
+    {% csrf_token %}
+    {{ attachment_form.as_p }}
+    <button class="btn-primary" type="submit">Upload File</button>
+  </form>
+</section>
+<section class="card">
+  <div class="file-grid">
+    {% for file in attachments %}
+      <article class="file-card">
+        <h4>{{ file.title|default:file.file.name }}</h4>
+        {% if file.extension == 'jpg' or file.extension == 'jpeg' or file.extension == 'png' or file.extension == 'gif' or file.extension == 'webp' %}
+          <img src="{{ file.file.url }}" alt="{{ file.title|default:'attachment' }}">
+        {% endif %}
+        <a class="btn-link" href="{{ file.file.url }}" target="_blank">Preview</a>
+      </article>
+    {% empty %}<p>No files uploaded.</p>{% endfor %}
+  </div>
+</section>
