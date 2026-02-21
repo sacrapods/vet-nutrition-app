@@ -21,6 +21,7 @@ urlpatterns = [
     path("parent/<int:parent_id>/pet/<int:pet_id>/attachment/create/", views.create_attachment, name="create_attachment"),
     path("parent/<int:parent_id>/pet/<int:pet_id>/reminder/create/", views.create_reminder, name="create_reminder"),
     path("inventory-item/create/", views.create_inventory_item, name="create_inventory_item"),
+    path("inventory-item/<int:item_id>/update/", views.update_inventory_item, name="update_inventory_item"),
     path("inventory-tx/create/", views.create_inventory_tx, name="create_inventory_tx"),
 
     path("record/<str:model_name>/<int:record_id>/archive/", views.soft_delete_record, name="soft_delete_record"),

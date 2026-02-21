@@ -1,0 +1,12 @@
+{% extends 'public_site/base.html' %}
+{% block content %}
+<section class="container section-pad page-hero"><h1>Frequently Asked Questions</h1><p>Clear answers about onboarding, payment, and consultation delivery.</p></section>
+<section class="container section-pad faq-list">
+  {% for q, a in faqs %}
+  <details>
+    <summary>{{ q }}</summary>
+    <p>{{ a }}</p>
+  </details>
+  {% endfor %}
+</section>
+{% endblock %}

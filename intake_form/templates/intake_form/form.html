@@ -1,60 +1,80 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poshtik NutriVet - Diet History Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'design_system/tokens.css' %}">
     <style>
+        /* shell-fallback: protects nav if static CSS fails */
+        html, body { margin:0 !important; padding:0 !important; }
+        .skip-link { position:fixed; left:12px; top:10px; transform:translateY(-180%); background:#0f1720; color:#fff; padding:8px 12px; border-radius:8px; z-index:9999; text-decoration:none; font-size:13px; font-weight:700; }
+        .skip-link:focus { transform:translateY(0); }
+        .app-shell { display:grid; grid-template-columns:244px 1fr; min-height:100dvh; margin:0 !important; }
+        .app-sidebar { background:linear-gradient(180deg,#102b23,#173a30); color:#dce7e1; padding:18px 12px; position:sticky; top:0; height:100dvh; overflow:auto; box-shadow:inset -1px 0 0 rgba(255,255,255,.06); }
+        .app-sidebar.app-sidebar--blue { background:linear-gradient(180deg,#173754,#2c5a8c); }
+        .app-sidebar .brand { margin:0 0 14px; font-size:17px; font-weight:800; letter-spacing:-.01em; color:#dce7e1; }
+        .app-sidebar nav a { display:block; color:#dce7e1; text-decoration:none; border:1px solid transparent; border-radius:10px; padding:9px 10px; font-size:13px; font-weight:700; margin-bottom:4px; }
+        .app-sidebar nav a:hover,.app-sidebar nav a.active { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.18); }
+        .app-main { padding:18px 16px 30px; }
+        @media (max-width:1080px){ .app-shell{grid-template-columns:1fr;} .app-sidebar{position:relative;height:auto;} .app-main{padding-top:12px;} }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             background: #FAF7F2;
             color: #2C2C2C;
-            line-height: 1.6;
+            line-height: 1.65;
         }
-        
+
         .container {
-            max-width: 800px;
+            max-width: 920px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px 20px;
         }
         
         .header {
             background: linear-gradient(135deg, #4A7A4F, #7A9E7E);
-            padding: 32px 24px;
+            padding: 34px 28px;
             text-align: center;
             border-radius: 12px 12px 0 0;
             color: white;
+            box-shadow: 0 12px 24px rgba(41, 74, 55, 0.16);
         }
         
         .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
         }
         
         .header p {
             opacity: 0.9;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         
         .form-card {
             background: white;
             border-radius: 0 0 12px 12px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            padding: 32px;
+            padding: 34px;
         }
         
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.35rem;
             color: #4A7A4F;
             margin-bottom: 24px;
             padding-bottom: 12px;
             border-bottom: 2px solid #E8E4DE;
+            letter-spacing: -0.01em;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
         
         .form-group label {
@@ -62,7 +82,7 @@
             font-weight: 600;
             margin-bottom: 8px;
             color: #2C2C2C;
-            font-size: 0.9rem;
+            font-size: 0.92rem;
         }
         
         .form-group input,
@@ -72,7 +92,7 @@
             padding: 12px 14px;
             border: 1.5px solid #D9D4CC;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.92rem;
             font-family: inherit;
             transition: all 0.2s;
         }
@@ -167,7 +187,7 @@
         .step-indicator {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 32px;
+            margin-bottom: 34px;
             padding: 0 20px;
         }
         
@@ -258,6 +278,22 @@
         .btn-prev:hover {
             border-color: #7A9E7E;
             color: #4A7A4F;
+        }
+
+        .save-draft-fab {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 999;
+            background: #2C5A8C;
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         
         .btn-next {
@@ -456,10 +492,27 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="app-shell">
+    <aside class="app-sidebar" aria-label="Primary navigation">
+        <div class="brand">POSHTIK NUTRIVET</div>
+        <nav>
+            <a href="{% url 'submission_history' %}">Dashboard</a>
+            <a href="{% url 'appointments:pet_dashboard' %}">Appointments</a>
+            <a class="active" href="{% url 'intake_form' %}">Intake Form</a>
+            <a href="{% url 'homemade_diet_questionnaire' %}">Homemade Form</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+    </aside>
+    <main id="main-content" class="app-main">
     <div class="container">
         <div class="header">
             <h1>Poshtik NutriVet</h1>
             <p>Canine Diet History Form</p>
+            <div id="autosave-indicator" class="autosave-indicator" aria-live="polite">
+                <span class="autosave-dot"></span>
+                <span id="autosave-text">Draft sync ready</span>
+            </div>
         </div>
         
         <div class="form-card">
@@ -469,39 +522,39 @@
                 <!-- Step Indicator -->
                 <div class="step-indicator">
                     <div class="step active" data-step="1" onclick="goToStep(1)">
-                        <div class="step-number">1</div>
+                        <div class="step-number" aria-hidden="true">1</div>
                         <div class="step-label">Owner & Pet</div>
                     </div>
                     <div class="step" data-step="2" onclick="goToStep(2)">
-                        <div class="step-number">2</div>
+                        <div class="step-number" aria-hidden="true">2</div>
                         <div class="step-label">Household</div>
                     </div>
                     <div class="step" data-step="3" onclick="goToStep(3)">
-                        <div class="step-number">3</div>
+                        <div class="step-number" aria-hidden="true">3</div>
                         <div class="step-label">Feeding</div>
                     </div>
                     <div class="step" data-step="4" onclick="goToStep(4)">
-                        <div class="step-number">4</div>
+                        <div class="step-number" aria-hidden="true">4</div>
                         <div class="step-label">Preferences</div>
                     </div>
                     <div class="step" data-step="5" onclick="goToStep(5)">
-                        <div class="step-number">5</div>
+                        <div class="step-number" aria-hidden="true">5</div>
                         <div class="step-label">Diet History</div>
                     </div>
                     <div class="step" data-step="6" onclick="goToStep(6)">
-                        <div class="step-number">6</div>
+                        <div class="step-number" aria-hidden="true">6</div>
                         <div class="step-label">Fitness</div>
                     </div>
                     <div class="step" data-step="7" onclick="goToStep(7)">
-                        <div class="step-number">7</div>
+                        <div class="step-number" aria-hidden="true">7</div>
                         <div class="step-label">Medical</div>
                     </div>
                     <div class="step" data-step="8" onclick="goToStep(8)">
-                        <div class="step-number">8</div>
+                        <div class="step-number" aria-hidden="true">8</div>
                         <div class="step-label">Vaccination</div>
                     </div>
                     <div class="step" data-step="9" onclick="goToStep(9)">
-                        <div class="step-number">9</div>
+                        <div class="step-number" aria-hidden="true">9</div>
                         <div class="step-label">Consent</div>
                     </div>
                 </div>
@@ -1787,8 +1840,9 @@
                 }
 
                 // ── Submit Handler ─────────────────────────────────────
-                function submitForm() {
-                    if (VALIDATION_ENABLED) {
+                function submitForm(action) {
+                    action = action || 'submit';
+                    if (action === 'submit' && VALIDATION_ENABLED) {
                         var allMissing = [];
                         for (var s = 1; s <= 9; s++) {
                             var missing = validateStep(s);
@@ -1802,15 +1856,34 @@
                         }
                     }
 
-                    // Strip required from hidden steps so browser doesn't block
-                    var hiddenSteps = document.querySelectorAll('.form-step:not(.active)');
-                    hiddenSteps.forEach(function(step) {
-                        step.querySelectorAll('[required]').forEach(function(el) {
-                            el.removeAttribute('required');
+                    if (action === 'submit') {
+                        // Strip required from hidden steps so browser doesn't block
+                        var hiddenSteps = document.querySelectorAll('.form-step:not(.active)');
+                        hiddenSteps.forEach(function(step) {
+                            step.querySelectorAll('[required]').forEach(function(el) {
+                                el.removeAttribute('required');
+                            });
                         });
-                    });
+                    }
 
-                    document.querySelector('form').submit();
+                    var form = document.querySelector('form');
+                    var oldAction = form.querySelector('input[name="action"]');
+                    if (oldAction) oldAction.remove();
+                    var hiddenAction = document.createElement('input');
+                    hiddenAction.type = 'hidden';
+                    hiddenAction.name = 'action';
+                    hiddenAction.value = action;
+                    form.appendChild(hiddenAction);
+
+                    var oldStep = form.querySelector('input[name="current_step"]');
+                    if (oldStep) oldStep.remove();
+                    var hiddenStep = document.createElement('input');
+                    hiddenStep.type = 'hidden';
+                    hiddenStep.name = 'current_step';
+                    hiddenStep.value = currentStep;
+                    form.appendChild(hiddenStep);
+
+                    form.submit();
                 }
 
                 // ── Submit Validation Modal ────────────────────────────
@@ -2465,11 +2538,139 @@
                     <!-- Final Navigation -->
                     <div class="form-navigation">
                         <button type="button" class="btn-prev" onclick="prevStep(8)">← Previous</button>
-                        <button type="button" class="btn-next" onclick="submitForm()">Submit Form</button>
+                        <div style="display:flex; gap:10px;">
+                            <button type="button" class="btn-prev" onclick="submitForm('save_draft')">Save Draft</button>
+                            <button type="button" class="btn-next" onclick="submitForm('submit')">Submit Form</button>
+                        </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    </main>
+    </div>
+    <button type="button" class="save-draft-fab" onclick="submitForm('save_draft')">Save Draft</button>
+    {{ prefill_payload|json_script:"intake-prefill-data" }}
+    {{ draft_payload|json_script:"intake-draft-data" }}
+    <script>
+    (function() {
+        var prefill = {};
+        var draft = {};
+        try {
+            prefill = JSON.parse(document.getElementById("intake-prefill-data").textContent || "{}");
+        } catch (e) {
+            prefill = {};
+        }
+        try {
+            draft = JSON.parse(document.getElementById("intake-draft-data").textContent || "{}");
+        } catch (e) {
+            draft = {};
+        }
+
+        function qsaByName(name) {
+            return document.querySelectorAll('[name="' + name.replace(/"/g, '\\"') + '"]');
+        }
+
+        function applyPayload(payload) {
+            Object.keys(payload).forEach(function(name) {
+                if (name === "action" || name === "current_step") return;
+                var values = Array.isArray(payload[name]) ? payload[name] : [payload[name]];
+                var controls = qsaByName(name);
+                if (!controls.length) return;
+
+                var first = controls[0];
+                if (first.type === "radio") {
+                    controls.forEach(function(ctrl) {
+                        ctrl.checked = values.indexOf(ctrl.value) !== -1;
+                        ctrl.dispatchEvent(new Event("change", { bubbles: true }));
+                    });
+                    return;
+                }
+
+                if (first.type === "checkbox") {
+                    controls.forEach(function(ctrl) {
+                        ctrl.checked = values.indexOf(ctrl.value) !== -1 || values.indexOf("on") !== -1;
+                        ctrl.dispatchEvent(new Event("change", { bubbles: true }));
+                    });
+                    return;
+                }
+
+                controls.forEach(function(ctrl, idx) {
+                    ctrl.value = values[idx] !== undefined ? values[idx] : "";
+                    ctrl.dispatchEvent(new Event("input", { bubbles: true }));
+                    ctrl.dispatchEvent(new Event("change", { bubbles: true }));
+                });
+            });
+        }
+
+        applyPayload(prefill);
+        applyPayload(draft);
+
+        var step = parseInt(draft.current_step || "1", 10);
+        if (!isNaN(step) && step > 1 && typeof goToStepDirect === "function") {
+            goToStepDirect(step);
+        }
+
+        document.querySelectorAll('.step').forEach(function(stepEl) {
+            stepEl.setAttribute('role', 'button');
+            stepEl.setAttribute('tabindex', '0');
+            stepEl.setAttribute('aria-label', 'Go to ' + (stepEl.querySelector('.step-label')?.textContent || 'step'));
+            stepEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    var targetStep = parseInt(stepEl.getAttribute('data-step'), 10);
+                    if (!isNaN(targetStep) && typeof goToStep === 'function') goToStep(targetStep);
+                }
+            });
+        });
+
+        var form = document.getElementById('dietHistoryForm');
+        var autosaveTimer = null;
+        var autosaveIndicator = document.getElementById('autosave-indicator');
+        var autosaveText = document.getElementById('autosave-text');
+        var autosaveToast = document.createElement('div');
+        autosaveToast.style.cssText = 'position:fixed;right:14px;bottom:14px;background:#edf8f3;border:1px solid #c9d9d2;color:#205940;padding:8px 10px;border-radius:8px;font-size:12px;display:none;z-index:9999';
+        autosaveToast.textContent = 'Draft autosaved';
+        document.body.appendChild(autosaveToast);
+
+        function autosaveNow() {
+            autosaveIndicator.classList.add('saving');
+            autosaveIndicator.classList.remove('error');
+            autosaveText.textContent = 'Saving draft...';
+            var fd = new FormData(form);
+            fd.set('action', 'autosave');
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd
+            }).then(function(resp) {
+                if (!resp.ok) return;
+                return resp.json();
+            }).then(function(data) {
+                autosaveToast.style.display = 'block';
+                setTimeout(function(){ autosaveToast.style.display = 'none'; }, 1200);
+                autosaveIndicator.classList.remove('saving', 'error');
+                if (data && data.saved_at) {
+                    var dt = new Date(data.saved_at);
+                    autosaveText.textContent = 'Last saved at ' + dt.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+                } else {
+                    autosaveText.textContent = 'Draft saved';
+                }
+            }).catch(function(){
+                autosaveIndicator.classList.remove('saving');
+                autosaveIndicator.classList.add('error');
+                autosaveText.textContent = 'Autosave failed. Retrying on next change.';
+            });
+        }
+
+        function queueAutosave() {
+            if (autosaveTimer) clearTimeout(autosaveTimer);
+            autosaveTimer = setTimeout(autosaveNow, 900);
+        }
+
+        form.addEventListener('input', queueAutosave);
+        form.addEventListener('change', queueAutosave);
+    })();
+    </script>
 </body>
 </html>

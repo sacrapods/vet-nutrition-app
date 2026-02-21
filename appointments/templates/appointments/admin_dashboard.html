@@ -1,0 +1,147 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Appointments Dashboard{% endblock %}
+{% block page_title %}Appointments Command Center{% endblock %}
+{% block page_subtitle %}Central operations view for queue triage, SLA risk, and workload balancing.{% endblock %}
+{% block top_action %}<a class="btn" href="{% url 'appointments:admin_workload' %}">Open Workload Planner</a>{% endblock %}
+
+{% block content %}
+<div class="cards" style="grid-template-columns:repeat(6,minmax(0,1fr));">
+  <div class="kpi"><div class="k">Total</div><div class="v">{{ total_appointments }}</div></div>
+  <div class="kpi"><div class="k">Today</div><div class="v">{{ today_count }}</div></div>
+  <div class="kpi"><div class="k">Unpaid/Open</div><div class="v">{{ open_unpaid }}</div></div>
+  <div class="kpi"><div class="k">Unassigned Upcoming</div><div class="v">{{ unassigned_upcoming }}</div></div>
+  <div class="kpi"><div class="k">Overdue Reschedules</div><div class="v">{{ overdue_reschedules }}</div></div>
+  <div class="kpi"><div class="k">Overdue Notes</div><div class="v">{{ overdue_notes }}</div></div>
+</div>
+
+<div class="panel" style="padding:12px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+  <span class="pill">SLA: Reschedule response within {{ sla.reschedule_response_hours }}h</span>
+  <span class="pill">SLA: Notes completion within {{ sla.note_completion_hours }}h</span>
+  <form method="post" style="margin-left:auto;">
+    {% csrf_token %}
+    <button class="small-btn approve" type="submit" name="action" value="send_due_24h_reminders">Send Due 24h Reminders</button>
+  </form>
+  <a class="small-btn" href="{% url 'appointments:admin_audit_history' %}">View Audit History</a>
+</div>
+
+<section class="panel" style="margin-bottom:12px;">
+  <div class="head"><h2>Workload Snapshot (Peak daily load in next 7 days)</h2></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Provider</th><th>Daily Limit</th><th>Peak Day Load</th><th>Peak Utilization</th></tr></thead>
+      <tbody>
+      {% for row in workload_cards %}
+        <tr>
+          <td>{{ row.provider.email|default:row.provider.username }}</td>
+          <td>{{ row.daily_limit }}</td>
+          <td>{{ row.peak_count }}</td>
+          <td>
+            <span class="pill" {% if row.utilization_pct >= 100 %}style="background:#faeded;color:#9b3434;"{% elif row.utilization_pct >= 80 %}style="background:#fff5d7;color:#7f5c07;"{% endif %}>
+              {{ row.utilization_pct }}%
+            </span>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="empty">No provider workload data.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="layout">
+  <section class="panel">
+    <div class="head"><h2>Pending Reschedule Approvals</h2><span class="pill">{{ pending_reschedule_requests|length }} pending</span></div>
+    <div style="padding:10px 14px;border-bottom:1px solid var(--line);background:#fcfdfc;">
+      <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="bulk_approve_reschedule" id="bulk-action-input">
+        <textarea id="bulk-admin-note-input" name="admin_note" placeholder="Optional note for selected requests" style="min-width:240px;flex:1;max-width:480px;"></textarea>
+        <button type="button" class="small-btn approve" onclick="setBulkAction('bulk_approve_reschedule')">Bulk Approve Selected</button>
+        <button type="button" class="small-btn reject" onclick="setBulkAction('bulk_reject_reschedule')">Bulk Reject Selected</button>
+      </form>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th><input type="checkbox" onclick="toggleChecks(this, '.res-check')"></th><th>Pet</th><th>Current Slot</th><th>Requested Slot</th><th>Requested By</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for req in pending_reschedule_requests %}
+          <tr>
+            <td>
+              <input form="bulk-reschedule-form" class="res-check" type="checkbox" name="request_ids" value="{{ req.id }}">
+            </td>
+            <td><strong>{{ req.appointment.pet.name }}</strong><br><span class="pill">{{ req.appointment.appointment_type_label }}</span></td>
+            <td>{{ req.appointment.start_at|ist|date:'d M Y, h:i A' }}</td>
+            <td>{{ req.requested_start_at|ist|date:'d M Y, h:i A' }}</td>
+            <td>{{ req.requested_by.email|default:req.requested_by.username }}</td>
+            <td>
+              <form method="post" style="display:flex;gap:6px;flex-direction:column;min-width:220px;">
+                {% csrf_token %}
+                <input type="hidden" name="request_id" value="{{ req.id }}">
+                <textarea name="admin_note" placeholder="Optional note for parent"></textarea>
+                <div style="display:flex;gap:6px;">
+                  <button class="small-btn approve" type="submit" name="action" value="approve_reschedule">Approve</button>
+                  <button class="small-btn reject" type="submit" name="action" value="reject_reschedule">Reject</button>
+                </div>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="empty">No pending reschedule requests.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form id="bulk-reschedule-form" method="post" style="display:none;">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="bulk-hidden-action">
+      <textarea name="admin_note" id="bulk-hidden-note"></textarea>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="head"><h2>Latest Appointments (50)</h2></div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>ID</th><th>Pet</th><th>Provider</th><th>Start (IST)</th><th>Status</th><th>Details</th></tr></thead>
+        <tbody>
+        {% for appt in appointments %}
+          <tr>
+            <td>{{ appt.id }}</td>
+            <td><strong>{{ appt.pet.name }}</strong></td>
+            <td>{% if appt.assigned_provider %}{{ appt.assigned_provider.email|default:appt.assigned_provider.username }}{% else %}-{% endif %}</td>
+            <td>{{ appt.start_at|ist|date:'d M Y, h:i A' }}</td>
+            <td><span class="status s-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+            <td><a class="small-btn" href="{% url 'appointments:admin_appointment_detail' appt.id %}">Open</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="empty">No appointments</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+function toggleChecks(master, selector){
+  document.querySelectorAll(selector).forEach(function(el){ el.checked = master.checked; });
+}
+function setBulkAction(action){
+  const form = document.getElementById('bulk-reschedule-form');
+  const selected = document.querySelectorAll('.res-check:checked');
+  if (!selected.length){ alert('Select at least one request.'); return; }
+  form.querySelectorAll('input[name=\"request_ids\"]').forEach(function(node){ node.remove(); });
+  document.getElementById('bulk-hidden-action').value = action;
+  document.getElementById('bulk-hidden-note').value = document.getElementById('bulk-admin-note-input').value || '';
+  selected.forEach(function(chk){
+    const i = document.createElement('input');
+    i.type = 'hidden'; i.name = 'request_ids'; i.value = chk.value;
+    form.appendChild(i);
+  });
+  form.submit();
+}
+</script>
+{% endblock %}

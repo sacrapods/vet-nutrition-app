@@ -1,0 +1,74 @@
+{% extends 'public_site/base.html' %}
+{% block content %}
+<section class="services-hero section-pad">
+  <div class="container services-hero-grid">
+    <div>
+      <p class="eyebrow-dark">Clinical Nutrition Programs</p>
+      <h1>Premium Veterinary Nutrition Services</h1>
+      <p>Designed for families who want precision, accountability, and medically guided feeding strategy for long-term outcomes.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="{% url 'brochure_landing' %}">Start With Brochure</a>
+        <a class="btn btn-secondary" href="{% url 'public_site:contact' %}">Speak To Consultation Team</a>
+      </div>
+    </div>
+    <aside class="services-highlight">
+      <h2>What Makes This Premium</h2>
+      <ul>
+        <li>Evidence-based planning with clinical context</li>
+        <li>Structured onboarding and case triage</li>
+        <li>Personalized diet protocol, not generic charts</li>
+        <li>Follow-up strategy for adherence and improvement</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<section class="container section-pad services-collection">
+  <div class="services-grid-premium">
+    <article class="service-premium">
+      <p class="service-tag">01</p>
+      <h2>Customized Diet Planning</h2>
+      <p>Tailored feeding strategy based on medical history, tolerance patterns, preferences, and practical family constraints.</p>
+    </article>
+    <article class="service-premium">
+      <p class="service-tag">02</p>
+      <h2>Weight Management</h2>
+      <p>Structured weight protocols for safe reduction or recovery, with measurable progress and review checkpoints.</p>
+    </article>
+    <article class="service-premium">
+      <p class="service-tag">03</p>
+      <h2>Puppy Nutrition</h2>
+      <p>Growth-stage nutrition guidance for bone development, gut adaptation, and healthy metabolic trajectory.</p>
+    </article>
+    <article class="service-premium">
+      <p class="service-tag">04</p>
+      <h2>Senior Nutrition</h2>
+      <p>Age-aware diet optimization to support comfort, mobility, appetite quality, and sustainable home management.</p>
+    </article>
+    <article class="service-premium">
+      <p class="service-tag">05</p>
+      <h2>Chronic Disease Nutrition</h2>
+      <p>Disease-specific dietary support integrated with existing medical treatment and primary veterinarian coordination.</p>
+    </article>
+    <article class="service-premium">
+      <p class="service-tag">06</p>
+      <h2>Follow-up & Monitoring</h2>
+      <p>Progress-led review cycles to recalibrate plans, improve adherence, and maintain outcome consistency.</p>
+    </article>
+  </div>
+</section>
+
+<section class="container section-pad service-pathway">
+  <div class="pathway-card">
+    <h2>Service Delivery Pathway</h2>
+    <ol>
+      <li>Brochure + consultation request submission</li>
+      <li>Case screening and onboarding forms</li>
+      <li>Payment confirmation and account activation</li>
+      <li>Detailed case review and one-on-one consult</li>
+      <li>Personalized plan delivery with follow-up strategy</li>
+    </ol>
+    <a class="btn btn-primary" href="{% url 'brochure_landing' %}">Request Consultation</a>
+  </div>
+</section>
+{% endblock %}

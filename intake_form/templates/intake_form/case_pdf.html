@@ -1,3 +1,4 @@
+{% load intake_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,15 +51,15 @@
 
     <h2>3. Feeding</h2>
     {% with f=pet.feeding %}{% if f %}
-    <div class="row"><span class="lbl">Availability</span><span class="val">{{ f.food_availability }} | {{ f.meals_per_day|default:"-" }} meals/day</span></div>
+    <div class="row"><span class="lbl">Availability</span><span class="val">{{ f.food_availability|pretty_token }} | {{ f.meals_per_day|default:"-" }} meals/day</span></div>
     <div class="row"><span class="lbl">Appetite</span><span class="val">{{ f.good_appetite|default:"-" }} | Recently: {{ f.appetite_recently|default:"-" }}</span></div>
     <div class="row"><span class="lbl">Unmonitored</span><span class="val">{% if f.unmonitored_food_access %}Yes: {{ f.unmonitored_sources }}{% else %}No{% endif %}</span></div>
     {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
 
     <h2>4. Preferences</h2>
     {% with fp=pet.food_preferences %}{% if fp %}
-    <div class="row"><span class="lbl">Food Prefs</span><span class="val">{{ fp.current_food_preferences|default:"-" }}</span></div>
-    <div class="row"><span class="lbl">Treat Prefs</span><span class="val">{{ fp.current_treat_preferences|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Food Prefs</span><span class="val">{{ fp.current_food_preferences|pretty_csv }}</span></div>
+    <div class="row"><span class="lbl">Treat Prefs</span><span class="val">{{ fp.current_treat_preferences|pretty_csv }}</span></div>
     <div class="row"><span class="lbl">Refuses</span><span class="val">{% if fp.refuses_food %}Yes: {{ fp.refused_food_details }}{% else %}No{% endif %}</span></div>
     {% endif %}{% endwith %}
 
@@ -82,7 +83,7 @@
     <h2>6. Fitness</h2>
     {% with fa=pet.fitness %}{% if fa %}
     <div class="row"><span class="lbl">Activity Level</span><span class="val">{{ fa.get_activity_level_display }}</span></div>
-    <div class="row"><span class="lbl">Exercise</span><span class="val">{{ fa.exercise_duration|default:"-" }} | Types: {{ fa.exercise_types|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Exercise</span><span class="val">{{ fa.exercise_duration|pretty_token }} | Types: {{ fa.exercise_types|pretty_csv }}</span></div>
     <div class="row"><span class="lbl">Fenced Yard</span><span class="val">{% if fa.fenced_yard_access %}Yes{% else %}No{% endif %} | {{ fa.urban_rural|default:"-" }}</span></div>
     {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
     {% if pet.activity_details.exists %}
@@ -111,9 +112,9 @@
     {% with v=pet.vaccination_status %}{% if v %}
     <div class="row"><span class="lbl">Yearly Vaccines</span><span class="val">{% if v.yearly_vaccinations %}Yes{% else %}No{% endif %}</span></div>
     <div class="row"><span class="lbl">Deworming</span><span class="val">{% if v.deworming %}Yes{% else %}No{% endif %}</span></div>
-    <div class="row"><span class="lbl">Tick/Flea</span><span class="val">Topical: {{ v.topical_tick_flea|default:"-" }} | Oral: {{ v.oral_tick_flea|default:"-" }}</span></div>
+    <div class="row"><span class="lbl">Tick/Flea</span><span class="val">Topical: {{ v.topical_tick_flea|pretty_token }} | Oral: {{ v.oral_tick_flea|pretty_token }}</span></div>
     {% else %}<p style="color:#999;font-style:italic">No data</p>{% endif %}{% endwith %}
-    {% with pv=pet.primary_vet %}{% if pv %}
+    {% with pv=primary_vet %}{% if pv %}
     <div class="row"><span class="lbl">Primary Vet</span><span class="val">{{ pv.vet_name }} | {{ pv.practice_name_location }} | {{ pv.clinic_phone }}</span></div>
     {% endif %}{% endwith %}
 
@@ -158,6 +159,11 @@
     <p style="font-weight:bold;font-size:10pt;margin-top:14px">Blood Work / Lab Reports</p>
     {% for upload in blood_work_uploads %}
     <div style="padding:6px 0;border-bottom:1px dotted #ddd">
+        {% if upload.is_image %}
+        <div style="margin:6px 0;">
+            <img src="{{ upload.file.url }}" alt="{{ upload.original_filename }}" style="max-width:360px;max-height:240px;width:auto;height:auto;border:1px solid #ddd;border-radius:6px;display:block;">
+        </div>
+        {% endif %}
         <a href="{{ upload.file.url }}" target="_blank" style="color:#2C5A8C;font-size:9pt;text-decoration:none">&#x1F4CE; {{ upload.original_filename }}</a>
         <span style="color:#999;font-size:8pt;margin-left:8px">{{ upload.uploaded_at|date:"d M Y" }}</span>
     </div>
@@ -168,6 +174,11 @@
     <p style="font-weight:bold;font-size:10pt;margin-top:14px">Diagnostic Imaging Reports</p>
     {% for upload in imaging_uploads %}
     <div style="padding:6px 0;border-bottom:1px dotted #ddd">
+        {% if upload.is_image %}
+        <div style="margin:6px 0;">
+            <img src="{{ upload.file.url }}" alt="{{ upload.original_filename }}" style="max-width:360px;max-height:240px;width:auto;height:auto;border:1px solid #ddd;border-radius:6px;display:block;">
+        </div>
+        {% endif %}
         <a href="{{ upload.file.url }}" target="_blank" style="color:#2C5A8C;font-size:9pt;text-decoration:none">&#x1F4CE; {{ upload.original_filename }}</a>
         <span style="color:#999;font-size:8pt;margin-left:8px">{{ upload.uploaded_at|date:"d M Y" }}</span>
     </div>

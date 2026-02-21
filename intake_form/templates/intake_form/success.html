@@ -81,16 +81,15 @@
         <h1>Form Submitted Successfully!</h1>
         <p>Thank you for completing the diet history form. Dr. Eunice Thomas will review your information before your consultation.</p>
         
-        {% if messages %}
-            {% for message in messages %}
-                <div class="case-id">
-                    <div class="label">Your Case ID</div>
-                    <div class="id">{{ message|striptags|cut:"Form submitted successfully! Your Case ID is: " }}</div>
-                </div>
-            {% endfor %}
+        {% if case_id %}
+            <div class="case-id">
+                <div class="label">Your Case ID</div>
+                <div class="id">{{ case_id }}</div>
+            </div>
         {% endif %}
         
         <p style="font-size: 0.9rem; margin-top: 24px;">You will receive a confirmation email shortly with your case details.</p>
+        <p style="font-size: 0.9rem; margin-top: 12px;"><a href="{% url 'submission_history' %}">View submission history</a></p>
     </div>
 </body>
 </html>

@@ -1,0 +1,40 @@
+{% extends 'appointments/admin/base.html' %}
+
+{% block title %}Workload Balance{% endblock %}
+{% block page_title %}Workload Balance{% endblock %}
+{% block page_subtitle %}Provider utilization planner for the upcoming 7 days based on assigned appointments.{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="head"><h2>Provider Workload ({{ today|date:'d M Y' }} onward)</h2></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Provider</th><th>Daily Limit</th><th>Weekly Assigned</th><th>Peak Day Load</th><th>Peak Utilization</th><th>Next 7 Days</th></tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          <td>
+            {% with name=row.provider.get_full_name %}
+              {% if name %}{{ name }}{% else %}{{ row.provider.email|default:row.provider.username }}{% endif %}
+            {% endwith %}
+          </td>
+          <td>{{ row.daily_limit }}</td>
+          <td>{{ row.weekly_total }}</td>
+          <td>{{ row.peak_day_load }}</td>
+          <td>
+            <span class="pill" {% if row.utilization_pct >= 100 %}style="background:#faeded;color:#9b3434;"{% elif row.utilization_pct >= 80 %}style="background:#fff5d7;color:#7f5c07;"{% endif %}>{{ row.utilization_pct }}%</span>
+          </td>
+          <td>
+            {% for day in row.next_7 %}
+              <span class="pill">{{ day.date|date:'D d' }}: {{ day.count }}</span>
+            {% endfor %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="empty">No provider rows available.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

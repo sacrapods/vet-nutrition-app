@@ -1,4 +1,5 @@
 (function () {
+  const APP_LOCALE = 'en-IN';
   function bySel(sel, root) { return (root || document).querySelector(sel); }
   function bySelAll(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
   let lockedScrollY = 0;
@@ -8,9 +9,11 @@
     document.body.classList.add('modal-open', 'modal-open-lock');
   }
   function unlockBodyScroll() {
+    const topStyle = document.body.style.top || '';
+    const topOffset = topStyle ? Math.abs(parseInt(topStyle, 10) || 0) : null;
     document.body.classList.remove('modal-open', 'modal-open-lock');
     document.body.style.top = '';
-    window.scrollTo(0, lockedScrollY);
+    window.scrollTo(0, topOffset !== null ? topOffset : lockedScrollY);
   }
   function openModal(modal) {
     if (!modal) return;
@@ -39,6 +42,53 @@
       window.localStorage.setItem(key, collapsed ? '1' : '0');
     });
   }
+
+  function enforceEnglishInputs() {
+    bySelAll('input[type="date"], input[type="datetime-local"]').forEach(function (input) {
+      input.setAttribute('lang', 'en-GB');
+    });
+  }
+
+  function initModernFilePickers(root) {
+    bySelAll('[data-file-picker]', root || document).forEach(function (picker) {
+      if (picker.dataset.bound === '1') return;
+      const input = bySel('input[type="file"]', picker);
+      const nameNode = bySel('[data-file-name]', picker);
+      if (!input || !nameNode) return;
+      picker.dataset.bound = '1';
+      const updateName = function () {
+        const fileName = input.files && input.files.length ? input.files[0].name : '';
+        nameNode.textContent = fileName || 'No file selected';
+      };
+      input.addEventListener('change', updateName);
+      updateName();
+    });
+  }
+
+  function initAutoDismissMessages(root) {
+    bySelAll('.alert:not(.alert-undo), .upload-inline-success', root || document).forEach(function (node) {
+      if (node.dataset.autoDismissBound === '1') return;
+      node.dataset.autoDismissBound = '1';
+      node.classList.add('auto-dismissable');
+      window.setTimeout(function () {
+        node.classList.add('is-dismissing');
+        window.setTimeout(function () {
+          if (node && node.parentNode) node.parentNode.removeChild(node);
+        }, 240);
+      }, 10000);
+    });
+  }
+
+  document.addEventListener('change', function (event) {
+    const input = event.target;
+    if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
+    const picker = input.closest('[data-file-picker]');
+    if (!picker) return;
+    const nameNode = bySel('[data-file-name]', picker);
+    if (!nameNode) return;
+    const fileName = input.files && input.files.length ? input.files[0].name : '';
+    nameNode.textContent = fileName || 'No file selected';
+  });
 
   bySelAll('[data-toggle-dropdown]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -130,6 +180,8 @@
       container.innerHTML = html;
       container.setAttribute('data-active-tab', tab);
       initCharts(container);
+      initModernFilePickers(container);
+      initAutoDismissMessages(container);
       window.history.replaceState({}, '', `?pet=${pet}&tab=${tab}`);
     });
   });
@@ -153,9 +205,9 @@
       const labels = points.map(function (p) {
         const d = new Date(p.x);
         if (allSameDay) {
-          return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return d.toLocaleTimeString(APP_LOCALE, { hour: '2-digit', minute: '2-digit' });
         }
-        return d.toLocaleDateString([], { day: '2-digit', month: 'short' });
+        return d.toLocaleDateString(APP_LOCALE, { day: '2-digit', month: 'short' });
       });
       const values = points.map(function (p) { return p.y; });
       if (canvas._chartInstance) {
@@ -200,4 +252,7 @@
 
   initCharts(document);
   initSidebarToggle();
+  enforceEnglishInputs();
+  initModernFilePickers(document);
+  initAutoDismissMessages(document);
 })();

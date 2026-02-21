@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f2f5f4;
+            --panel: #ffffff;
+            --line: #d7e2dd;
+            --text: #1d2622;
+            --muted: #65756f;
+            --brand: #1f6a4b;
+            --brand-soft: #e6f3ec;
+            --blue: #1f5ea7;
+            --blue-soft: #e7f0fa;
+            --warn: #9a5e2f;
+            --warn-soft: #faeee3;
+            --danger: #ab3535;
+            --radius: 16px;
+            --shadow: 0 14px 32px rgba(23, 33, 29, 0.08);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Manrope', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 8% 0%, #e4ece8 0%, transparent 36%),
+                radial-gradient(circle at 100% 20%, #eaf1f7 0%, transparent 30%),
+                var(--bg);
+        }
+        .wrap { max-width: 1220px; margin: 28px auto 40px; padding: 0 16px; }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 38px;
+            letter-spacing: -0.03em;
+        }
+        .sub {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 14px;
+            max-width: 760px;
+        }
+        .btn-link {
+            text-decoration: none;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: #33413b;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .alert {
+            margin-bottom: 12px;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid #c9d9d2;
+            background: #edf8f3;
+            color: #205940;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1.12fr 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .panel-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, #fbfdfc, #f8fbfa);
+        }
+        .panel-head h2 {
+            margin: 0;
+            font-size: 19px;
+            letter-spacing: -0.01em;
+        }
+        .panel-head p {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .panel-body { padding: 14px 16px 16px; }
+
+        .progress {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .p-step {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            padding: 10px 10px;
+            text-align: center;
+        }
+        .p-step .k { font-size: 11px; color: #7d8c86; text-transform: uppercase; letter-spacing: .08em; }
+        .p-step .v { margin-top: 4px; font-size: 13px; font-weight: 800; }
+        .p-step.active { border-color: #9dc7b3; background: var(--brand-soft); }
+
+        .field { margin-bottom: 10px; }
+        .field label {
+            display: block;
+            margin-bottom: 6px;
+            color: #5e6f68;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .field select,
+        .field input,
+        .field textarea {
+            width: 100%;
+            border: 1px solid #d6dfdb;
+            border-radius: 10px;
+            padding: 10px 11px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .field textarea { min-height: 84px; resize: vertical; }
+        .pet-select {
+            appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, #5f746a 50%),
+                linear-gradient(135deg, #5f746a 50%, transparent 50%),
+                linear-gradient(to right, #edf2ef, #edf2ef);
+            background-position:
+                calc(100% - 20px) calc(50% - 2px),
+                calc(100% - 14px) calc(50% - 2px),
+                calc(100% - 36px) 50%;
+            background-size: 6px 6px, 6px 6px, 1px 24px;
+            background-repeat: no-repeat;
+            font-weight: 700;
+        }
+
+        .calendar-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .month-title { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+        .nav-group { display: flex; gap: 6px; }
+        .icon-btn {
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: #fff;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+            font-weight: 800;
+            color: #2f423a;
+        }
+
+        .calendar {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        .dow {
+            padding: 8px 0;
+            text-align: center;
+            background: #f8fbfa;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #75847d;
+            border-bottom: 1px solid var(--line);
+            font-weight: 700;
+        }
+        .day {
+            border: none;
+            border-right: 1px solid #edf2ef;
+            border-bottom: 1px solid #edf2ef;
+            background: #fff;
+            min-height: 52px;
+            text-align: left;
+            padding: 7px 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #2d3c36;
+            transition: 0.15s ease;
+        }
+        .day:nth-child(7n) { border-right: none; }
+        .day:hover { background: #f2f8f5; }
+        .day.muted { color: #a6b2ad; background: #fbfcfc; cursor: default; }
+        .day.disabled { color: #c3ccca; background: #fafafa; cursor: not-allowed; }
+        .day.selected { background: var(--brand-soft); outline: 2px solid #8ec0a9; outline-offset: -2px; font-weight: 800; }
+
+        .picker-meta {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .02em;
+        }
+        .badge-ok { background: var(--brand-soft); color: var(--brand); }
+        .badge-note { background: var(--blue-soft); color: var(--blue); }
+        .badge-warn { background: var(--warn-soft); color: var(--warn); }
+
+        .slot-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            max-height: 330px;
+            overflow: auto;
+            padding-right: 2px;
+        }
+        .slot {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            padding: 10px 10px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.15s ease;
+        }
+        .slot .t { font-size: 14px; font-weight: 800; }
+        .slot .s { margin-top: 3px; font-size: 11px; color: #73827c; }
+        .slot:hover { border-color: #9ab6aa; }
+        .slot.selected { border-color: #8ec0a9; background: var(--brand-soft); }
+        .slot.disabled { opacity: 0.52; cursor: not-allowed; background: #fafafa; }
+
+        .summary {
+            margin-top: 12px;
+            border: 1px dashed #bfd1c8;
+            border-radius: 12px;
+            background: #f8fcfa;
+            padding: 12px;
+        }
+        .summary h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: .02em; text-transform: uppercase; color: #5d6d66; }
+        .summary .row { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 14px; }
+        .summary .k { color: #65756f; }
+        .summary .v { font-weight: 700; text-align: right; }
+
+        .confirm {
+            margin-top: 12px;
+            border: none;
+            width: 100%;
+            background: linear-gradient(130deg, #1d5f44, #2d7d59);
+            color: #fff;
+            border-radius: 12px;
+            padding: 12px 13px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .confirm:disabled {
+            background: #b7c8c1;
+            cursor: not-allowed;
+        }
+
+        .hint {
+            margin-top: 8px;
+            color: #6c7b75;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .hide-native { display: none; }
+
+        @media (max-width: 1024px) {
+            .topbar { flex-direction: column; }
+            .topbar .btn-link { width: 100%; text-align: center; }
+            .layout { grid-template-columns: 1fr; }
+            .slot-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 640px) {
+            .wrap { margin: 16px auto 24px; padding: 0 10px; }
+            h1 { font-size: 30px; }
+            .slot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .progress { grid-template-columns: 1fr; }
+            .panel-head, .panel-body { padding-left: 12px; padding-right: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="topbar">
+        <div>
+            <h1>Book Appointment</h1>
+            <div class="sub">Choose a weekday slot in IST. Select date first, then pick an available full-hour time. Slot locks for 5 minutes after selection.</div>
+        </div>
+        <a class="btn-link" href="{% url 'appointments:pet_dashboard' %}">Back to Dashboard</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        <div class="alert" style="background:#fbeeee;border-color:#efcaca;color:#8f2e2e;">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <form method="post" id="booking-form">
+        {% csrf_token %}
+        <div class="hide-native">
+            {{ form.appointment_date }}
+            {{ form.appointment_time }}
+            {{ form.lock_token }}
+        </div>
+
+        <div class="layout">
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Step 1: Pick Date</h2>
+                    <p>Monday to Friday only. Weekend dates are disabled.</p>
+                </div>
+                <div class="panel-body">
+                    <div class="progress">
+                        <div class="p-step active"><div class="k">Step 1</div><div class="v">Date</div></div>
+                        <div class="p-step"><div class="k">Step 2</div><div class="v">Time</div></div>
+                        <div class="p-step"><div class="k">Step 3</div><div class="v">Confirm</div></div>
+                    </div>
+
+                    <div class="field">
+                        <label for="id_pet">Pet</label>
+                        {{ form.pet }}
+                    </div>
+
+                    <div class="calendar-toolbar">
+                        <div class="month-title" id="month-title"></div>
+                        <div class="nav-group">
+                            <button type="button" class="icon-btn" id="prev-month" aria-label="Previous month">‹</button>
+                            <button type="button" class="icon-btn" id="next-month" aria-label="Next month">›</button>
+                        </div>
+                    </div>
+
+                    <div class="calendar">
+                        <div class="calendar-grid" id="dow-row"></div>
+                        <div class="calendar-grid" id="day-grid"></div>
+                    </div>
+
+                    <div class="picker-meta" id="selected-date-label">No date selected.</div>
+                    <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <span class="badge badge-ok">IST: 9:00 AM - 5:00 PM</span>
+                        <span class="badge badge-note">1-hour slots only</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Step 2 & 3: Time + Confirm</h2>
+                    <p>Choose from live available slots, then confirm booking.</p>
+                </div>
+                <div class="panel-body">
+                    <div class="slot-top">
+                        <strong>Available Time Slots</strong>
+                        <span class="badge badge-warn">Remaining: <span id="remaining-slots">0</span></span>
+                    </div>
+
+                    <div class="slot-grid" id="slots-grid">
+                        <div class="slot disabled">
+                            <div class="t">Select date first</div>
+                            <div class="s">Slots will load here</div>
+                        </div>
+                    </div>
+
+                    <div class="field" style="margin-top:12px;">
+                        <label for="id_payment_reference">Payment Reference (Optional)</label>
+                        {{ form.payment_reference }}
+                    </div>
+
+                    <div class="summary">
+                        <h3>Booking Summary</h3>
+                        <div class="row"><span class="k">Pet</span><span class="v" id="sum-pet">-</span></div>
+                        <div class="row"><span class="k">Date</span><span class="v" id="sum-date">-</span></div>
+                        <div class="row"><span class="k">Time</span><span class="v" id="sum-time">-</span></div>
+                        <div class="row"><span class="k">Appointment Type</span><span class="v">Initial Consultation</span></div>
+                        <div class="row"><span class="k">Timezone</span><span class="v">Asia/Kolkata</span></div>
+                        <div class="row"><span class="k">UPI ID</span><span class="v"><code>{{ upi_id }}</code></span></div>
+                    </div>
+
+                    <button type="submit" class="confirm" id="confirm-btn" disabled>Confirm Appointment</button>
+                    <div class="hint">Your selected slot is temporarily locked for 5 minutes once selected.</div>
+                </div>
+            </section>
+        </div>
+    </form>
+</div>
+
+<script>
+(function() {
+    const IST_LOCALE = 'en-IN';
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    const form = document.getElementById('booking-form');
+    const petSelect = document.getElementById('id_pet');
+    const dateInput = document.getElementById('id_appointment_date');
+    const timeInput = document.getElementById('id_appointment_time');
+    const lockInput = document.getElementById('id_lock_token');
+    const remainingEl = document.getElementById('remaining-slots');
+    const slotsGrid = document.getElementById('slots-grid');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const monthTitle = document.getElementById('month-title');
+    const dayGrid = document.getElementById('day-grid');
+    const dowRow = document.getElementById('dow-row');
+    const selectedDateLabel = document.getElementById('selected-date-label');
+
+    const sumPet = document.getElementById('sum-pet');
+    const sumDate = document.getElementById('sum-date');
+    const sumTime = document.getElementById('sum-time');
+
+    let viewDate = dateInput.value ? new Date(dateInput.value + 'T00:00:00') : new Date();
+    let selectedDate = dateInput.value || '';
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function formatDatePretty(iso) {
+        if (!iso) return '-';
+        const d = new Date(iso + 'T00:00:00');
+        return d.toLocaleDateString(IST_LOCALE, { day: '2-digit', month: 'short', year: 'numeric', weekday: 'short' });
+    }
+
+    function syncSummary() {
+        const petText = petSelect.options[petSelect.selectedIndex] ? petSelect.options[petSelect.selectedIndex].text : '-';
+        sumPet.textContent = petText && petText !== 'Select pet' ? petText : '-';
+        sumDate.textContent = selectedDate ? formatDatePretty(selectedDate) : '-';
+        sumTime.textContent = timeInput.value ? timeInput.value : '-';
+    }
+
+    function renderDows() {
+        dowRow.innerHTML = '';
+        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(lbl => {
+            const el = document.createElement('div');
+            el.className = 'dow';
+            el.textContent = lbl;
+            dowRow.appendChild(el);
+        });
+    }
+
+    function isPast(dateObj) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const d = new Date(dateObj);
+        d.setHours(0,0,0,0);
+        return d < today;
+    }
+
+    function renderCalendar() {
+        const y = viewDate.getFullYear();
+        const m = viewDate.getMonth();
+        monthTitle.textContent = viewDate.toLocaleDateString(IST_LOCALE, { month: 'long', year: 'numeric' });
+
+        const first = new Date(y, m, 1);
+        const last = new Date(y, m + 1, 0);
+        const offset = first.getDay();
+
+        dayGrid.innerHTML = '';
+
+        for (let i = 0; i < offset; i++) {
+            const blank = document.createElement('button');
+            blank.type = 'button';
+            blank.className = 'day muted';
+            blank.disabled = true;
+            blank.textContent = '';
+            dayGrid.appendChild(blank);
+        }
+
+        for (let d = 1; d <= last.getDate(); d++) {
+            const current = new Date(y, m, d);
+            const iso = `${current.getFullYear()}-${pad(current.getMonth()+1)}-${pad(current.getDate())}`;
+            const weekend = current.getDay() === 0 || current.getDay() === 6;
+            const disabled = weekend || isPast(current);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'day' + (disabled ? ' disabled' : '');
+            if (iso === selectedDate) btn.classList.add('selected');
+            btn.textContent = String(d);
+            btn.disabled = disabled;
+
+            if (weekend) btn.title = 'Weekend not available';
+            if (disabled && !weekend && isPast(current)) btn.title = 'Past date not allowed';
+
+            btn.addEventListener('click', async () => {
+                selectedDate = iso;
+                dateInput.value = iso;
+                timeInput.value = '';
+                lockInput.value = '';
+                confirmBtn.disabled = true;
+                selectedDateLabel.textContent = `Selected: ${formatDatePretty(iso)}`;
+                renderCalendar();
+                syncSummary();
+                await loadSlots();
+            });
+
+            dayGrid.appendChild(btn);
+        }
+
+        if (!selectedDate) {
+            selectedDateLabel.textContent = 'No date selected.';
+        }
+    }
+
+    async function loadSlots() {
+        if (!selectedDate) return;
+
+        const res = await fetch(`{% url 'appointments:available_slots_api' %}?date=${selectedDate}`);
+        const data = await res.json();
+
+        slotsGrid.innerHTML = '';
+        remainingEl.textContent = data.remaining ?? 0;
+
+        (data.slots || []).forEach(slot => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'slot' + (slot.available ? '' : ' disabled');
+            card.innerHTML = `<div class="t">${slot.label}</div><div class="s">${slot.available ? 'Available' : (slot.reason || 'Unavailable')}</div>`;
+
+            if (!slot.available) {
+                card.disabled = true;
+                slotsGrid.appendChild(card);
+                return;
+            }
+
+            card.addEventListener('click', async () => {
+                await lockSlot(slot, card);
+            });
+
+            slotsGrid.appendChild(card);
+        });
+    }
+
+    async function lockSlot(slot, card) {
+        confirmBtn.disabled = true;
+
+        const body = new URLSearchParams();
+        body.append('date', selectedDate);
+        body.append('time', String(slot.hour).padStart(2, '0') + ':00');
+
+        const res = await fetch("{% url 'appointments:lock_slot_api' %}", {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken')},
+            body
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.error || 'Unable to lock this slot.');
+            await loadSlots();
+            return;
+        }
+
+        document.querySelectorAll('.slot').forEach(el => el.classList.remove('selected'));
+        card.classList.add('selected');
+
+        timeInput.value = String(slot.hour).padStart(2, '0') + ':00';
+        lockInput.value = data.lock_token;
+        confirmBtn.disabled = false;
+
+        syncSummary();
+    }
+
+    document.getElementById('prev-month').addEventListener('click', () => {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+        renderCalendar();
+    });
+
+    document.getElementById('next-month').addEventListener('click', () => {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+        renderCalendar();
+    });
+
+    petSelect.addEventListener('change', syncSummary);
+
+    form.addEventListener('submit', (e) => {
+        if (!dateInput.value || !timeInput.value || !lockInput.value) {
+            e.preventDefault();
+            alert('Please select date and lock a time slot before confirming.');
+        }
+    });
+
+    renderDows();
+    renderCalendar();
+    syncSummary();
+
+    if (selectedDate) {
+        selectedDateLabel.textContent = `Selected: ${formatDatePretty(selectedDate)}`;
+        loadSlots();
+    }
+})();
+</script>
+</body>
+</html>

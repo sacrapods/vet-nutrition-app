@@ -1,0 +1,88 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Blocked Dates &amp; Slots{% endblock %}
+{% block page_title %}Blocked Dates &amp; Slots{% endblock %}
+{% block page_subtitle %}Block full days or specific time slots to prevent bookings.{% endblock %}
+
+{% block content %}
+<div class="panel" style="padding:12px; margin-bottom:12px;">
+  <form method="post" class="row" style="margin-bottom:10px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create_single">
+    <div class="field"><label>Single Date</label><input type="date" name="block_date" required></div>
+    <div class="field"><label>Reason (optional)</label><input type="text" name="reason"></div>
+    <button class="danger-btn" type="submit">Block Date</button>
+  </form>
+  <form method="post" class="row range" style="margin-bottom:10px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create_range">
+    <div class="field"><label>Start Date</label><input type="date" name="block_start_date" required></div>
+    <div class="field"><label>End Date</label><input type="date" name="block_end_date" required></div>
+    <div class="field"><label>Reason (optional)</label><input type="text" name="reason"></div>
+    <button class="danger-btn" type="submit">Block Range</button>
+  </form>
+  <form method="post" class="row">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create_slot">
+    <div class="field"><label>Block Specific Time Slot (IST)</label><input type="date" name="slot_date" required></div>
+    <div class="field"><label>Time (IST)</label><input type="time" name="slot_time" required></div>
+    <div class="field"><label>Reason (optional)</label><input type="text" name="reason"></div>
+    <button class="danger-btn" type="submit">Block Slot</button>
+  </form>
+</div>
+
+<section class="panel">
+  <div class="head"><h2>Current Blocked Dates</h2><span class="pill">{{ blocked_dates|length }}</span></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Date</th><th>Reason</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for item in blocked_dates %}
+        <tr>
+          <td><strong>{{ item.date }}</strong></td>
+          <td>{{ item.reason|default:'-' }}</td>
+          <td>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="id" value="{{ item.id }}">
+              <button class="small-btn reject" type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" class="empty">No blocked dates.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="head"><h2>Current Blocked Time Slots</h2><span class="pill">{{ blocked_slots|length }}</span></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Date &amp; Time (IST)</th><th>Reason</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for slot in blocked_slots %}
+        <tr>
+          <td><strong>{{ slot.start_at|ist|date:'d M Y, h:i A' }}</strong></td>
+          <td>{{ slot.reason|default:'-' }}</td>
+          <td>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete_slot">
+              <input type="hidden" name="id" value="{{ slot.id }}">
+              <button class="small-btn reject" type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" class="empty">No blocked time slots.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -2,55 +2,68 @@
 {% block title %}{{ parent.name }} | EMR Hub{% endblock %}
 {% block content %}
 <section class="profile-hub" data-parent-id="{{ parent.id }}" data-current-pet-id="{{ selected_pet.id }}" data-tab-url="{% url 'pet_admin_portal:tab_content' parent.id %}">
+
+  <!-- Sticky profile header -->
   <header class="sticky-profile-header">
-    <div class="profile-left">
-      <button class="link-title" data-open-modal="parent-modal">{{ parent.name }}</button>
-      <div class="meta-line">{{ parent.phone }} · {{ parent.email }}</div>
-      <div class="meta-line">
-        <div class="dropdown pet-switch">
-          <button class="chip pet-switch-trigger" data-toggle-dropdown="pet-dropdown">{{ pet_count }} pet{{ pet_count|pluralize }}</button>
-          <div id="pet-dropdown" class="dropdown-menu">
-            {% for pet in pets %}
-              <a class="pet-option" href="?pet={{ pet.id }}&tab={{ active_tab }}">
-                <span class="pet-option-name">{{ pet.name }}</span>
-                <span class="pet-option-meta">{{ pet.get_species_display }}{% if pet.breed %} · {{ pet.breed }}{% endif %}</span>
-              </a>
-            {% endfor %}
-          </div>
+    <div class="profile-header-inner">
+      <div class="profile-left">
+        <button class="link-title" data-open-modal="parent-modal">{{ parent.name }}</button>
+        <div class="meta-line">
+          <span>{{ parent.phone }}</span>
+          <span class="meta-sep">·</span>
+          <span>{{ parent.email }}</span>
         </div>
-        <span class="badge">Active: {{ status_counts.active }}</span>
-        <span class="badge">Inactive: {{ status_counts.inactive }}</span>
-        <span class="badge danger">Deceased: {{ status_counts.deceased }}</span>
-      </div>
-    </div>
-    <div class="profile-right">
-      {% if selected_pet %}
-        <div class="pet-identity-card">
-          <button class="pet-avatar-wrap pet-avatar-button" type="button" data-open-modal="pet-modal" title="Click to upload or change pet photo">
-            {% if selected_pet_meta.photo %}
-              <img class="pet-avatar" src="{{ selected_pet_meta.photo.url }}" alt="{{ selected_pet.name }}">
-            {% else %}
-              <div class="pet-avatar pet-avatar-fallback">{{ selected_pet.name|slice:":1"|upper }}</div>
-            {% endif %}
-          </button>
-          <div class="pet-identity-text">
-            <button class="link-title" data-open-modal="pet-modal">{{ selected_pet.name }}</button>
-            <div class="meta-line">{{ selected_pet.get_species_display }} / {{ selected_pet.breed }}</div>
-            <div class="meta-line">Age: {{ selected_pet.dob_age }} · Weight: {{ selected_pet.current_weight_kg|default:'-' }} kg</div>
-            <div class="meta-line">
-              <span class="badge">Behavior: {{ selected_pet_meta.get_behavior_badge_display }}</span>
-              <span class="badge {% if selected_pet_meta.status == 'deceased' %}danger{% endif %}">Status: {{ selected_pet_meta.get_status_display }}</span>
+        <div class="meta-line">
+          <div class="dropdown pet-switch">
+            <button class="chip pet-switch-trigger" data-toggle-dropdown="pet-dropdown">{{ pet_count }} pet{{ pet_count|pluralize }}</button>
+            <div id="pet-dropdown" class="dropdown-menu">
+              {% for pet in pets %}
+                <a class="pet-option" href="?pet={{ pet.id }}&tab={{ active_tab }}">
+                  <span class="pet-option-name">{{ pet.name }}</span>
+                  <span class="pet-option-meta">{{ pet.get_species_display }}{% if pet.breed %} · {{ pet.breed }}{% endif %}</span>
+                </a>
+              {% endfor %}
             </div>
           </div>
+          <span class="badge brand">Active: {{ status_counts.active }}</span>
+          <span class="badge muted">Inactive: {{ status_counts.inactive }}</span>
+          {% if status_counts.deceased > 0 %}
+            <span class="badge danger">Deceased: {{ status_counts.deceased }}</span>
+          {% endif %}
         </div>
-      {% else %}
-        <div class="meta-line">No pets available for this parent.</div>
-      {% endif %}
+      </div>
+
+      <div class="profile-right">
+        {% if selected_pet %}
+          <div class="pet-identity-card">
+            <button class="pet-avatar-wrap pet-avatar-button" type="button" data-open-modal="pet-modal" title="Click to upload or change pet photo">
+              {% if selected_pet_meta.photo %}
+                <img class="pet-avatar" src="{{ selected_pet_meta.photo.url }}" alt="{{ selected_pet.name }}">
+              {% else %}
+                <div class="pet-avatar pet-avatar-fallback">{{ selected_pet.name|slice:":1"|upper }}</div>
+              {% endif %}
+            </button>
+            <div class="pet-identity-text">
+              <button class="link-title" data-open-modal="pet-modal">{{ selected_pet.name }}</button>
+              <div class="meta-line">{{ selected_pet.get_species_display }}{% if selected_pet.breed %} · {{ selected_pet.breed }}{% endif %}</div>
+              <div class="meta-line">Age: {{ selected_pet.dob_age }} · {{ selected_pet.current_weight_kg|default:'-' }} kg</div>
+              <div class="meta-line">
+                <span class="badge">{{ selected_pet_meta.get_behavior_badge_display }}</span>
+                <span class="badge {% if selected_pet_meta.status == 'deceased' %}danger{% elif selected_pet_meta.status == 'inactive' %}muted{% endif %}">{{ selected_pet_meta.get_status_display }}</span>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <p class="hint">No pets linked to this parent yet.</p>
+        {% endif %}
+      </div>
     </div>
   </header>
 
+  <!-- Hub body: sidebar tabs + content -->
   <div class="hub-body">
     <aside class="hub-sidebar">
+      <div class="hub-sidebar-label">Sections</div>
       {% for tab in tabs %}
         <button
           class="tab-link {% if active_tab == tab %}active{% endif %}"
@@ -58,44 +71,80 @@
           data-parent="{{ parent.id }}"
           data-pet="{{ selected_pet.id }}"
         >
-          {% if tab == 'medical_notes' %}Medical Notes
-          {% elif tab == 'attach_files' %}Attach Files
-          {% elif tab == 'emr_export' %}EMR Export
-          {% else %}{{ tab|title }}{% endif %}
+          {% if tab == 'overview' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Overview
+          {% elif tab == 'medical_notes' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg></span>Medical Notes
+          {% elif tab == 'exams' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>Exams
+          {% elif tab == 'prescription' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M8 7h8M8 17h8M6 12h12"/></svg></span>Prescriptions
+          {% elif tab == 'reminders' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>Reminders
+          {% elif tab == 'memo' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Memo
+          {% elif tab == 'attach_files' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span>Files
+          {% elif tab == 'emr_export' %}
+            <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></span>EMR Export
+          {% else %}
+            {{ tab|title }}
+          {% endif %}
         </button>
       {% endfor %}
     </aside>
+
     <section id="tab-content" class="hub-content" data-active-tab="{{ active_tab }}">
       {% if selected_pet %}
         {% include 'pet_admin_portal/tabs/'|add:active_tab|add:'.html' %}
       {% else %}
-        <section class="card"><p>No pet records are linked to this parent yet.</p></section>
+        <section class="card">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p>No pet records are linked to this parent yet.</p>
+          </div>
+        </section>
       {% endif %}
     </section>
   </div>
 </section>
 
+<!-- Parent edit modal -->
 <div id="parent-modal" class="modal" aria-hidden="true">
   <div class="modal-panel">
-    <div class="modal-head"><h3>Edit Pet Parent</h3><button data-close-modal>&times;</button></div>
+    <div class="modal-head">
+      <h3>Edit Pet Parent</h3>
+      <button data-close-modal aria-label="Close">&times;</button>
+    </div>
     <form method="post" action="{% url 'pet_admin_portal:edit_parent' parent.id %}" class="ajax-form">
       {% csrf_token %}
-      <label>Name</label><input name="name" value="{{ parent.name }}" required>
+      <label>Full Name</label><input name="name" value="{{ parent.name }}" required>
       <label>Phone</label><input name="phone" value="{{ parent.phone }}" required>
       <label>Email</label><input name="email" value="{{ parent.email }}" required>
-      <label>Location</label><input name="location_primary_vet" value="{{ parent.location_primary_vet }}">
-      <button class="btn-primary" type="submit">Save</button>
+      <label>Location / Primary Vet</label><input name="location_primary_vet" value="{{ parent.location_primary_vet }}">
+      <button class="btn-primary" type="submit">Save Changes</button>
     </form>
   </div>
 </div>
 
+<!-- Pet edit modal -->
 {% if selected_pet %}
 <div id="pet-modal" class="modal" aria-hidden="true">
   <div class="modal-panel">
-    <div class="modal-head"><h3>Edit Pet</h3><button data-close-modal>&times;</button></div>
+    <div class="modal-head">
+      <h3>Edit Pet — {{ selected_pet.name }}</h3>
+      <button data-close-modal aria-label="Close">&times;</button>
+    </div>
     <form method="post" enctype="multipart/form-data" action="{% url 'pet_admin_portal:edit_pet' parent.id selected_pet.id %}" class="ajax-form">
       {% csrf_token %}
-      <label>Pet Photo</label><input type="file" name="meta-photo" accept="image/*">
+      <div class="modern-file-picker" data-file-picker>
+        <label for="meta-photo-input">Pet Photo</label>
+        <input id="meta-photo-input" type="file" name="meta-photo" accept="image/*">
+        <div class="picker-row">
+          <label for="meta-photo-input" class="picker-trigger">Choose Photo</label>
+          <span class="picker-name" data-file-name>{% if selected_pet_meta.photo %}Current photo set{% else %}No file selected{% endif %}</span>
+        </div>
+      </div>
       <label>Pet Name</label><input name="pet-name" value="{{ selected_pet.name }}" required>
       <label>Species</label>
       <select name="pet-species">
@@ -106,7 +155,6 @@
       <label>Breed</label><input name="pet-breed" value="{{ selected_pet.breed }}">
       <label>Age</label><input name="pet-dob_age" value="{{ selected_pet.dob_age }}">
       <label>Weight (kg)</label><input type="number" step="0.01" name="pet-current_weight_kg" value="{{ selected_pet.current_weight_kg }}">
-
       <label>Behavior</label>
       <select name="meta-behavior_badge">
         {% for value,label in selected_pet_meta.BEHAVIOR_CHOICES %}
@@ -119,8 +167,7 @@
         <option value="{{ value }}" {% if selected_pet_meta.status == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
-
-      <button class="btn-primary" type="submit">Save</button>
+      <button class="btn-primary" type="submit">Save Changes</button>
     </form>
   </div>
 </div>

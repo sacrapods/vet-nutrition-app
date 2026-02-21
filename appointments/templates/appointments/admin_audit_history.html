@@ -1,0 +1,37 @@
+{% extends 'appointments/admin/base.html' %}
+
+{% block title %}Audit History{% endblock %}
+{% block page_title %}Audit History{% endblock %}
+{% block page_subtitle %}Who changed what and when across appointments, queues, settings and templates.{% endblock %}
+
+{% block content %}
+<div class="panel" style="padding:12px; margin-bottom:12px;">
+  <form method="get" class="row" style="grid-template-columns:1fr auto;">
+    <div class="field"><label>Search</label><input type="text" name="q" value="{{ q }}" placeholder="action, entity, id, summary, user"></div>
+    <button class="btn" type="submit">Apply</button>
+  </form>
+</div>
+
+<section class="panel">
+  <div class="head"><h2>Audit Events</h2><span class="pill">{{ logs|length }} shown</span></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>When</th><th>Entity</th><th>Entity ID</th><th>Action</th><th>Changed By</th><th>Summary</th></tr></thead>
+      <tbody>
+      {% for log in logs %}
+        <tr>
+          <td>{{ log.created_at|date:'d M Y, H:i:s' }}</td>
+          <td>{{ log.get_entity_type_display }}</td>
+          <td>{{ log.entity_id|default:'-' }}</td>
+          <td>{{ log.action }}</td>
+          <td>{% if log.changed_by %}{% with name=log.changed_by.get_full_name %}{% if name %}{{ name }}{% else %}{{ log.changed_by.email|default:log.changed_by.username }}{% endif %}{% endwith %}{% else %}System{% endif %}</td>
+          <td>{{ log.summary|default:'-' }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="empty">No audit events available.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

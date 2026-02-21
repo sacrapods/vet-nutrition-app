@@ -1,18 +1,20 @@
 {% extends 'pet_admin_portal/base.html' %}
 {% block title %}Pet Parents | Portal{% endblock %}
 {% block content %}
-<section class="card">
-  <div class="card-head card-head-split">
-    <div>
-      <h1>Pet Parent Profile Hub</h1>
-      <p>Admin/Vet/Staff-only clinical records module.</p>
-    </div>
-    <form method="get" class="inline-form">
-      <input name="q" value="{{ q }}" placeholder="Search by name, case ID, phone, email">
-      <button class="btn-primary" type="submit">Search</button>
-    </form>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Pet Parent Hub</h1>
+    <p class="page-subtitle">Admin / Vet / Staff — clinical records module</p>
   </div>
-  <div class="table-wrap">
+  <form method="get" class="inline-form">
+    <input name="q" value="{{ q }}" placeholder="Search by name, case ID, phone, email…" autocomplete="off">
+    <button class="btn-primary" type="submit">Search</button>
+  </form>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+  <div class="table-wrap" style="border: none; border-radius: 0;">
     <table>
       <thead>
         <tr>
@@ -27,18 +29,26 @@
       <tbody>
         {% for parent in parents %}
           <tr>
-            <td>{{ parent.case_id }}</td>
-            <td>{{ parent.name }}</td>
+            <td><span class="badge brand">{{ parent.case_id }}</span></td>
+            <td><strong>{{ parent.name }}</strong></td>
             <td>{{ parent.phone }}</td>
             <td>{{ parent.email }}</td>
             <td>{{ parent.pet_count }}</td>
-            <td><a class="btn-link" href="{% url 'pet_admin_portal:profile_hub' parent.id %}">Open Hub</a></td>
+            <td><a class="btn-link btn-sm" href="{% url 'pet_admin_portal:profile_hub' parent.id %}">Open Hub →</a></td>
           </tr>
         {% empty %}
-          <tr><td colspan="6">No pet parents found.</td></tr>
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <p>No pet parents found{% if q %} matching "{{ q }}"{% endif %}.</p>
+              </div>
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-</section>
+</div>
+
 {% endblock %}

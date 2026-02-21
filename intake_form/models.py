@@ -1,8 +1,12 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 import random
 import string
 import os
+import secrets
+
+User = get_user_model()
 
 # ═══════════════════════════════════════════════════════
 # CORE MODELS: Pet Parent & Pet
@@ -10,9 +14,12 @@ import os
 
 class PetParent(models.Model):
     """Pet owner/guardian information"""
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True, related_name='pet_parent_submissions'
+    )
     # Unique identifiers
     case_id = models.CharField(max_length=20, unique=True, editable=False)
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     
     # Contact information
     name = models.CharField(max_length=200)
@@ -555,6 +562,9 @@ class PrimaryVetInfo(models.Model):
 class ClinicalHistory(models.Model):
     """Clinical history filled by referring veterinarian"""
     pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='clinical_history')
+    submitted_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='clinical_history_submissions'
+    )
     
     additional_notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -622,6 +632,9 @@ class VetUpload(models.Model):
     category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
     file = models.FileField(upload_to='vet_uploads/%Y/%m/')
     original_filename = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='vet_uploads'
+    )
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -738,6 +751,13 @@ class DoctorNote(models.Model):
 
 class HomemadeDietQuestionnaire(models.Model):
     """Standalone homemade diet questionnaire submissions."""
+    submitted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='homemade_questionnaire_submissions',
+    )
 
     owner_name = models.CharField(max_length=200)
     owner_email = models.EmailField(blank=True)
@@ -754,6 +774,17 @@ class HomemadeDietQuestionnaire(models.Model):
     recipe_ingredients = models.TextField(blank=True, help_text="Main ingredients currently fed")
     recipe_preparation = models.TextField(blank=True)
     supplements_medications = models.TextField(blank=True)
+    treat_plan_preferences = models.TextField(blank=True, help_text="Comma-separated selected treat preferences")
+    homemade_diet_rows = models.TextField(blank=True, help_text="JSON list of homemade diet table rows")
+    brands_to_avoid_rows = models.TextField(blank=True, help_text="JSON list of brand/reason rows")
+    q1_protein_matrix = models.TextField(blank=True, help_text="JSON matrix for Q1 protein ingredient selections")
+    q1_novel_protein = models.TextField(blank=True, help_text="JSON row for Q1 Novel Protein Spp selection")
+    q2_other_proteins = models.TextField(blank=True, help_text="JSON rows for Q2 additional protein sources")
+    q3_carb_fat_fibre_matrix = models.TextField(blank=True, help_text="JSON matrix for Q3 carbohydrate/fat/fibre/veggie selections")
+    q4_other_carb_fat_fibre = models.TextField(blank=True, help_text="JSON rows for Q4 additional carb/fat/fibre/veggie sources")
+    q5_food_refusal = models.TextField(blank=True, help_text="JSON rows for Q5 foods pet will not eat and reasons")
+    q6_palatable_options = models.TextField(blank=True, help_text="JSON rows for Q6 preferred palatable options")
+    questionnaire_payload = models.TextField(blank=True, help_text="Raw JSON payload of full questionnaire submission")
     concerns_or_goals = models.TextField(blank=True)
     additional_notes = models.TextField(blank=True)
 
@@ -764,3 +795,95 @@ class HomemadeDietQuestionnaire(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class IntakeFormDraft(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='intake_form_draft')
+    payload = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Intake Draft - {self.user}"
+
+
+class HomemadeQuestionnaireDraft(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='homemade_questionnaire_draft')
+    payload = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Homemade Draft - {self.user}"
+
+
+class VetFormDraft(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vet_form_drafts')
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='vet_form_drafts')
+    payload = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'pet')
+
+    def __str__(self):
+        return f"Vet Draft - {self.pet} ({self.user})"
+
+
+class VetFormAccessLink(models.Model):
+    pet = models.OneToOneField(Pet, on_delete=models.CASCADE, related_name='vet_form_access_link')
+    token = models.CharField(max_length=128, unique=True, editable=False)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='generated_vet_form_links'
+    )
+    is_active = models.BooleanField(default=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Vet Access Link - {self.pet}"
+
+
+class PreConsultSubmission(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('access_granted', 'Access Granted'),
+    ]
+
+    parent_name = models.CharField(max_length=200)
+    parent_email = models.EmailField()
+    parent_phone = models.CharField(max_length=20)
+    parent_city = models.CharField(max_length=150, blank=True)
+
+    pet_name = models.CharField(max_length=100)
+    pet_species = models.CharField(max_length=20, choices=Pet.SPECIES_CHOICES)
+    pet_breed = models.CharField(max_length=100, blank=True)
+    pet_age = models.CharField(max_length=100, blank=True)
+    pet_sex = models.CharField(max_length=10, choices=Pet.SEX_CHOICES, blank=True)
+    pet_neutered = models.BooleanField(default=False)
+    pet_weight_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    consultation_goals = models.TextField(blank=True)
+    consultation_focus = models.TextField(
+        blank=True,
+        help_text="Comma-separated focus areas selected by the pet parent",
+    )
+    additional_notes = models.TextField(blank=True)
+
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    linked_user = models.OneToOneField(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='preconsult_submission'
+    )
+    activated_at = models.DateTimeField(null=True, blank=True)
+    invite_sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Pre-consult: {self.parent_name} - {self.pet_name}"

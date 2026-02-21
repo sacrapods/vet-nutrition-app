@@ -1,10 +1,12 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Count, Q
+from django.db.models import Count, DecimalField, F, Q, Sum, Value
+from django.db.models.functions import Coalesce, TruncDate
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -71,6 +73,30 @@ def _flat_form_errors(form):
         field: [err["message"] for err in errs]
         for field, errs in form.errors.get_json_data().items()
     }
+
+
+def _redirect_inventory_with_anchor(request):
+    base = request.META.get("HTTP_REFERER", reverse("pet_admin_portal:clinic_inventory"))
+    anchor = (request.POST.get("return_anchor") or "").strip().lstrip("#")
+    if not anchor:
+        return redirect(base)
+    base_no_fragment = base.split("#", 1)[0]
+    return redirect(f"{base_no_fragment}#{anchor}")
+
+
+def _append_query_params(url, params):
+    parts = urlsplit(url)
+    current = dict(parse_qsl(parts.query, keep_blank_values=True))
+    current.update(params)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(current), parts.fragment))
+
+
+def _remove_query_params(url, keys):
+    parts = urlsplit(url)
+    current = dict(parse_qsl(parts.query, keep_blank_values=True))
+    for key in keys:
+        current.pop(key, None)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(current), parts.fragment))
 
 
 def _portal_meta_for_pet(pet):
@@ -204,11 +230,121 @@ def parent_list(request):
 
 @portal_required
 def clinic_inventory(request):
+    q = request.GET.get("q", "").strip()
+    sort = request.GET.get("sort", "name")
+    direction = request.GET.get("dir", "asc")
+    tx_type = request.GET.get("tx_type", "").strip()
+    tx_from = request.GET.get("tx_from", "").strip()
+    tx_to = request.GET.get("tx_to", "").strip()
+
+    sort_map = {
+        "name": "name",
+        "category": "category",
+        "stock": "stock_quantity",
+        "updated": "updated_at",
+    }
+    sort_field = sort_map.get(sort, "name")
+    order_by = f"-{sort_field}" if direction == "desc" else sort_field
+
+    items = InventoryItem.objects.all()
+    if q:
+        items = items.filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(category__icontains=q))
+    items = items.order_by(order_by)
+
+    transactions = InventoryTransaction.objects.select_related("inventory_item", "created_by").all()
+    if tx_type in {InventoryTransaction.TYPE_PURCHASE, InventoryTransaction.TYPE_CONSUMPTION, InventoryTransaction.TYPE_ADJUSTMENT}:
+        transactions = transactions.filter(transaction_type=tx_type)
+
+    if tx_from:
+        try:
+            from_dt = datetime.strptime(tx_from, "%Y-%m-%d").date()
+            transactions = transactions.filter(created_at__date__gte=from_dt)
+        except ValueError:
+            tx_from = ""
+    if tx_to:
+        try:
+            to_dt = datetime.strptime(tx_to, "%Y-%m-%d").date()
+            transactions = transactions.filter(created_at__date__lte=to_dt)
+        except ValueError:
+            tx_to = ""
+
+    total_items = InventoryItem.objects.count()
+    low_stock_items = InventoryItem.objects.filter(stock_quantity__gt=0, stock_quantity__lte=F("low_stock_threshold"))
+    out_of_stock_items = InventoryItem.objects.filter(stock_quantity__lte=0)
+    tx_today_count = InventoryTransaction.objects.filter(created_at__date=timezone.localdate()).count()
+    recent_items = InventoryItem.objects.order_by("-created_at")[:5]
+
+    stock_chart_items = InventoryItem.objects.order_by("-stock_quantity", "name")[:12]
+    stock_levels_chart = {
+        "labels": [item.name for item in stock_chart_items],
+        "values": [float(item.stock_quantity) for item in stock_chart_items],
+    }
+
+    trend_start = timezone.localdate() - timedelta(days=9)
+    trend_rows = (
+        InventoryTransaction.objects.filter(created_at__date__gte=trend_start)
+        .annotate(day=TruncDate("created_at"))
+        .values("day")
+        .annotate(
+            purchases=Coalesce(
+                Sum("quantity", filter=Q(transaction_type=InventoryTransaction.TYPE_PURCHASE)),
+                Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)),
+            ),
+            consumption=Coalesce(
+                Sum("quantity", filter=Q(transaction_type=InventoryTransaction.TYPE_CONSUMPTION)),
+                Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)),
+            ),
+            adjustments=Coalesce(
+                Sum("quantity", filter=Q(transaction_type=InventoryTransaction.TYPE_ADJUSTMENT)),
+                Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)),
+            ),
+        )
+        .order_by("day")
+    )
+    trend_map = {row["day"]: row for row in trend_rows}
+    tx_trend_chart = {"labels": [], "purchases": [], "consumption": [], "adjustments": []}
+    for i in range(10):
+        day = trend_start + timedelta(days=i)
+        row = trend_map.get(day)
+        tx_trend_chart["labels"].append(day.strftime("%d %b"))
+        tx_trend_chart["purchases"].append(float(row["purchases"]) if row else 0.0)
+        tx_trend_chart["consumption"].append(float(row["consumption"]) if row else 0.0)
+        tx_trend_chart["adjustments"].append(float(row["adjustments"]) if row else 0.0)
+
+    top_consumed_rows = (
+        InventoryItem.objects.annotate(
+            consumed=Coalesce(
+                Sum("transactions__quantity", filter=Q(transactions__transaction_type=InventoryTransaction.TYPE_CONSUMPTION)),
+                Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)),
+            )
+        )
+        .filter(consumed__gt=0)
+        .order_by("-consumed", "name")[:8]
+    )
+    top_consumed_chart = {
+        "labels": [row.name for row in top_consumed_rows],
+        "values": [float(row.consumed) for row in top_consumed_rows],
+    }
+
     context = {
         "inventory_item_form": InventoryItemForm(),
         "inventory_tx_form": InventoryTransactionForm(),
-        "inventory_items": InventoryItem.objects.all(),
-        "inventory_transactions": InventoryTransaction.objects.select_related("inventory_item", "created_by")[:100],
+        "inventory_items": items,
+        "inventory_transactions": transactions[:200],
+        "total_items": total_items,
+        "low_stock_count": low_stock_items.count(),
+        "out_of_stock_count": out_of_stock_items.count(),
+        "tx_today_count": tx_today_count,
+        "recent_items": recent_items,
+        "q": q,
+        "sort": sort,
+        "direction": direction,
+        "tx_type": tx_type,
+        "tx_from": tx_from,
+        "tx_to": tx_to,
+        "stock_levels_chart_json": json.dumps(stock_levels_chart, cls=DjangoJSONEncoder),
+        "tx_trend_chart_json": json.dumps(tx_trend_chart, cls=DjangoJSONEncoder),
+        "top_consumed_chart_json": json.dumps(top_consumed_chart, cls=DjangoJSONEncoder),
     }
     return render(request, "pet_admin_portal/inventory_hub.html", context)
 
@@ -228,6 +364,7 @@ def profile_hub(request, parent_id):
         "tab_labels": TAB_LABELS,
         "active_tab": tab,
         "pets": pets,
+        "attachment_uploaded": request.GET.get("attachment_uploaded") == "1",
     }
     context.update(_header_context(parent, selected_pet))
     context.update(_tab_context(tab, parent, selected_pet))
@@ -245,6 +382,7 @@ def tab_content(request, parent_id):
     if pet is None:
         return HttpResponse('<section class="card"><p>No pet records are linked to this parent yet.</p></section>')
     context = _tab_context(tab, parent, pet)
+    context["attachment_uploaded"] = request.GET.get("attachment_uploaded") == "1"
     return render(request, f"pet_admin_portal/tabs/{tab}.html", context)
 
 
@@ -402,7 +540,10 @@ def create_attachment(request, parent_id, pet_id):
         obj.uploaded_by = request.user
         obj.save()
         log_audit(request.user, "create", obj, {"title": obj.title, "file": obj.file.name})
-        messages.success(request, "Attachment uploaded.")
+        return redirect(
+            f"{reverse('pet_admin_portal:profile_hub', args=[parent.id])}"
+            f"?pet={pet.id}&tab=attach_files&attachment_uploaded=1"
+        )
     else:
         messages.error(request, "Unable to upload file.")
     return redirect(f"{reverse('pet_admin_portal:profile_hub', args=[parent.id])}?pet={pet.id}&tab=attach_files")
@@ -436,7 +577,7 @@ def create_inventory_item(request):
         messages.success(request, "Inventory item created.")
     else:
         messages.error(request, "Unable to create inventory item.")
-    return redirect(request.META.get("HTTP_REFERER", reverse("pet_admin_portal:clinic_inventory")))
+    return _redirect_inventory_with_anchor(request)
 
 
 @portal_required
@@ -458,7 +599,21 @@ def create_inventory_tx(request):
         messages.success(request, "Inventory transaction logged.")
     else:
         messages.error(request, "Unable to log inventory transaction.")
-    return redirect(request.META.get("HTTP_REFERER", reverse("pet_admin_portal:clinic_inventory")))
+    return _redirect_inventory_with_anchor(request)
+
+
+@portal_required
+@require_POST
+def update_inventory_item(request, item_id):
+    item = get_object_or_404(InventoryItem, pk=item_id)
+    form = InventoryItemForm(request.POST, instance=item)
+    if form.is_valid():
+        form.save()
+        log_audit(request.user, "update", item, form.cleaned_data)
+        messages.success(request, "Inventory item updated.")
+    else:
+        messages.error(request, "Unable to update inventory item.")
+    return _redirect_inventory_with_anchor(request)
 
 
 @portal_required
@@ -481,8 +636,13 @@ def soft_delete_record(request, model_name, record_id):
     record = get_object_or_404(model.all_objects, pk=record_id)
     record.soft_delete(user=request.user)
     log_audit(request.user, "soft_delete", record, {})
-    messages.success(request, "Record archived. You can restore it from undo.")
-    return redirect(request.META.get("HTTP_REFERER", reverse("pet_admin_portal:parent_list")))
+    messages.success(request, "Record archived.")
+    anchor = (request.POST.get("return_anchor") or "").strip().lstrip("#")
+    base = request.META.get("HTTP_REFERER", reverse("pet_admin_portal:parent_list"))
+    base = _append_query_params(base, {"undo_model": model_name, "undo_id": str(record_id)})
+    if anchor:
+        base = f"{base.split('#', 1)[0]}#{anchor}"
+    return redirect(base)
 
 
 @portal_required
@@ -506,7 +666,9 @@ def restore_record(request, model_name, record_id):
     record.restore()
     log_audit(request.user, "restore", record, {})
     messages.success(request, "Record restored.")
-    return redirect(request.META.get("HTTP_REFERER", reverse("pet_admin_portal:parent_list")))
+    target = request.META.get("HTTP_REFERER", reverse("pet_admin_portal:parent_list"))
+    target = _remove_query_params(target, {"undo_model", "undo_id"})
+    return redirect(target)
 
 
 @portal_required

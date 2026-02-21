@@ -1,0 +1,13 @@
+{% extends 'public_site/base.html' %}
+{% block content %}
+<section class="container section-pad page-hero"><h1>Client Testimonials</h1><p>Real outcomes from structured veterinary nutrition planning.</p></section>
+<section class="container section-pad card-grid three">
+  {% for story in stories %}
+  <article class="story-card">
+    <img src="{{ story.image }}" alt="{{ story.pet }} receiving improved nutrition care">
+    <h2>{{ story.pet }}</h2>
+    <p>{{ story.text }}</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

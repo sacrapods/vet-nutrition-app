@@ -1,0 +1,70 @@
+{% extends 'appointments/admin/base.html' %}
+
+{% block title %}Appointment Settings{% endblock %}
+{% block page_title %}Appointment Settings{% endblock %}
+{% block page_subtitle %}Configure slot rules, SLA targets, and provider daily capacities.{% endblock %}
+
+{% block content %}
+<div class="layout" style="grid-template-columns:1fr 1fr;">
+<section class="panel" style="padding:14px;">
+  <h2 style="margin:0 0 10px;font-size:17px;">Booking Configuration</h2>
+  <form method="post" style="display:grid; gap:10px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save_config">
+    <div class="field"><label>Start Hour (IST)</label>{{ form.start_hour_ist }}</div>
+    <div class="field"><label>End Hour (IST)</label>{{ form.end_hour_ist }}</div>
+    <div class="field"><label>Buffer Minutes</label>{{ form.buffer_minutes }}</div>
+    <div class="field"><label>Daily Appointment Limit</label>{{ form.daily_appointment_limit }}</div>
+    <div class="field"><label>Follow-up Enabled</label>{{ form.follow_up_enabled }}</div>
+    <div class="field"><label>Follow-up Days</label>{{ form.follow_up_days }}</div>
+    <div class="field"><label>Slot Lock Minutes</label>{{ form.slot_lock_minutes }}</div>
+    <div class="field"><label>UPI ID</label>{{ form.upi_id }}</div>
+    <button class="small-btn approve" type="submit" style="width:fit-content;">Save Booking Settings</button>
+  </form>
+</section>
+
+<section class="panel" style="padding:14px;">
+  <h2 style="margin:0 0 10px;font-size:17px;">SLA Configuration</h2>
+  <form method="post" style="display:grid; gap:10px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save_sla">
+    <div class="field"><label>Reschedule Response (Hours)</label>{{ sla_form.reschedule_response_hours }}</div>
+    <div class="field"><label>Notes Completion (Hours)</label>{{ sla_form.note_completion_hours }}</div>
+    <div class="field"><label>Overdue Warning Threshold (Hours)</label>{{ sla_form.overdue_warning_hours }}</div>
+    <button class="small-btn approve" type="submit" style="width:fit-content;">Save SLA Settings</button>
+  </form>
+
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+    <h3 style="margin:0 0 8px;font-size:14px;">Provider Capacity</h3>
+    <form method="post" style="display:grid; gap:8px;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_provider_capacity">
+      <div class="field">
+        <label>Provider</label>
+        {{ provider_form.provider }}
+      </div>
+      <div class="field"><label>Daily Limit</label>{{ provider_form.daily_limit }}</div>
+      <div class="field"><label>Active</label>{{ provider_form.active }}</div>
+      <button class="small-btn" type="submit" style="width:fit-content;">Save Provider Capacity</button>
+    </form>
+
+    <div style="margin-top:10px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:10px;">
+      <table>
+        <thead><tr><th>Provider</th><th>Daily Limit</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for row in provider_capacities %}
+            <tr>
+              <td>{{ row.provider.email|default:row.provider.username }}</td>
+              <td>{{ row.daily_limit }}</td>
+              <td>{% if row.active %}Active{% else %}Inactive{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="empty">No provider capacity overrides.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</div>
+{% endblock %}

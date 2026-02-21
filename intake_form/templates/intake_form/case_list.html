@@ -2,128 +2,429 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - NutriVet</title>
-    <link rel="stylesheet" href="{% static 'design_system/tokens.css' %}">
-    <style>
-        /* shell-fallback: protects nav if static CSS fails */
-        html, body { margin:0 !important; padding:0 !important; }
-        .skip-link { position:fixed; left:12px; top:10px; transform:translateY(-180%); background:#0f1720; color:#fff; padding:8px 12px; border-radius:8px; z-index:9999; text-decoration:none; font-size:13px; font-weight:700; }
-        .skip-link:focus { transform:translateY(0); }
-        .app-shell { display:grid; grid-template-columns:244px 1fr; min-height:100dvh; margin:0 !important; }
-        .app-sidebar { background:linear-gradient(180deg,#102b23,#173a30); color:#dce7e1; padding:18px 12px; position:sticky; top:0; height:100dvh; overflow:auto; box-shadow:inset -1px 0 0 rgba(255,255,255,.06); }
-        .app-sidebar.app-sidebar--blue { background:linear-gradient(180deg,#173754,#2c5a8c); }
-        .app-sidebar .brand { margin:0 0 14px; font-size:17px; font-weight:800; letter-spacing:-.01em; color:#dce7e1; }
-        .app-sidebar nav a { display:block; color:#dce7e1; text-decoration:none; border:1px solid transparent; border-radius:10px; padding:9px 10px; font-size:13px; font-weight:700; margin-bottom:4px; }
-        .app-sidebar nav a:hover,.app-sidebar nav a.active { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.18); }
-        .app-main { padding:18px 16px 30px; }
-        @media (max-width:1080px){ .app-shell{grid-template-columns:1fr;} .app-sidebar{position:relative;height:auto;} .app-main{padding-top:12px;} }
-        body { font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif; }
-        .hero { border-radius:20px; padding:26px; background:linear-gradient(126deg,#18402f,#2d6a4f 54%,#4f866d); color:#fff; box-shadow:0 18px 30px rgba(21,55,41,.2); }
-        .hero-top { display:flex; justify-content:space-between; gap:12px; align-items:start; }
-        h1 { margin-top:6px; font-size:30px; letter-spacing:-.02em; }
-        .sub { margin-top:8px; max-width:620px; color:rgba(255,255,255,.86); font-size:14px; }
-        .actions { display:flex; flex-wrap:wrap; gap:8px; }
-        .btn { text-decoration:none; border:1px solid rgba(255,255,255,.35); color:#fff; padding:10px 13px; border-radius:10px; font-size:13px; font-weight:700; background:rgba(255,255,255,.12); }
-        .stats { margin-top:14px; display:grid; gap:10px; grid-template-columns:repeat(4,minmax(0,1fr)); }
-        .stat { background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:12px 14px; }
-        .stat .label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; opacity:.78; }
-        .stat .value { margin-top:4px; font-size:24px; font-weight:800; letter-spacing:-.02em; }
-        .panel { margin-top:16px; background:var(--ds-panel); border:1px solid var(--ds-line); border-radius:var(--ds-radius); box-shadow:0 8px 20px rgba(21,26,24,.04); }
-        .panel-head { padding:14px; border-bottom:1px solid var(--ds-line); }
-        .search { display:flex; gap:8px; width:100%; }
-        .search input { flex:1; border:1px solid var(--ds-line); border-radius:10px; padding:10px 12px; font-size:14px; }
-        .search button { border:none; border-radius:10px; padding:10px 14px; font-weight:700; background:var(--ds-brand); color:#fff; cursor:pointer; }
-        .table-wrap { overflow:auto; }
-        table { width:100%; border-collapse:collapse; min-width:860px; }
-        th,td { padding:12px 14px; border-bottom:1px solid #edf1ef; text-align:left; font-size:14px; vertical-align:middle; }
-        th { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#74837c; background:#f8fbf9; }
-        .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-weight:700; color:#385a4e; }
-        .owner { color:var(--ds-muted); font-size:13px; }
-        .status { display:inline-block; padding:4px 9px; border-radius:999px; font-size:11px; font-weight:700; }
-        .status-open { background:#f8ebe2; color:#a6582a; }
-        .status-done { background:#e8f2ed; color:#2d6a4f; }
-        .row-actions { display:flex; gap:6px; }
-        .link-btn { text-decoration:none; border:1px solid var(--ds-line); background:#fff; color:#2f3b36; padding:6px 9px; border-radius:8px; font-size:12px; font-weight:700; }
-        @media (max-width:720px){
-          .hero{padding:18px 14px;border-radius:16px}
-          h1{font-size:26px}
-          .hero-top{flex-direction:column}
-          .actions{width:100%}
-          .actions .btn{width:100%;text-align:center}
-          .search{flex-direction:column}
-          .search input,.search button{width:100%}
-          th,td{padding:10px 9px;font-size:13px}
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinical Case Dashboard — NutriVet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'design_system/tokens.css' %}">
+  <style>
+    html, body { margin: 0; padding: 0; font-family: "Manrope", system-ui, sans-serif; }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      border-radius: var(--ds-radius-lg);
+      padding: 28px 28px 24px;
+      background: linear-gradient(128deg, #0e3323 0%, #1a5c3a 50%, #2a7a52 100%);
+      color: #fff;
+      box-shadow: 0 16px 36px rgba(14,51,35,.22);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
+      pointer-events: none;
+    }
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .hero-eyebrow {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: .65;
+      margin-bottom: 6px;
+    }
+    .hero h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+    }
+    .hero-sub {
+      margin: 0;
+      font-size: 13.5px;
+      color: rgba(255,255,255,.78);
+      max-width: 520px;
+      line-height: 1.55;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .hero-btn {
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.3);
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: var(--ds-radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(255,255,255,.1);
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .hero-btn:hover { background: rgba(255,255,255,.18); }
+
+    /* ── Stats ────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,.13);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .stat-box .s-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: .68;
+      margin-bottom: 6px;
+    }
+    .stat-box .s-value {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .stat-box .s-meta {
+      font-size: 11px;
+      opacity: .58;
+      margin-top: 4px;
+    }
+
+    /* ── Panel / Table ────────────────────────────── */
+    .panel {
+      background: var(--ds-panel);
+      border: 1px solid var(--ds-line);
+      border-radius: var(--ds-radius);
+      box-shadow: var(--ds-shadow-sm);
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--ds-line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ds-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .search {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--ds-line-2);
+      border-radius: var(--ds-radius-sm);
+      overflow: hidden;
+      background: var(--ds-panel);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .search:focus-within {
+      border-color: var(--ds-brand-2);
+      box-shadow: 0 0 0 3px var(--ds-brand-glow);
+    }
+    .search input {
+      border: none;
+      outline: none;
+      padding: 9px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      background: transparent;
+      color: var(--ds-text);
+      min-width: 240px;
+    }
+    .search input::placeholder { color: var(--ds-muted-2); }
+    .search button {
+      border: none;
+      border-left: 1px solid var(--ds-line);
+      background: var(--ds-panel-2);
+      padding: 9px 16px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--ds-brand);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .search button:hover { background: var(--ds-brand-3); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    thead { background: var(--ds-panel-2); }
+    th {
+      padding: 11px 14px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--ds-muted);
+      border-bottom: 1px solid var(--ds-line);
+      white-space: nowrap;
+      text-align: left;
+    }
+    td {
+      padding: 13px 14px;
+      font-size: 13.5px;
+      color: var(--ds-text-2);
+      border-bottom: 1px solid var(--ds-line);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .12s; }
+    tbody tr:hover { background: var(--ds-panel-2); }
+
+    .case-id {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--ds-brand-3);
+      color: var(--ds-brand);
+      border: 1px solid var(--ds-ok-border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .pet-name { font-weight: 700; color: var(--ds-text); }
+    .pet-breed { font-size: 12px; color: var(--ds-muted); margin-top: 2px; }
+    .owner-name { color: var(--ds-text-2); font-weight: 600; }
+    .owner-email { font-size: 12px; color: var(--ds-muted); margin-top: 2px; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .status-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-done {
+      background: var(--ds-ok-bg);
+      color: var(--ds-ok);
+      border: 1px solid var(--ds-ok-border);
+    }
+    .status-done::before { background: var(--ds-ok); }
+    .status-open {
+      background: var(--ds-warn-bg);
+      color: var(--ds-warn);
+      border: 1px solid var(--ds-warn-border);
+    }
+    .status-open::before { background: var(--ds-warn); }
+
+    .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .action-btn {
+      text-decoration: none;
+      border: 1px solid var(--ds-line-2);
+      background: var(--ds-panel);
+      color: var(--ds-text-2);
+      padding: 6px 11px;
+      border-radius: var(--ds-radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      transition: background .12s, border-color .12s, color .12s;
+      white-space: nowrap;
+    }
+    .action-btn:hover { background: var(--ds-panel-2); border-color: var(--ds-line-2); color: var(--ds-text); }
+    .action-btn.primary {
+      background: var(--ds-brand-3);
+      border-color: var(--ds-ok-border);
+      color: var(--ds-brand);
+    }
+    .action-btn.primary:hover { background: #d4ecdf; }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .hero h1 { font-size: 22px; }
+      .panel-head { flex-direction: column; align-items: stretch; }
+      .search input { min-width: 0; flex: 1; }
+    }
+    @media (max-width: 600px) {
+      .hero { padding: 20px 16px; border-radius: 16px; }
+      .hero h1 { font-size: 19px; }
+      .hero-top { flex-direction: column; }
+      .hero-actions .hero-btn { flex: 1; text-align: center; }
+      .stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .stat-box .s-value { font-size: 22px; }
+      .search { flex-direction: column; border-radius: var(--ds-radius-sm); }
+      .search input { min-width: 0; }
+      .search button { border-left: none; border-top: 1px solid var(--ds-line); }
+    }
+  </style>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="app-shell">
+
+  <!-- Sidebar -->
   <aside class="app-sidebar" aria-label="Admin navigation">
-    <div class="brand">NUTRIVET ADMIN</div>
+    <div class="brand">POSHTIK NUTRIVET</div>
+    <div class="brand-sub">Admin Portal</div>
     <nav>
-      <a class="active" href="{% url 'case_list' %}">Case Dashboard</a>
-      <a href="{% url 'vet_cases' %}">Vet Cases</a>
-      <a href="{% url 'appointments:admin_dashboard' %}">Appointments Ops</a>
-      <a href="{% url 'logout' %}">Logout</a>
+      <div class="nav-section">Clinical</div>
+      <a class="active" href="{% url 'case_list' %}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Case Dashboard
+      </a>
+      <a href="{% url 'vet_cases' %}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+        Vet Cases
+      </a>
+      <a href="{% url 'appointments:admin_dashboard' %}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        Appointments
+      </a>
+      <div class="nav-section">Records</div>
+      <a href="{% url 'pet_admin_portal:parent_list' %}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Pet Parent Hub
+      </a>
     </nav>
+    <div class="sidebar-footer">
+      <a href="{% url 'logout' %}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M14 8l4 4-4 4M18 12H9"/></svg>
+        Logout
+      </a>
+    </div>
   </aside>
 
+  <!-- Main -->
   <main id="main-content" class="app-main">
+
+    <!-- Hero -->
     <section class="hero">
       <div class="hero-top">
         <div>
-          <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;">Admin Workspace</div>
+          <div class="hero-eyebrow">Admin Workspace</div>
           <h1>Clinical Case Dashboard</h1>
-          <p class="sub">Monitor incoming cases, open each pet profile quickly, and track vet form completion status from one screen.</p>
+          <p class="hero-sub">Monitor incoming cases, open each pet profile, and track vet form completion from one screen.</p>
         </div>
-        <div class="actions"><a class="btn" href="{% url 'appointments:admin_dashboard' %}">Appointments Ops</a></div>
+        <div class="hero-actions">
+          <a class="hero-btn" href="{% url 'appointments:admin_dashboard' %}">Appointments →</a>
+          <a class="hero-btn" href="{% url 'pet_admin_portal:parent_list' %}">Pet Parent Hub →</a>
+        </div>
       </div>
+
       <div class="stats">
-        <div class="stat"><div class="label">Total Cases</div><div class="value">{{ stats.total_cases }}</div></div>
-        <div class="stat"><div class="label">Total Pets</div><div class="value">{{ stats.total_pets }}</div></div>
-        <div class="stat"><div class="label">New Today</div><div class="value">{{ stats.cases_today }}</div></div>
-        <div class="stat"><div class="label">Open Vet Forms</div><div class="value">{{ stats.open_vet_forms }}</div></div>
+        <div class="stat-box">
+          <div class="s-label">Total Cases</div>
+          <div class="s-value">{{ stats.total_cases }}</div>
+          <div class="s-meta">all time</div>
+        </div>
+        <div class="stat-box">
+          <div class="s-label">Total Pets</div>
+          <div class="s-value">{{ stats.total_pets }}</div>
+          <div class="s-meta">registered</div>
+        </div>
+        <div class="stat-box">
+          <div class="s-label">New Today</div>
+          <div class="s-value">{{ stats.cases_today }}</div>
+          <div class="s-meta">submissions</div>
+        </div>
+        <div class="stat-box">
+          <div class="s-label">Open Vet Forms</div>
+          <div class="s-value">{{ stats.open_vet_forms }}</div>
+          <div class="s-meta">awaiting vet</div>
+        </div>
       </div>
     </section>
 
-    <section class="panel">
+    <!-- Cases table -->
+    <div class="panel">
       <div class="panel-head">
+        <span class="panel-title">All Cases</span>
         <form class="search" method="get" role="search">
-          <input type="text" name="q" value="{{ q }}" placeholder="Search by case ID, owner, or pet name" aria-label="Search cases">
+          <input type="text" name="q" value="{{ q }}" placeholder="Search by case ID, owner, or pet name…" aria-label="Search cases">
           <button type="submit">Search</button>
         </form>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Case ID</th><th>Pet</th><th>Owner</th><th>Submitted</th><th>Vet Status</th><th>Actions</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Case ID</th>
+              <th>Pet</th>
+              <th>Owner</th>
+              <th>Submitted</th>
+              <th>Vet Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
           <tbody>
             {% for parent in parents %}
-            {% for pet in parent.pets.all %}
-            <tr>
-              <td class="mono">{{ parent.case_id }}</td>
-              <td><strong>{{ pet.name }}</strong><div class="owner">{{ pet.breed }}</div></td>
-              <td>{{ parent.name }}<div class="owner">{{ parent.email }}</div></td>
-              <td>{{ parent.created_at|date:"d M Y" }}</td>
-              <td>{% if pet.clinical_history %}<span class="status status-done">Completed</span>{% else %}<span class="status status-open">Pending</span>{% endif %}</td>
-              <td>
-                <div class="row-actions">
-                  <a class="link-btn" href="{% url 'case_detail' pet.pk %}">Open</a>
-                  <a class="link-btn" href="{% url 'case_pdf' pet.pk %}">Print</a>
-                  <a class="link-btn" href="{% url 'pet_admin_portal:profile_hub' parent.id %}?pet={{ pet.id }}">EMR Hub</a>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
+              {% for pet in parent.pets.all %}
+              <tr>
+                <td><span class="case-id">{{ parent.case_id }}</span></td>
+                <td>
+                  <div class="pet-name">{{ pet.name }}</div>
+                  <div class="pet-breed">{{ pet.get_species_display }}{% if pet.breed %} · {{ pet.breed }}{% endif %}</div>
+                </td>
+                <td>
+                  <div class="owner-name">{{ parent.name }}</div>
+                  <div class="owner-email">{{ parent.email }}</div>
+                </td>
+                <td style="white-space:nowrap; color:var(--ds-muted); font-size:13px;">{{ parent.created_at|date:"d M Y" }}</td>
+                <td>
+                  {% if pet.clinical_history %}
+                    <span class="status-badge status-done">Completed</span>
+                  {% else %}
+                    <span class="status-badge status-open">Pending</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <a class="action-btn primary" href="{% url 'case_detail' pet.pk %}">Open</a>
+                    <a class="action-btn" href="{% url 'case_pdf' pet.pk %}">Print</a>
+                    <a class="action-btn" href="{% url 'pet_admin_portal:profile_hub' parent.id %}?pet={{ pet.id }}">EMR Hub</a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
             {% empty %}
-            <tr><td colspan="6"><div class="empty-state"><h3>No cases found</h3><p>{% if q %}No results for "{{ q }}".{% else %}No cases submitted yet.{% endif %}</p></div></td></tr>
+              <tr>
+                <td colspan="6">
+                  <div class="empty-state">
+                    <h3>No cases found</h3>
+                    <p>{% if q %}No results for "{{ q }}". Try a different search.{% else %}No cases have been submitted yet.{% endif %}</p>
+                  </div>
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
+
   </main>
 </div>
 </body>

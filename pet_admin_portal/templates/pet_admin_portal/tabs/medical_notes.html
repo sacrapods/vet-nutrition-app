@@ -1,20 +1,37 @@
 <section class="card">
-  <div class="card-head"><h3>SOAP Medical Note</h3></div>
+  <div class="card-head">
+    <h3>New SOAP Note</h3>
+    <p>Subjective · Objective · Assessment · Plan</p>
+  </div>
   <form method="post" action="{% url 'pet_admin_portal:create_medical_note' parent.id pet.id %}" class="form-grid">
     {% csrf_token %}
     {{ note_form.as_p }}
     <button class="btn-primary" type="submit">Save Note</button>
   </form>
 </section>
+
 <section class="card">
-  <div class="card-head"><h3>Medical Notes History</h3></div>
+  <div class="card-head card-head-split">
+    <h3>Notes History</h3>
+    <span class="badge brand">{{ medical_notes|length }} note{{ medical_notes|length|pluralize }}</span>
+  </div>
   {% for note in medical_notes %}
     <article class="note">
-      <h4>{{ note.created_at|date:'d M Y H:i' }} · {{ note.created_by|default:'System' }}</h4>
-      <p><strong>S:</strong> {{ note.subjective|default:'-' }}</p>
-      <p><strong>O:</strong> {{ note.objective|default:'-' }}</p>
-      <p><strong>A:</strong> {{ note.assessment|default:'-' }}</p>
-      <p><strong>P:</strong> {{ note.plan|default:'-' }}</p>
+      <div class="note-header">
+        <h4>{{ note.created_at|date:'d M Y · H:i' }}</h4>
+        {% if note.created_by %}<span class="badge muted">{{ note.created_by }}</span>{% endif %}
+      </div>
+      <div class="note-body">
+        <p><span class="note-label">S</span>{{ note.subjective|default:'—' }}</p>
+        <p><span class="note-label">O</span>{{ note.objective|default:'—' }}</p>
+        <p><span class="note-label">A</span>{{ note.assessment|default:'—' }}</p>
+        <p><span class="note-label">P</span>{{ note.plan|default:'—' }}</p>
+      </div>
     </article>
-  {% empty %}<p>No notes yet.</p>{% endfor %}
+  {% empty %}
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4" stroke-linecap="round"/></svg>
+      <p>No medical notes yet. Add the first SOAP note above.</p>
+    </div>
+  {% endfor %}
 </section>

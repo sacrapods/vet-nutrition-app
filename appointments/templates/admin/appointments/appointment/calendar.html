@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load appointments_extras %}
+{% block content %}
+<style>
+.ap-card{background:#fff;border:1px solid #d8e1dd;border-radius:12px;padding:14px;margin-bottom:12px}
+.ap-row{display:grid;grid-template-columns:1fr 170px auto;gap:8px;align-items:end}
+.ap-row.range{grid-template-columns:1fr 1fr 1fr auto}
+.ap-field label{display:block;margin-bottom:4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6f7d78;font-weight:700}
+.ap-field input,.ap-field select{width:100%;border:1px solid #d6dfdb;border-radius:8px;padding:8px 9px}
+.ap-danger{background:#ba2121;color:#fff;border:none;border-radius:8px;padding:9px 10px;font-weight:700;cursor:pointer}
+.ap-kpis{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ap-kpi{border:1px solid #d8e1dd;border-radius:8px;padding:8px 10px;background:#f8fbfa}
+.ap-list{border:1px solid #d8e1dd;border-radius:12px;background:#fff;overflow:hidden}
+.ap-day{padding:11px 12px;border-bottom:1px solid #edf2ef}
+.ap-day-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ap-chip{display:inline-block;margin-top:6px;margin-right:6px;padding:4px 8px;border:1px solid #d8e1dd;border-radius:999px;font-size:11px;background:#fff}
+.ap-badge{padding:3px 7px;border-radius:999px;font-size:11px;font-weight:700}
+.ap-block{background:#fcecec;color:#a63232}
+</style>
+
+<h1>{{ title }}</h1>
+<div class="ap-card">
+  <form method="get" class="ap-row" style="margin-bottom:10px;">
+    <div class="ap-field"><label>Anchor Date</label><input type="date" name="date" value="{{ anchor_date|date:'Y-m-d' }}"></div>
+    <div class="ap-field"><label>View</label><select name="view"><option value="month" {% if view_type == 'month' %}selected{% endif %}>Monthly</option><option value="week" {% if view_type == 'week' %}selected{% endif %}>Weekly</option></select></div>
+    <button type="submit" class="button">Apply</button>
+  </form>
+
+  <form method="post" action="{% url 'admin:appointments_appointment_block_day' %}" class="ap-row" style="margin-bottom:10px;">{% csrf_token %}
+    <div class="ap-field"><label>Quick Block Single Day</label><input type="date" name="date" required></div>
+    <div></div>
+    <button type="submit" class="ap-danger">Block Day</button>
+  </form>
+
+  <form method="post" action="{% url 'admin:appointments_appointment_block_range' %}" class="ap-row range">{% csrf_token %}
+    <div class="ap-field"><label>Block Start</label><input type="date" name="start_date" required></div>
+    <div class="ap-field"><label>Block End</label><input type="date" name="end_date" required></div>
+    <div class="ap-field"><label>Reason (Optional)</label><input type="text" name="reason" placeholder="Holiday / unavailable"></div>
+    <button type="submit" class="ap-danger">Block Date Range</button>
+  </form>
+</div>
+
+<div class="ap-kpis">
+  <div class="ap-kpi">Total: {{ summary.total }}</div>
+  <div class="ap-kpi">Pending: {{ summary.pending }}</div>
+  <div class="ap-kpi">No Show: {{ summary.no_show }}</div>
+</div>
+
+<div class="ap-list">
+  {% for day, appts in appointments_by_day.items %}
+    <div class="ap-day">
+      <div class="ap-day-top">
+        <div><strong>{{ day }}</strong> {% if day in blocked_dates %}<span class="ap-badge ap-block">Blocked</span>{% endif %}</div>
+        <a href="{% url 'admin:appointments_appointment_calendar_day' day|date:'Y-m-d' %}">Open Day</a>
+      </div>
+      <div>
+      {% for appt in appts %}
+        <span class="ap-chip">{{ appt.start_at|ist|date:'h:i A' }} • {{ appt.pet.name }} • {{ appt.appointment_type_label }} • {{ appt.get_status_display }}</span>
+      {% endfor %}
+      </div>
+    </div>
+  {% empty %}
+    <div class="ap-day">No appointments available.</div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Rescheduling Requests{% endblock %}
+{% block page_title %}Rescheduling Requests{% endblock %}
+{% block page_subtitle %}Review pending and historical requests from pet parents. Supports bulk approval/rejection.{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="head"><h2>Request Queue</h2><span class="pill">{{ requests|length }} shown</span></div>
+  <div style="padding:10px 14px;border-bottom:1px solid var(--line);background:#fcfdfc;">
+    <form id="bulk-reschedule-form" method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="bulk_approve_reschedule" id="bulk-action">
+      <div class="field" style="min-width:280px;flex:1;">
+        <label>Admin Note For Selected</label>
+        <textarea name="admin_note" id="bulk-note" placeholder="Optional note"></textarea>
+      </div>
+      <button type="button" class="small-btn approve" onclick="submitBulk('bulk_approve_reschedule')">Bulk Approve</button>
+      <button type="button" class="small-btn reject" onclick="submitBulk('bulk_reject_reschedule')">Bulk Reject</button>
+    </form>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th><input type="checkbox" onclick="toggleChecks(this)"></th><th>ID</th><th>Pet</th><th>Current Slot</th><th>Requested Slot</th><th>Requester</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for req in requests %}
+        <tr>
+          <td>
+            {% if req.status == 'pending' %}
+              <input type="checkbox" class="req-check" form="bulk-reschedule-form" name="request_ids" value="{{ req.id }}">
+            {% endif %}
+          </td>
+          <td>{{ req.id }}</td>
+          <td><strong>{{ req.appointment.pet.name }}</strong></td>
+          <td>{{ req.appointment.start_at|ist|date:'d M Y, h:i A' }}</td>
+          <td>{{ req.requested_start_at|ist|date:'d M Y, h:i A' }}</td>
+          <td>{{ req.requested_by.email|default:req.requested_by.username }}</td>
+          <td><span class="pill">{{ req.get_status_display }}</span></td>
+          <td>
+            {% if req.status == 'pending' %}
+            <form method="post" style="display:flex;gap:6px;flex-direction:column;min-width:220px;">
+              {% csrf_token %}
+              <input type="hidden" name="request_id" value="{{ req.id }}">
+              <textarea name="admin_note" placeholder="Optional note"></textarea>
+              <div style="display:flex;gap:6px;">
+                <button class="small-btn approve" type="submit" name="action" value="approve_reschedule">Approve</button>
+                <button class="small-btn reject" type="submit" name="action" value="reject_reschedule">Reject</button>
+              </div>
+            </form>
+            {% else %}
+              {{ req.admin_note|default:'-' }}
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="8" class="empty">No reschedule requests.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+function toggleChecks(master){
+  document.querySelectorAll('.req-check').forEach(function(el){ el.checked = master.checked; });
+}
+function submitBulk(action){
+  const checked = document.querySelectorAll('.req-check:checked');
+  if (!checked.length){ alert('Select at least one pending request.'); return; }
+  document.getElementById('bulk-action').value = action;
+  document.getElementById('bulk-reschedule-form').submit();
+}
+</script>
+{% endblock %}

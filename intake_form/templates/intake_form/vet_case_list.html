@@ -1,0 +1,392 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vet Cases — NutriVet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'design_system/tokens.css' %}?v=20260221">
+    <style>
+        html, body { margin: 0; padding: 0; font-family: 'Manrope', system-ui, sans-serif; }
+
+        /* ── Hero ────────────────────────────────────── */
+        .hero {
+            border-radius: var(--ds-radius-lg);
+            padding: 28px 28px 24px;
+            background: linear-gradient(128deg, #061e33 0%, #0c3356 50%, #0f4880 100%);
+            color: #fff;
+            box-shadow: var(--ds-shadow-lg);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.04);
+            pointer-events: none;
+        }
+        .hero-eyebrow {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: .6;
+            margin-bottom: 6px;
+        }
+        .hero h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
+        }
+        .hero-sub {
+            margin: 0;
+            font-size: 13.5px;
+            color: rgba(255,255,255,.75);
+            max-width: 520px;
+            line-height: 1.55;
+        }
+
+        /* ── Stats ───────────────────────────────────── */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .stat-box {
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.17);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .stat-box .s-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: .65;
+            margin-bottom: 6px;
+        }
+        .stat-box .s-value {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+        .stat-box .s-meta {
+            font-size: 11px;
+            opacity: .55;
+            margin-top: 4px;
+        }
+
+        /* ── Panel / Table ───────────────────────────── */
+        .panel {
+            background: var(--ds-panel);
+            border: 1px solid var(--ds-line);
+            border-radius: var(--ds-radius);
+            box-shadow: var(--ds-shadow-sm);
+            overflow: hidden;
+        }
+        .panel-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--ds-line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .panel-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ds-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .search {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--ds-line-2);
+            border-radius: var(--ds-radius-sm);
+            overflow: hidden;
+            background: var(--ds-panel);
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .search:focus-within {
+            border-color: var(--ds-accent-2);
+            box-shadow: 0 0 0 3px var(--ds-accent-3);
+        }
+        .search input {
+            border: none;
+            outline: none;
+            padding: 9px 12px;
+            font-family: inherit;
+            font-size: 13px;
+            background: transparent;
+            color: var(--ds-text);
+            min-width: 240px;
+        }
+        .search input::placeholder { color: var(--ds-muted-2); }
+        .search button {
+            border: none;
+            border-left: 1px solid var(--ds-line);
+            background: var(--ds-panel-2);
+            padding: 9px 16px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--ds-accent);
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .search button:hover { background: var(--ds-accent-3); }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        thead { background: var(--ds-panel-2); }
+        th {
+            padding: 11px 14px;
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: var(--ds-muted);
+            border-bottom: 1px solid var(--ds-line);
+            white-space: nowrap;
+            text-align: left;
+        }
+        td {
+            padding: 13px 14px;
+            font-size: 13.5px;
+            color: var(--ds-text-2);
+            border-bottom: 1px solid var(--ds-line);
+            vertical-align: middle;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background .12s; }
+        tbody tr:hover { background: var(--ds-panel-2); }
+
+        .case-id {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--ds-accent-3);
+            color: var(--ds-accent);
+            border: 1px solid rgba(11,83,148,.18);
+            border-radius: 6px;
+            padding: 3px 8px;
+            white-space: nowrap;
+        }
+        .pet-name { font-weight: 700; color: var(--ds-text); }
+        .pet-breed { font-size: 12px; color: var(--ds-muted); margin-top: 2px; }
+
+        /* Status badges — distinct colors per state */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .status-badge::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .status-done {
+            background: var(--ds-ok-bg);
+            color: var(--ds-ok);
+            border: 1px solid var(--ds-ok-border);
+        }
+        .status-done::before { background: var(--ds-ok); }
+        .status-draft {
+            background: var(--ds-warn-bg);
+            color: var(--ds-warn);
+            border: 1px solid var(--ds-warn-border);
+        }
+        .status-draft::before { background: var(--ds-warn); }
+        .status-open {
+            background: var(--ds-accent-3);
+            color: var(--ds-accent);
+            border: 1px solid rgba(11,83,148,.2);
+        }
+        .status-open::before { background: var(--ds-accent); }
+
+        /* Action buttons */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            border: 1.5px solid var(--ds-line-2);
+            background: var(--ds-panel);
+            color: var(--ds-text-2);
+            padding: 6px 13px;
+            border-radius: var(--ds-radius-sm);
+            font-size: 12px;
+            font-weight: 700;
+            transition: background .12s, border-color .12s, color .12s;
+            white-space: nowrap;
+        }
+        .action-btn:hover { background: var(--ds-panel-2); border-color: var(--ds-muted-2); color: var(--ds-text); }
+        .action-btn.primary {
+            background: var(--ds-accent-3);
+            border-color: rgba(11,83,148,.22);
+            color: var(--ds-accent);
+        }
+        .action-btn.primary:hover { background: #d5e7f9; border-color: var(--ds-accent); }
+
+        .empty-state { text-align: center; padding: 36px 20px; color: var(--ds-muted); }
+        .empty-state h3 { margin: 0 0 6px; font-size: 15px; color: var(--ds-text); }
+        .empty-state p { margin: 0; font-size: 13px; }
+
+        /* ── Responsive ──────────────────────────────── */
+        @media (max-width: 900px) {
+            .stats { grid-template-columns: 1fr 1fr 1fr; }
+            .hero h1 { font-size: 22px; }
+            .panel-head { flex-direction: column; align-items: stretch; }
+            .search input { min-width: 0; flex: 1; }
+        }
+        @media (max-width: 600px) {
+            .hero { padding: 20px 16px; border-radius: var(--ds-radius); }
+            .hero h1 { font-size: 19px; }
+            .stats { grid-template-columns: 1fr; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="app-sidebar app-sidebar--blue" aria-label="Vet navigation">
+        <div class="brand">POSHTIK NUTRIVET</div>
+        <div class="brand-sub">Vet Portal</div>
+        <nav>
+            <div class="nav-section">Clinical</div>
+            <a class="active" href="{% url 'vet_cases' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+                Vet Cases
+            </a>
+            <div class="nav-section">Admin</div>
+            <a href="{% url 'case_list' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Case Dashboard
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main id="main-content" class="app-main">
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-eyebrow">Vet Workspace</div>
+            <h1>Vet Clinical Forms</h1>
+            <p class="hero-sub">Review referral cases, continue saved drafts, and complete clinical history updates efficiently.</p>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="s-label">Total Cases</div>
+                    <div class="s-value">{{ stats.total_cases }}</div>
+                    <div class="s-meta">assigned</div>
+                </div>
+                <div class="stat-box">
+                    <div class="s-label">Completed</div>
+                    <div class="s-value">{{ stats.completed_forms }}</div>
+                    <div class="s-meta">forms submitted</div>
+                </div>
+                <div class="stat-box">
+                    <div class="s-label">Drafts</div>
+                    <div class="s-value">{{ stats.draft_forms }}</div>
+                    <div class="s-meta">in progress</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cases table -->
+        <section class="panel">
+            <div class="panel-head">
+                <span class="panel-title">All Cases</span>
+                <form class="search" method="get" role="search">
+                    <input type="text" name="q" value="{{ q }}" placeholder="Search by case ID, owner, or pet name…" aria-label="Search vet cases">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Pet</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th>Uploads</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pet in pets %}
+                        <tr>
+                            <td><span class="case-id">{{ pet.owner.case_id }}</span></td>
+                            <td>
+                                <div class="pet-name">{{ pet.name }}</div>
+                                <div class="pet-breed">{{ pet.breed }}</div>
+                            </td>
+                            <td>{{ pet.owner.name }}</td>
+                            <td>
+                                {% if pet.id in draft_pet_ids %}
+                                    <span class="status-badge status-draft">Draft Saved</span>
+                                {% elif pet.clinical_history %}
+                                    <span class="status-badge status-done">Completed</span>
+                                {% else %}
+                                    <span class="status-badge status-open">Not Started</span>
+                                {% endif %}
+                            </td>
+                            <td style="color:var(--ds-muted); font-size:13px;">{{ pet.vet_upload_count }}</td>
+                            <td>
+                                {% if pet.id in draft_pet_ids %}
+                                    <a class="action-btn primary" href="{% url 'vet_form' pet.pk %}">Continue Draft</a>
+                                {% elif pet.clinical_history %}
+                                    <a class="action-btn" href="{% url 'vet_form' pet.pk %}">Review / Edit</a>
+                                {% else %}
+                                    <a class="action-btn primary" href="{% url 'vet_form' pet.pk %}">Start Form</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <h3>No cases available</h3>
+                                    <p>Once pet parent intake is submitted, cases appear here.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+</div>
+</body>
+</html>

@@ -4,56 +4,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
   <title>{% block title %}Pet Admin Portal{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'pet_admin_portal/portal.css' %}?v=20260220b">
+  <link rel="stylesheet" href="{% static 'pet_admin_portal/portal.css' %}?v=20260221b">
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="notranslate">
   <div class="portal-shell app-shell">
     <aside id="portal-sidebar" class="portal-sidebar" aria-label="Admin portal navigation">
       <div class="sidebar-head">
         <button class="sidebar-toggle" type="button" aria-label="Toggle navigation" data-sidebar-toggle>
-          <span class="burger-line"></span>
-          <span class="burger-line"></span>
-          <span class="burger-line"></span>
+          <span class="burger-icon">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+          </span>
         </button>
-        <div class="brand">NUTRIVET ADMIN</div>
+        <div class="brand-wrap">
+          <div class="brand">POSHTIK NUTRIVET</div>
+          <div class="brand-sub">Admin Portal</div>
+        </div>
       </div>
       <nav>
+        <div class="nav-section">Clinical</div>
         <a class="nav-link" data-tooltip="Case Dashboard" href="{% url 'case_list' %}">
           <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
-          </span><span class="nav-label">Case Dashboard</span>
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          </span>
+          <span class="nav-label">Case Dashboard</span>
         </a>
         <a class="nav-link" data-tooltip="Vet Cases" href="{% url 'vet_cases' %}">
           <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M8 7h8M8 17h8M6 12h12"/></svg>
-          </span><span class="nav-label">Vet Cases</span>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+          </span>
+          <span class="nav-label">Vet Cases</span>
         </a>
-        <a class="nav-link" data-tooltip="Appointments Ops" href="{% url 'appointments:admin_dashboard' %}">
+        <a class="nav-link" data-tooltip="Appointments" href="{% url 'appointments:admin_dashboard' %}">
           <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-          </span><span class="nav-label">Appointments Ops</span>
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          </span>
+          <span class="nav-label">Appointments</span>
         </a>
+
+        <div class="nav-section">Records</div>
         <a class="nav-link {% if request.resolver_match.url_name == 'parent_list' or request.resolver_match.url_name == 'profile_hub' %}active{% endif %}" data-tooltip="Pet Parent Hub" href="{% url 'pet_admin_portal:parent_list' %}">
           <span class="nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M7.2 10.5a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8ZM12 9.3a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8ZM16.8 10.5a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8ZM9.5 18.8c.8 1 4.2 1 5 0 1.3-1.6 1-3.8-2.5-5-3.5 1.2-3.8 3.4-2.5 5Z"/></svg>
-          </span><span class="nav-label">Pet Parent Hub</span>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="nav-label">Pet Parent Hub</span>
         </a>
         <a class="nav-link {% if request.resolver_match.url_name == 'clinic_inventory' %}active{% endif %}" data-tooltip="Inventory" href="{% url 'pet_admin_portal:clinic_inventory' %}">
           <span class="nav-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><path d="M3 8.5 12 4l9 4.5v7L12 20l-9-4.5v-7Z"/><path d="M12 4v16M3 8.5l9 4.5 9-4.5"/></svg>
-          </span><span class="nav-label">Inventory</span>
+          </span>
+          <span class="nav-label">Inventory</span>
         </a>
+      </nav>
+
+      <div class="sidebar-footer">
         <a class="nav-link" data-tooltip="Logout" href="{% url 'logout' %}">
           <span class="nav-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M14 8l4 4-4 4M18 12H9"/></svg>
-          </span><span class="nav-label">Logout</span>
+          </span>
+          <span class="nav-label">Logout</span>
         </a>
-      </nav>
+      </div>
     </aside>
     <main class="portal-main app-main">
       {% if messages %}
@@ -61,13 +79,22 @@
         {% for message in messages %}
         <div class="alert">{{ message }}</div>
         {% endfor %}
+        {% if request.GET.undo_model and request.GET.undo_id %}
+        <div class="alert alert-undo">
+          <span>Undo available for last archived record.</span>
+          <form method="post" action="{% url 'pet_admin_portal:restore_record' request.GET.undo_model request.GET.undo_id %}" class="inline-undo-form">
+            {% csrf_token %}
+            <button type="submit" class="btn-link btn-sm">Undo</button>
+          </form>
+        </div>
+        {% endif %}
       </div>
       {% endif %}
       {% block content %}{% endblock %}
     </main>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="{% static 'pet_admin_portal/portal.js' %}?v=20260220b"></script>
+  <script src="{% static 'pet_admin_portal/portal.js' %}?v=20260221b"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

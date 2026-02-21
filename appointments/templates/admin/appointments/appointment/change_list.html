@@ -1,0 +1,49 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+.ap-shell{margin-bottom:14px}
+.ap-hero{background:linear-gradient(135deg,#1f6a4b,#2f7a58);color:#fff;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.ap-hero h1{margin:0;font-size:22px;letter-spacing:-.02em}
+.ap-hero p{margin:4px 0 0;font-size:13px;opacity:.92}
+.ap-links{display:flex;gap:8px;flex-wrap:wrap}
+.ap-link{display:inline-block;border:1px solid rgba(255,255,255,.45);color:#fff !important;text-decoration:none;padding:7px 10px;border-radius:8px;font-weight:700;font-size:12px;background:rgba(255,255,255,.12)}
+.ap-grid{margin-top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ap-card{background:#fff;border:1px solid #d8e1dd;border-radius:10px;padding:9px 10px}
+.ap-k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6f7d78;font-weight:700}
+.ap-v{margin-top:3px;font-size:18px;font-weight:800;color:#1d2622}
+@media (max-width:900px){.ap-grid{grid-template-columns:1fr}.ap-hero{flex-direction:column;align-items:flex-start}}
+</style>
+{% endblock %}
+
+{% block content_title %}
+<div class="ap-shell">
+  <div class="ap-hero">
+    <div>
+      <h1>Appointment Operations</h1>
+      <p>Manage statuses, follow-ups, and scheduling controls from one place.</p>
+    </div>
+    <div class="ap-links">
+      <a class="ap-link" href="{% url 'admin:appointments_appointment_calendar' %}">Calendar View</a>
+      <a class="ap-link" href="{% url 'appointments:admin_dashboard' %}">Control Center</a>
+      <a class="ap-link" href="{% url 'admin:appointments_appointmentreschedulerequest_changelist' %}">Reschedule Queue</a>
+    </div>
+  </div>
+  <div class="ap-grid">
+    <div class="ap-card"><div class="ap-k">Model</div><div class="ap-v">Appointments</div></div>
+    <div class="ap-card"><div class="ap-k">Tip</div><div class="ap-v" style="font-size:14px">Use filters for status and payment quick triage.</div></div>
+    <div class="ap-card"><div class="ap-k">Workflow</div><div class="ap-v" style="font-size:14px">Approve reschedules from Control Center.</div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block object-tools-items %}
+  <li>
+    <a href="{% url 'admin:appointments_appointment_calendar' %}" class="addlink">Calendar View</a>
+  </li>
+  <li>
+    <a href="{% url 'appointments:admin_dashboard' %}" class="addlink">Control Center</a>
+  </li>
+  {{ block.super }}
+{% endblock %}

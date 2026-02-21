@@ -1,0 +1,849 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Appointment Calendar{% endblock %}
+{% block page_title %}{% endblock %}
+{% block page_subtitle %}{% endblock %}
+
+{% block content %}
+<style>
+/* ── Calendar shell ─────────────────────────────────────────── */
+.cal-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: calc(100vh - 72px);
+  min-height: 600px;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────── */
+.cal-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 14px;
+  flex-wrap: wrap;
+}
+.cal-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ds-text);
+  flex: 1;
+  min-width: 160px;
+}
+.cal-title .cal-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ds-muted);
+  letter-spacing: 0;
+  display: block;
+  margin-top: 1px;
+}
+.cal-nav { display: flex; align-items: center; gap: 4px; }
+.cal-nav-btn {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid var(--ds-line-2);
+  background: var(--ds-panel);
+  color: var(--ds-text-2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 120ms, border-color 120ms;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+}
+.cal-nav-btn:hover { background: var(--ds-panel-2); border-color: var(--ds-muted-2); color: var(--ds-text); }
+.cal-today-btn {
+  padding: 0 14px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid var(--ds-line-2);
+  background: var(--ds-panel);
+  color: var(--ds-text-2);
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex; align-items: center;
+  transition: background 120ms;
+  white-space: nowrap;
+}
+.cal-today-btn:hover { background: var(--ds-panel-2); color: var(--ds-text); }
+
+/* View switcher */
+.cal-view-tabs {
+  display: flex;
+  background: var(--ds-panel-2);
+  border: 1.5px solid var(--ds-line);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+}
+.cal-view-tab {
+  padding: 5px 14px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ds-muted);
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+  white-space: nowrap;
+}
+.cal-view-tab:hover { color: var(--ds-text); background: rgba(0,0,0,.04); }
+.cal-view-tab.active {
+  background: var(--ds-panel);
+  color: var(--ds-text);
+  box-shadow: 0 1px 4px rgba(15,30,43,.1);
+}
+
+/* Month jump */
+.cal-month-jump {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-month-jump select,
+.cal-month-jump input[type="number"] {
+  height: 34px;
+  border: 1.5px solid var(--ds-line-2);
+  border-radius: 8px;
+  background: var(--ds-panel);
+  color: var(--ds-text);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 0 8px;
+  outline: none;
+  cursor: pointer;
+  width: auto;
+  transition: border-color 120ms;
+}
+.cal-month-jump select:focus,
+.cal-month-jump input[type="number"]:focus { border-color: var(--ds-brand); }
+.cal-month-jump input[type="number"] { width: 72px; }
+.cal-month-jump-btn {
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 8px;
+  border: none;
+  background: var(--ds-brand);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms;
+}
+.cal-month-jump-btn:hover { background: var(--ds-brand-2, #1a6b4e); }
+
+/* Book btn */
+.cal-book-btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--ds-brand);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: background 120ms;
+}
+.cal-book-btn:hover { background: var(--ds-brand-2, #1a6b4e); color: #fff; }
+
+/* Block actions */
+.cal-actions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 0 14px;
+  border-bottom: 1.5px solid var(--ds-line);
+  margin-bottom: 14px;
+}
+.cal-block-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cal-block-form label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ds-muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  white-space: nowrap;
+}
+.cal-block-form input[type="date"],
+.cal-block-form input[type="text"] {
+  border: 1.5px solid var(--ds-line-2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ds-text);
+  background: var(--ds-panel);
+  outline: none;
+  height: 34px;
+  width: auto;
+}
+.cal-block-form input[type="date"]:focus,
+.cal-block-form input[type="text"]:focus {
+  border-color: var(--ds-brand);
+  box-shadow: 0 0 0 3px var(--ds-brand-glow);
+}
+.block-day-btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--ds-danger-bg);
+  color: var(--ds-danger);
+  border: 1.5px solid var(--ds-danger-border);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 120ms;
+}
+.block-day-btn:hover { background: #f7d0d0; }
+.sep { width: 1px; height: 28px; background: var(--ds-line-2); flex-shrink: 0; }
+
+/* ── MONTH GRID ─────────────────────────────────────────────── */
+.cal-month {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-panel);
+  border: 1.5px solid var(--ds-line);
+  border-radius: var(--ds-radius);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-sm);
+}
+.cal-month-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--ds-panel-2);
+  border-bottom: 1.5px solid var(--ds-line);
+}
+.cal-month-head .dow {
+  padding: 8px 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ds-muted);
+}
+.cal-month-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cal-month-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+  border-bottom: 1px solid var(--ds-line);
+  min-height: 0;
+}
+.cal-month-row:last-child { border-bottom: none; }
+.cal-day {
+  border-right: 1px solid var(--ds-line);
+  padding: 6px 7px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: default;
+  transition: background 100ms;
+  overflow: hidden;
+}
+.cal-day:last-child { border-right: none; }
+.cal-day:hover { background: #f5f8fa; }
+.cal-day.other-month { background: var(--ds-panel-2); }
+.cal-day.other-month .cal-day-num { color: var(--ds-muted-2); }
+.cal-day.today { background: #f0f7ff; }
+.cal-day.today .cal-day-num {
+  background: var(--ds-accent);
+  color: #fff;
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+.cal-day.blocked { background: #fff8f8; }
+.cal-day-num {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ds-text);
+  line-height: 1;
+  min-width: 24px;
+  display: flex; align-items: center; justify-content: center;
+  align-self: flex-start;
+}
+.blocked-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--ds-danger);
+  background: var(--ds-danger-bg);
+  border: 1px solid var(--ds-danger-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  align-self: flex-start;
+}
+.cal-appt-chip {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  line-height: 1.5;
+  display: block;
+  text-decoration: none;
+}
+.chip-pending    { background: var(--ds-warn-bg); color: var(--ds-warn); border: 1px solid var(--ds-warn-border); }
+.chip-confirmed  { background: var(--ds-accent-3); color: var(--ds-accent); border: 1px solid rgba(11,83,148,.18); }
+.chip-completed  { background: var(--ds-ok-bg); color: var(--ds-ok); border: 1px solid var(--ds-ok-border); }
+.chip-cancelled, .chip-rescheduled { background: var(--ds-panel-2); color: var(--ds-muted); border: 1px solid var(--ds-line-2); }
+.chip-no_show { background: var(--ds-danger-bg); color: var(--ds-danger); border: 1px solid var(--ds-danger-border); }
+.cal-more {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ds-muted);
+  padding: 1px 4px;
+}
+
+/* ── WEEK VIEW ──────────────────────────────────────────────── */
+.cal-week {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-panel);
+  border: 1.5px solid var(--ds-line);
+  border-radius: var(--ds-radius);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-sm);
+}
+.cal-week-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--ds-panel-2);
+  border-bottom: 1.5px solid var(--ds-line);
+}
+.cal-week-head-day {
+  padding: 10px 8px;
+  text-align: center;
+  border-right: 1px solid var(--ds-line);
+}
+.cal-week-head-day:last-child { border-right: none; }
+.cal-week-head-day .wd-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--ds-muted);
+}
+.cal-week-head-day .wd-num {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ds-text);
+  line-height: 1.2;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 2px auto 0;
+  border-radius: 50%;
+}
+.cal-week-head-day.today .wd-num {
+  background: var(--ds-accent);
+  color: #fff;
+}
+.cal-week-head-day.blocked-day .wd-name { color: var(--ds-danger); }
+.cal-week-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  overflow-y: auto;
+  min-height: 0;
+}
+.cal-week-col {
+  border-right: 1px solid var(--ds-line);
+  padding: 10px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 320px;
+}
+.cal-week-col:last-child { border-right: none; }
+.cal-week-col.today-col { background: #f6faff; }
+.cal-week-col.blocked-col { background: #fff8f8; }
+.week-appt-card {
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  border-left: 3px solid;
+  background: var(--ds-panel);
+  text-decoration: none;
+  display: block;
+  transition: box-shadow 120ms;
+  box-shadow: 0 1px 3px rgba(15,30,43,.06);
+}
+.week-appt-card:hover { box-shadow: 0 3px 8px rgba(15,30,43,.12); }
+.week-appt-card .wac-time {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ds-muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.week-appt-card .wac-pet {
+  font-weight: 800;
+  color: var(--ds-text);
+  font-size: 12px;
+  margin-top: 1px;
+}
+.week-appt-card .wac-type {
+  font-size: 10.5px;
+  color: var(--ds-muted);
+}
+.card-pending    { border-left-color: var(--ds-warn); background: var(--ds-warn-bg); }
+.card-confirmed  { border-left-color: var(--ds-accent); background: var(--ds-accent-3); }
+.card-completed  { border-left-color: var(--ds-ok); background: var(--ds-ok-bg); }
+.card-cancelled, .card-rescheduled  { border-left-color: var(--ds-muted-2); background: var(--ds-panel-2); }
+.card-no_show    { border-left-color: var(--ds-danger); background: var(--ds-danger-bg); }
+.week-empty { font-size: 12px; color: var(--ds-muted-2); text-align: center; padding: 20px 0; }
+.blocked-week-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--ds-danger);
+  background: var(--ds-danger-bg); border: 1px solid var(--ds-danger-border);
+  border-radius: 5px; padding: 3px 7px; text-align: center;
+}
+
+/* ── DAY VIEW ───────────────────────────────────────────────── */
+.cal-day-view {
+  flex: 1;
+  background: var(--ds-panel);
+  border: 1.5px solid var(--ds-line);
+  border-radius: var(--ds-radius);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+.cal-day-head {
+  padding: 16px 20px 14px;
+  border-bottom: 1.5px solid var(--ds-line);
+  background: var(--ds-panel-2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cal-day-head .cdh-date {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--ds-text);
+}
+.cal-day-head .cdh-day {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ds-muted);
+}
+.cal-day-head .cdh-count {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ds-muted);
+  background: var(--ds-panel-2);
+  border: 1.5px solid var(--ds-line);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.cal-day-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.day-appt-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--ds-line);
+  background: var(--ds-panel);
+  text-decoration: none;
+  transition: box-shadow 120ms, border-color 120ms;
+  box-shadow: var(--ds-shadow-sm);
+}
+.day-appt-card:hover { border-color: var(--ds-line-2); box-shadow: var(--ds-shadow); }
+.dac-time-col {
+  text-align: right;
+  flex-shrink: 0;
+  width: 70px;
+}
+.dac-time {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ds-text);
+}
+.dac-duration {
+  font-size: 11px;
+  color: var(--ds-muted);
+  margin-top: 1px;
+}
+.dac-bar {
+  width: 4px;
+  border-radius: 3px;
+  align-self: stretch;
+  flex-shrink: 0;
+  min-height: 40px;
+}
+.dac-bar-pending { background: var(--ds-warn); }
+.dac-bar-confirmed { background: var(--ds-accent); }
+.dac-bar-completed { background: var(--ds-ok); }
+.dac-bar-cancelled, .dac-bar-rescheduled { background: var(--ds-muted-2); }
+.dac-bar-no_show { background: var(--ds-danger); }
+.dac-info { flex: 1; min-width: 0; }
+.dac-pet { font-size: 15px; font-weight: 800; color: var(--ds-text); }
+.dac-type { font-size: 12px; color: var(--ds-muted); margin-top: 2px; }
+.dac-user { font-size: 11.5px; color: var(--ds-muted); margin-top: 4px; }
+.dac-status { margin-left: auto; flex-shrink: 0; }
+.day-empty {
+  text-align: center;
+  color: var(--ds-muted);
+  padding: 48px 20px;
+  font-size: 14px;
+}
+.day-blocked-banner {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--ds-danger-bg);
+  border: 1.5px solid var(--ds-danger-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--ds-danger);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* status pills (reuse) */
+.sp { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.sp::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.sp-pending    { background:var(--ds-warn-bg); color:var(--ds-warn); border:1px solid var(--ds-warn-border); }
+.sp-pending::before { background:var(--ds-warn); }
+.sp-confirmed  { background:var(--ds-accent-3); color:var(--ds-accent); border:1px solid rgba(11,83,148,.2); }
+.sp-confirmed::before { background:var(--ds-accent); }
+.sp-completed  { background:var(--ds-ok-bg); color:var(--ds-ok); border:1px solid var(--ds-ok-border); }
+.sp-completed::before { background:var(--ds-ok); }
+.sp-no_show    { background:var(--ds-danger-bg); color:var(--ds-danger); border:1px solid var(--ds-danger-border); }
+.sp-no_show::before { background:var(--ds-danger); }
+.sp-cancelled, .sp-rescheduled  { background:var(--ds-panel-2); color:var(--ds-muted); border:1px solid var(--ds-line-2); }
+.sp-cancelled::before, .sp-rescheduled::before { background:var(--ds-muted); }
+
+.cal-empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; color: var(--ds-muted);
+}
+.cal-empty-state svg { opacity: .25; margin-bottom: 12px; }
+.cal-empty-state p { font-size: 14px; font-weight: 600; }
+</style>
+
+<div class="cal-shell">
+
+  <!-- Toolbar -->
+  <div class="cal-toolbar">
+    <div class="cal-title">
+      {% if view_type == 'month' %}
+        {{ anchor_date|date:"F Y" }}
+        <span class="cal-sub">Monthly view</span>
+      {% elif view_type == 'week' %}
+        {{ start_day|date:"d M" }} – {{ end_day|date:"d M Y" }}
+        <span class="cal-sub">Weekly view</span>
+      {% else %}
+        {{ anchor_date|date:"l, d F Y" }}
+        <span class="cal-sub">Day view</span>
+      {% endif %}
+    </div>
+
+    <!-- nav arrows -->
+    <div class="cal-nav">
+      <a class="cal-nav-btn" href="?view={{ view_type }}&date={{ prev_anchor|date:'Y-m-d' }}" title="Previous">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <a class="cal-today-btn" href="?view={{ view_type }}&date={{ today|date:'Y-m-d' }}">Today</a>
+      <a class="cal-nav-btn" href="?view={{ view_type }}&date={{ next_anchor|date:'Y-m-d' }}" title="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <!-- Month/Year jump -->
+    <form class="cal-month-jump" id="monthJumpForm">
+      <select id="jumpMonth" title="Month">
+        <option value="1"  {% if anchor_date|date:"n" == "1"  %}selected{% endif %}>Jan</option>
+        <option value="2"  {% if anchor_date|date:"n" == "2"  %}selected{% endif %}>Feb</option>
+        <option value="3"  {% if anchor_date|date:"n" == "3"  %}selected{% endif %}>Mar</option>
+        <option value="4"  {% if anchor_date|date:"n" == "4"  %}selected{% endif %}>Apr</option>
+        <option value="5"  {% if anchor_date|date:"n" == "5"  %}selected{% endif %}>May</option>
+        <option value="6"  {% if anchor_date|date:"n" == "6"  %}selected{% endif %}>Jun</option>
+        <option value="7"  {% if anchor_date|date:"n" == "7"  %}selected{% endif %}>Jul</option>
+        <option value="8"  {% if anchor_date|date:"n" == "8"  %}selected{% endif %}>Aug</option>
+        <option value="9"  {% if anchor_date|date:"n" == "9"  %}selected{% endif %}>Sep</option>
+        <option value="10" {% if anchor_date|date:"n" == "10" %}selected{% endif %}>Oct</option>
+        <option value="11" {% if anchor_date|date:"n" == "11" %}selected{% endif %}>Nov</option>
+        <option value="12" {% if anchor_date|date:"n" == "12" %}selected{% endif %}>Dec</option>
+      </select>
+      <input type="number" id="jumpYear" value="{{ anchor_date|date:'Y' }}" min="2020" max="2099" title="Year">
+      <button type="submit" class="cal-month-jump-btn">Go</button>
+    </form>
+
+    <!-- View switcher -->
+    <div class="cal-view-tabs">
+      <a class="cal-view-tab {% if view_type == 'day' %}active{% endif %}" href="?view=day&date={{ anchor_date|date:'Y-m-d' }}">Day</a>
+      <a class="cal-view-tab {% if view_type == 'week' %}active{% endif %}" href="?view=week&date={{ anchor_date|date:'Y-m-d' }}">Week</a>
+      <a class="cal-view-tab {% if view_type == 'month' %}active{% endif %}" href="?view=month&date={{ anchor_date|date:'Y-m-d' }}">Month</a>
+    </div>
+
+    <!-- Book button -->
+    <a class="cal-book-btn" href="{% url 'appointments:admin_book_appointment' %}?date={{ anchor_date|date:'Y-m-d' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Book
+    </a>
+  </div>
+
+  <!-- Block controls -->
+  <div class="cal-actions-row">
+    <form method="post" class="cal-block-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="block_day">
+      <label>Block day</label>
+      <input type="date" name="block_date" required>
+      <button class="block-day-btn" type="submit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="margin-right:5px;"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+        Block Day
+      </button>
+    </form>
+
+    <div class="sep"></div>
+
+    <form method="post" class="cal-block-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="block_range">
+      <label>From</label>
+      <input type="date" name="block_start_date" required>
+      <label>To</label>
+      <input type="date" name="block_end_date" required>
+      <input type="text" name="block_reason" placeholder="Reason (optional)" style="min-width:160px;">
+      <button class="block-day-btn" type="submit">Block Range</button>
+    </form>
+  </div>
+
+  <!-- ══ MONTH VIEW ══ -->
+  {% if view_type == 'month' %}
+  <div class="cal-month">
+    <div class="cal-month-head">
+      <div class="dow">Mon</div>
+      <div class="dow">Tue</div>
+      <div class="dow">Wed</div>
+      <div class="dow">Thu</div>
+      <div class="dow">Fri</div>
+      <div class="dow">Sat</div>
+      <div class="dow">Sun</div>
+    </div>
+    <div class="cal-month-body">
+      {% for week in cal_weeks %}
+      <div class="cal-month-row">
+        {% for cell in week %}
+        <div class="cal-day {% if not cell.is_current_month %}other-month{% endif %}{% if cell.is_today %} today{% endif %}{% if cell.is_blocked %} blocked{% endif %}" data-date="{{ cell.date|date:'Y-m-d' }}">
+          <div class="cal-day-num">{{ cell.date|date:"j" }}</div>
+          {% if cell.is_blocked %}<div class="blocked-badge">Blocked</div>{% endif %}
+          {% for appt in cell.appointments|slice:":3" %}
+            <a href="{% url 'appointments:admin_appointment_detail' appt.pk %}" class="cal-appt-chip chip-{{ appt.status }}">
+              {{ appt.start_at|ist|date:"h:iA" }} {{ appt.pet.name }}
+            </a>
+          {% endfor %}
+          {% with extra=cell.appointments|length|sub:3 %}
+            {% if extra > 0 %}<span class="cal-more">+{{ extra }} more</span>{% endif %}
+          {% endwith %}
+        </div>
+        {% endfor %}
+      </div>
+      {% empty %}
+      <div class="cal-empty-state"><p>No data for this month.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ══ WEEK VIEW ══ -->
+  {% elif view_type == 'week' %}
+  <div class="cal-week">
+    <div class="cal-week-head">
+      {% for wd in week_days %}
+      <div class="cal-week-head-day {% if wd.is_today %}today{% endif %}{% if wd.is_blocked %} blocked-day{% endif %}">
+        <div class="wd-name">{{ wd.date|date:"D" }}</div>
+        <div class="wd-num">{{ wd.date|date:"j" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="cal-week-body">
+      {% for wd in week_days %}
+      <div class="cal-week-col {% if wd.is_today %}today-col{% endif %}{% if wd.is_blocked %} blocked-col{% endif %}">
+        {% if wd.is_blocked %}
+          <div class="blocked-week-label">Blocked</div>
+        {% endif %}
+        {% for appt in wd.appointments %}
+          <a href="{% url 'appointments:admin_appointment_detail' appt.pk %}" class="week-appt-card card-{{ appt.status }}">
+            <div class="wac-time">{{ appt.start_at|ist|date:"h:i A" }}</div>
+            <div class="wac-pet">{{ appt.pet.name }}</div>
+            <div class="wac-type">{{ appt.appointment_type_label }}</div>
+          </a>
+        {% empty %}
+          {% if not wd.is_blocked %}
+            <div class="week-empty">—</div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ══ DAY VIEW ══ -->
+  {% else %}
+  {% with day_appts=appointments_by_day|dict_get:anchor_date %}
+  <div class="cal-day-view">
+    <div class="cal-day-head">
+      <div>
+        <div class="cdh-day">{{ anchor_date|date:"l" }}</div>
+        <div class="cdh-date">{{ anchor_date|date:"d F Y" }}</div>
+      </div>
+      {% if anchor_date in blocked_dates %}
+        <span class="sp sp-no_show">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+          Blocked
+        </span>
+      {% endif %}
+      <div class="cdh-count">{{ day_appts|length }} appointment{{ day_appts|length|pluralize }}</div>
+    </div>
+    <div class="cal-day-body">
+      {% if anchor_date in blocked_dates %}
+      <div class="day-blocked-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+        This day is blocked. No new appointments can be booked.
+      </div>
+      {% endif %}
+      {% for appt in day_appts %}
+        <a href="{% url 'appointments:admin_appointment_detail' appt.pk %}" class="day-appt-card">
+          <div class="dac-time-col">
+            <div class="dac-time">{{ appt.start_at|ist|date:"h:i A" }}</div>
+            <div class="dac-duration">→ {{ appt.end_at|ist|date:"h:i A" }}</div>
+          </div>
+          <div class="dac-bar dac-bar-{{ appt.status }}"></div>
+          <div class="dac-info">
+            <div class="dac-pet">{{ appt.pet.name }}</div>
+            <div class="dac-type">{{ appt.appointment_type_label }}</div>
+            <div class="dac-user">{{ appt.user.email|default:appt.user.username }}</div>
+          </div>
+          <div class="dac-status">
+            <span class="sp sp-{{ appt.status }}">{{ appt.get_status_display }}</span>
+          </div>
+        </a>
+      {% empty %}
+        {% if anchor_date not in blocked_dates %}
+        <div class="day-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="opacity:.2;display:block;margin:0 auto 10px;"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          No appointments scheduled for this day.
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endwith %}
+  {% endif %}
+
+</div>
+
+<script>
+// ── Month/year jump form ─────────────────────────────────────────
+(function() {
+  var form = document.getElementById('monthJumpForm');
+  if (!form) return;
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var month = parseInt(document.getElementById('jumpMonth').value, 10);
+    var year  = parseInt(document.getElementById('jumpYear').value, 10);
+    if (!month || !year || year < 2020 || year > 2099) return;
+    var mm = String(month).padStart(2, '0');
+    var currentView = '{{ view_type }}';
+    window.location.href = '?view=' + currentView + '&date=' + year + '-' + mm + '-01';
+  });
+  // Also navigate immediately when month/year selects change (UX shortcut)
+  ['jumpMonth', 'jumpYear'].forEach(function(id) {
+    document.getElementById(id).addEventListener('change', function() {
+      var month = parseInt(document.getElementById('jumpMonth').value, 10);
+      var year  = parseInt(document.getElementById('jumpYear').value, 10);
+      if (month && year && year >= 2020 && year <= 2099) {
+        var mm = String(month).padStart(2, '0');
+        window.location.href = '?view={{ view_type }}&date=' + year + '-' + mm + '-01';
+      }
+    });
+  });
+})();
+
+// ── Month day cells: click to book appointment ────────────────────
+document.querySelectorAll('.cal-day').forEach(function(cell) {
+  cell.style.cursor = 'pointer';
+  cell.addEventListener('click', function(e) {
+    // Don't navigate if clicking on an appointment chip link
+    if (e.target.closest('a')) return;
+    var dateAttr = cell.getAttribute('data-date');
+    if (!dateAttr) return;
+    // Shift+click → day view; plain click → book appointment
+    if (e.shiftKey) {
+      window.location.href = '?view=day&date=' + dateAttr;
+    } else {
+      window.location.href = '{% url "appointments:admin_book_appointment" %}?date=' + dateAttr;
+    }
+  });
+});
+
+// ── Week view day headers: click to book ─────────────────────────
+document.querySelectorAll('.cal-week-head-day').forEach(function(col, idx) {
+  col.style.cursor = 'pointer';
+  col.title = 'Book appointment on this day';
+  var weekDates = [
+    {% for wd in week_days %}'{{ wd.date|date:"Y-m-d" }}'{% if not forloop.last %},{% endif %}{% endfor %}
+  ];
+  col.addEventListener('click', function(e) {
+    if (e.target.closest('a')) return;
+    if (weekDates[idx]) {
+      window.location.href = '{% url "appointments:admin_book_appointment" %}?date=' + weekDates[idx];
+    }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'appointments/admin/base.html' %}
+
+{% block title %}Pets{% endblock %}
+{% block page_title %}Pets{% endblock %}
+{% block page_subtitle %}All pets linked to submissions, with quick access to their details and appointment history.{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="head"><h2>Pets Directory</h2><span class="pill">{{ pets|length }} shown</span></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Pet</th><th>Species / Breed</th><th>Parent</th><th>Case ID</th><th>Appointments</th><th>Details</th></tr></thead>
+      <tbody>
+      {% for pet in pets %}
+        <tr>
+          <td><strong>{{ pet.name }}</strong></td>
+          <td>{{ pet.get_species_display }}{% if pet.breed %} • {{ pet.breed }}{% endif %}</td>
+          <td>{{ pet.owner.name }}</td>
+          <td>{{ pet.owner.case_id }}</td>
+          <td>{{ pet.appointments.count }}</td>
+          <td><a class="small-btn" href="{% url 'case_detail' pet.id %}">Open Details</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="empty">No pets found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

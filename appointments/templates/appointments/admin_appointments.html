@@ -1,0 +1,87 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Appointments Booked{% endblock %}
+{% block page_title %}Appointments Booked{% endblock %}
+{% block page_subtitle %}Search, filter, and bulk assign providers to maintain balanced daily workload.{% endblock %}
+
+{% block content %}
+<div class="layout" style="grid-template-columns:2fr 1fr;">
+  <div class="panel" style="padding:12px; margin-bottom:12px;">
+    <form method="get" class="row" style="grid-template-columns:1fr 220px auto;">
+      <div class="field"><label>Search</label><input type="text" name="q" value="{{ q }}" placeholder="Pet name / user email"></div>
+      <div class="field"><label>Status</label><select name="status"><option value="">All</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+      <button class="btn" type="submit">Apply</button>
+    </form>
+  </div>
+
+  <section class="panel">
+    <div class="head"><h2>Provider Balance Snapshot</h2></div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Provider</th><th>Peak/Day</th><th>Limit</th><th>Utilization</th></tr></thead>
+        <tbody>
+        {% for row in provider_load %}
+          <tr>
+            <td>{{ row.provider.email|default:row.provider.username }}</td>
+            <td>{{ row.peak }}</td>
+            <td>{{ row.daily_limit }}</td>
+            <td><span class="pill" {% if row.utilization_pct >= 100 %}style="background:#faeded;color:#9b3434;"{% elif row.utilization_pct >= 80 %}style="background:#fff5d7;color:#7f5c07;"{% endif %}>{{ row.utilization_pct }}%</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="empty">No provider load data.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<section class="panel">
+  <div class="head"><h2>Appointments</h2><span class="pill">{{ appointments|length }} shown</span></div>
+  <div style="padding:10px 14px;border-bottom:1px solid var(--line);background:#fcfdfc;">
+    <form id="bulk-assign-form" method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="bulk_assign_provider">
+      <div class="field" style="min-width:260px;">
+        <label>Assign Provider</label>
+        <select name="provider_id" required>
+          <option value="">Select provider</option>
+          {% for p in providers %}
+            <option value="{{ p.id }}">{{ p.email|default:p.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="small-btn approve" type="submit">Bulk Assign Selected</button>
+    </form>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th><input type="checkbox" onclick="toggleAppointmentChecks(this)"></th><th>ID</th><th>Pet</th><th>User</th><th>Provider</th><th>Start (IST)</th><th>Type</th><th>Status</th><th>Details</th></tr></thead>
+      <tbody>
+      {% for appt in appointments %}
+        <tr>
+          <td><input type="checkbox" class="appt-check" form="bulk-assign-form" name="appointment_ids" value="{{ appt.id }}"></td>
+          <td>{{ appt.id }}</td>
+          <td><strong>{{ appt.pet.name }}</strong></td>
+          <td>{{ appt.user.email|default:appt.user.username }}</td>
+          <td>{% if appt.assigned_provider %}{{ appt.assigned_provider.email|default:appt.assigned_provider.username }}{% else %}-{% endif %}</td>
+          <td>{{ appt.start_at|ist|date:'d M Y, h:i A' }}</td>
+          <td><span class="pill">{{ appt.appointment_type_label }}</span></td>
+          <td><span class="status s-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+          <td><a class="small-btn" href="{% url 'appointments:admin_appointment_detail' appt.id %}">Open</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9" class="empty">No appointments found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+function toggleAppointmentChecks(master){
+  document.querySelectorAll('.appt-check').forEach(function(el){ el.checked = master.checked; });
+}
+</script>
+{% endblock %}

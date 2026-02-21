@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poshtik NutriVet Clinical Nutrition Consult</title>
+    <style>
+        :root {
+            --bg: #f3f5f4;
+            --ink: #1d2a26;
+            --muted: #5e6f68;
+            --line: #d7e0dc;
+            --card: #ffffff;
+            --accent: #255f47;
+            --accent-soft: #e7f2ed;
+            --warm: #9b5d2f;
+            --warm-soft: #faeee3;
+            --radius: 16px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif; color: var(--ink); background: radial-gradient(circle at 10% 0%, #e5ece8 0%, var(--bg) 32%); line-height: 1.5; }
+        .wrap { max-width: 1100px; margin: 22px auto 38px; padding: 0 14px; }
+
+        .hero { border-radius: 24px; background: linear-gradient(130deg, #15392b, #255f47 58%, #4b846c); color: #fff; padding: 28px 24px; box-shadow: 0 18px 34px rgba(19, 53, 39, 0.23); }
+        .hero h1 { font-size: 34px; letter-spacing: -0.03em; }
+        .hero p { margin-top: 10px; color: rgba(255,255,255,.88); max-width: 760px; font-size: 15px; }
+        .hero-actions { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 800; padding: 10px 13px; display: inline-block; }
+        .btn-light { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+        .btn-light:hover { background: rgba(255,255,255,.23); }
+
+        .notice { margin-top: 12px; border-radius: 10px; background: #edf8f2; border: 1px solid #b7dbc8; padding: 12px 14px; color: #216245; }
+
+        .grid { margin-top: 16px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; align-items: start; }
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 8px 22px rgba(22, 30, 27, 0.05); overflow: hidden; }
+        .head { padding: 14px 16px; border-bottom: 1px solid var(--line); background: #f8fbfa; }
+        .head h2 { font-size: 18px; letter-spacing: -0.01em; }
+        .head p { margin-top: 4px; color: var(--muted); font-size: 13px; }
+        .body { padding: 14px 16px 16px; }
+
+        .list { list-style: none; }
+        .list li { position: relative; padding-left: 30px; margin-bottom: 12px; font-size: 14px; color: #2f3d38; }
+        .list li .n { position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 800; }
+        .hint { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--warm-soft); border: 1px solid #eed3bc; color: #6d4528; font-size: 13px; }
+
+        .section-title { margin-top: 12px; margin-bottom: 8px; color: #33433d; font-size: 13px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        label { display: block; font-size: 12px; color: #5a6c65; margin-bottom: 5px; font-weight: 700; }
+        input, select, textarea { width: 100%; border: 1px solid #d7dfdc; border-radius: 10px; padding: 10px 11px; font-size: 14px; background: #fff; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #7ba592; box-shadow: 0 0 0 3px #ebf3ef; }
+        textarea { min-height: 92px; resize: vertical; }
+        .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .check { border: 1px solid #dbe3df; border-radius: 10px; background: #fbfdfc; padding: 8px 10px; display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #33413b; }
+        .check input { width: auto; margin-top: 2px; }
+        .submit { margin-top: 12px; border: none; background: linear-gradient(130deg, #215741, #317158); color: #fff; border-radius: 12px; padding: 12px 14px; font-weight: 800; font-size: 14px; cursor: pointer; width: 100%; }
+        .submit:hover { filter: brightness(1.04); }
+        .micro { margin-top: 8px; color: #62736c; font-size: 12px; text-align: center; }
+
+        @media (max-width: 980px) {
+            .grid { grid-template-columns: 1fr; }
+            .row2, .row3, .checks { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <section class="hero">
+            <h1>Poshtik Nutrivet- Clinical Nutrition Consultation for Pets</h1>
+            <p>Welcome Pet Parents seeking nutritional advice for your pet(s)! Please read the following information carefully to understand the pre-requisites required for this service and inclusions offered during the clinical nutrition consult with the veterinary nutritionist.</p>
+            <div class="hero-actions">
+                <a href="{% url 'login' %}" class="btn btn-light">Already Have Access? Login</a>
+            </div>
+        </section>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notice">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="grid">
+            <article class="card">
+                <div class="head">
+                    <h2>Consult Brochure</h2>
+                    <p>Exact service terms and process details.</p>
+                </div>
+                <div class="body">
+                    <div class="section-title">Pre-requisites for Nutrition Consult</div>
+                    <ol class="list">
+                        <li><span class="n">1</span>Completed diet history form (filled by the pet parent)</li>
+                        <li><span class="n">2</span>Completed medical history form (filled by your primary vet)</li>
+                        <li><span class="n">3</span>For Wellness Nutrition consults: Blood reports (CBC, LFT, KFT), Stool and urine Reports: Validity of report- 3 months.</li>
+                        <li><span class="n">4</span>For Therapeutic Nutrition consults: CBC, LFT, KFT and any additional tests as advised, Stool and Urine Reports: Validity of reports- one week.</li>
+                        <li><span class="n">5</span>All diagnostic tests must be processed at a Veterinary Diagnostic Labs ONLY. Any follow up tests must be done at the same lab ONLY for better interpretation of your pet’s reports.</li>
+                        <li><span class="n">6</span>Attendance of all persons involved in preparing or serving the pets meals is recommended at the in-person/tele/video consult.</li>
+                    </ol>
+
+                    <div class="section-title">Kindly Note</div>
+                    <ol class="list">
+                        <li><span class="n">1</span>We recommend that you reserve at least 30 minutes to complete the diet history form at home. All measurements of food which your pet consumes should be done on a digital kitchen weighing scale ONLY. The better the data provided to us, the better our recommendations will be to you. Thank you.</li>
+                        <li><span class="n">2</span>Your primary care veterinarian is a vital partner in the care of your pet. The medical records specific to your pet must duly filled by your vet, must be sent and reviewed by us before making a dietary recommendation. To manage medical conditions, we must also work through your referred veterinarian to make nutritional recommendations. This is not optional. The more information we have, the better for the pet.</li>
+                    </ol>
+
+                    <div class="section-title">What to Expect</div>
+                    <ol class="list">
+                        <li><span class="n">1</span>You will be provided with relevant dietary information regarding your pet’s medical condition/wellness queries during the consult.</li>
+                        <li><span class="n">2</span>Diet plans for individual pets is what we offer.</li>
+                        <li><span class="n">3</span>Each nutrition consultation service includes the following: one in-person visit with your pet for a physical exam at a designated veterinary clinic, followed by an online video consult. Total Duration :1 hour; one follow-up video/tele consultation. Validity: within 3 weeks from the date of receipt of diet prescription. Duration: 15 minutes only; one nutritional formulation (i.e. one diet recipe prescription ONLY); immediate follow-up questions you may have about our dietary recommendations, food rejection or aversions by your pet are potential problems too. We provide additional guidance in these cases. Validity: upto 3 days post receipt of diet prescription/recommendations ONLY. Any appointment once confirmed will not be rescheduled.</li>
+                        <li><span class="n">4</span>Your consult request, pet’s diet history and medical history forms and diagnostic reports will be reviewed before the online video consultation.</li>
+                        <li><span class="n">5</span>Submission of ALL pre-requisites mentioned above is mandatory. Thereafter only, appointment for online video/tele consult will be scheduled and confirmed.</li>
+                        <li><span class="n">6</span>The entire process (i.e. from submission of pre-requisites abovementioned to online consult) will be accomplished usually within 10 days only.</li>
+                        <li><span class="n">7</span>Final diet recipe prescription will be emailed to the pet parent within 5 days from the date of online video consult.</li>
+                        <li><span class="n">8</span>Availability of diet prescription on urgent basis (i.e. within 24-48 hours after in-person/tele-video consult) maybe provided but will be chargeable at an additional fee.</li>
+                        <li><span class="n">9</span>You may check on the status of your consultation at any time by messaging at +91 9004097839.</li>
+                        <li><span class="n">10</span>If you have other healthy pets in the same household, in most cases they are not identical to the first pet and will be considered as a separate second consultation chargeable service.</li>
+                        <li><span class="n">11</span>All services provided will be by appointment ONLY.</li>
+                        <li><span class="n">12</span>Any follow up consultation(s) in between (other than mentioned above) for in-person /video-tele nutrition consults will be chargeable.</li>
+                        <li><span class="n">13</span>Fees once paid are non-refundable.</li>
+                    </ol>
+                    <div class="hint">Pre-requisite forms will be emailed to the pet-parent only once FULL payment of fees is made for this service.</div>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="head">
+                    <h2>Pre-Consult Request</h2>
+                    <p>Submit these details so we can evaluate scope and share payment steps.</p>
+                </div>
+                <div class="body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="section-title">Pet Parent</div>
+                        <div class="row2">
+                            <div><label>Full Name</label><input required name="parent_name"></div>
+                            <div><label>Email</label><input required type="email" name="parent_email"></div>
+                        </div>
+                        <div class="row2" style="margin-top:10px">
+                            <div><label>Phone</label><input required name="parent_phone"></div>
+                            <div><label>City</label><input name="parent_city"></div>
+                        </div>
+
+                        <div class="section-title">Pet Information</div>
+                        <div class="row2">
+                            <div><label>Pet Name</label><input required name="pet_name"></div>
+                            <div>
+                                <label>Species</label>
+                                <select name="pet_species">
+                                    <option value="dog">Dog</option>
+                                    <option value="cat">Cat</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row3" style="margin-top:10px">
+                            <div><label>Breed</label><input name="pet_breed"></div>
+                            <div><label>Age / DOB</label><input name="pet_age"></div>
+                            <div><label>Current Weight (kg)</label><input type="number" step="0.01" name="pet_weight_kg"></div>
+                        </div>
+                        <div class="row2" style="margin-top:10px">
+                            <div>
+                                <label>Sex</label>
+                                <select name="pet_sex">
+                                    <option value="">Select</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Neutered / Spayed</label>
+                                <select name="pet_neutered">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Consult Objective</div>
+                        <label>What are your goals for this consultation?</label>
+                        <textarea name="consultation_goals" placeholder="Tell us what you want help with in this consult."></textarea>
+
+                        <div class="section-title">Diet Plan Preferences</div>
+                        <label style="margin-bottom:8px">If you are requesting a diet plan, please select your preference(s):</label>
+                        <div class="checks">
+                            {% for value, label in focus_choices %}
+                                <label class="check"><input type="checkbox" name="consultation_focus" value="{{ value }}"> {{ label }}</label>
+                            {% endfor %}
+                        </div>
+
+                        <label style="margin-top:10px">Additional Notes</label>
+                        <textarea name="additional_notes" placeholder="Any additional history you want us to consider before payment and scheduling."></textarea>
+
+                        <button class="submit" type="submit">Submit Pre-Consult Request</button>
+                        <p class="micro">After payment confirmation, account access and full form links are provided on email.</p>
+                    </form>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

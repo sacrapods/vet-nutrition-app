@@ -1,0 +1,31 @@
+{% extends 'public_site/base.html' %}
+{% block content %}
+<section class="container section-pad page-hero"><h1>Contact Us</h1><p>Reach our consultation team for onboarding and service queries.</p></section>
+<section class="container section-pad contact-grid">
+  <article class="service-detail">
+    <h2>Consultation Desk</h2>
+    <p>Email: consult@poshtiknutrivet.com</p>
+    <p>Phone: +91 9004097839</p>
+    <p>Hours: Mon–Sat, 10:00 AM to 6:00 PM IST</p>
+    <div class="map-placeholder">
+      <div>
+        <strong>Andheri, Mumbai</strong><br>
+        <a href="https://maps.google.com/?q=Andheri,Mumbai" target="_blank" rel="noopener">Open location in Google Maps</a>
+      </div>
+    </div>
+  </article>
+  <article class="service-detail">
+    <h2>Send A Message</h2>
+    <form method="post" class="contact-form">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <label for="{{ form.full_name.id_for_label }}">Full Name</label>{{ form.full_name }}
+      <label for="{{ form.email.id_for_label }}">Email</label>{{ form.email }}
+      <label for="{{ form.phone.id_for_label }}">Phone</label>{{ form.phone }}
+      <label for="{{ form.pet_type.id_for_label }}">Pet Type</label>{{ form.pet_type }}
+      <label for="{{ form.message.id_for_label }}">Message</label>{{ form.message }}
+      <button class="btn btn-primary" type="submit">Submit Inquiry</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

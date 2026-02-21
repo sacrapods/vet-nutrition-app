@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activate Account | Poshtik NutriVet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'intake_form/auth.css' %}?v=20260221">
+</head>
+<body>
+  <div class="auth-shell">
+    <section class="auth-panel" aria-labelledby="activate-title">
+      <div class="brand">Poshtik NutriVet</div>
+      <h1 id="activate-title" class="auth-title">Activate Account</h1>
+      <p class="auth-subtitle">After payment approval, enter your registered details and create a strong password to activate login.</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="msg">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" class="auth-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        {% for field in form %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="auth-help">{{ field.help_text }}</p>{% endif %}
+          {% for error in field.errors %}<p class="field-errors">{{ error }}</p>{% endfor %}
+        {% endfor %}
+
+        <button type="submit" class="auth-btn">Activate Account</button>
+      </form>
+
+      <div class="auth-links">
+        <a href="{% url 'login' %}">Back to login</a>
+      </div>
+    </section>
+
+    <aside class="auth-side" aria-label="Password guidance">
+      <div class="side-card">
+        <h2>Password Requirements</h2>
+        <ul class="side-list">
+          <li>Minimum 8 characters</li>
+          <li>Include uppercase and lowercase letters</li>
+          <li>Include at least one number</li>
+          <li>Include at least one symbol (e.g. @, #, !, %)</li>
+        </ul>
+      </div>
+      <div class="side-card">
+        <h2>Email Verification</h2>
+        <p>After activation, a verification email is sent. Verify first, then sign in to access your dashboard.</p>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

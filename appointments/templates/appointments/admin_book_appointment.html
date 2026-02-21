@@ -1,0 +1,608 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Book Appointment{% endblock %}
+{% block page_title %}Book Appointment{% endblock %}
+{% block page_subtitle %}Create a manual appointment on behalf of a pet parent{% endblock %}
+
+{% block content %}
+<style>
+/* ── Layout ──────────────────────────────────────────────── */
+.book-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 960px) { .book-grid { grid-template-columns: 1fr; } }
+
+/* ── Form card ───────────────────────────────────────────── */
+.bk-card {
+  background: var(--ds-panel);
+  border: 1.5px solid var(--ds-line);
+  border-radius: var(--ds-radius);
+  box-shadow: var(--ds-shadow-sm);
+  overflow: hidden;
+}
+.bk-section {
+  padding: 20px 22px;
+  border-bottom: 1.5px solid var(--ds-line);
+}
+.bk-section:last-child { border-bottom: none; }
+.bk-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ds-muted);
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bk-section-title svg { opacity: .6; }
+.bk-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.bk-row:last-child { margin-bottom: 0; }
+.bk-row.single { grid-template-columns: 1fr; }
+.bk-row.three { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 640px) { .bk-row, .bk-row.three { grid-template-columns: 1fr; } }
+.bk-field { display: flex; flex-direction: column; gap: 5px; }
+.bk-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--ds-muted);
+}
+.bk-label .req { color: var(--ds-danger); margin-left: 2px; }
+.bk-input,
+.bk-select,
+.bk-textarea {
+  border: 1.5px solid var(--ds-line-2);
+  border-radius: var(--ds-radius-sm);
+  padding: 9px 11px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ds-text);
+  background: var(--ds-panel);
+  outline: none;
+  width: 100%;
+  transition: border-color .15s, box-shadow .15s;
+}
+.bk-input:focus, .bk-select:focus, .bk-textarea:focus {
+  border-color: var(--ds-brand);
+  box-shadow: 0 0 0 3px var(--ds-brand-3);
+}
+.bk-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+.bk-hint {
+  font-size: 11.5px;
+  color: var(--ds-muted);
+  margin-top: 2px;
+}
+
+/* ── Override checkbox ───────────────────────────────────── */
+.bk-override {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--ds-warn-bg);
+  border: 1.5px solid var(--ds-warn-border);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ds-warn);
+}
+.bk-override input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--ds-warn); }
+
+/* ── Status select highlight ─────────────────────────────── */
+select[name="status"] { font-weight: 700; }
+
+/* ── Submit row ──────────────────────────────────────────── */
+.bk-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 18px 22px;
+  background: var(--ds-panel-2);
+  border-top: 1.5px solid var(--ds-line);
+}
+.bk-submit {
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 9px;
+  border: none;
+  background: var(--ds-brand);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background .15s;
+}
+.bk-submit:hover { background: var(--ds-brand-2, #1a6b4e); }
+.bk-cancel {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 9px;
+  border: 1.5px solid var(--ds-line-2);
+  background: var(--ds-panel);
+  color: var(--ds-text-2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background .15s;
+}
+.bk-cancel:hover { background: var(--ds-panel-2); color: var(--ds-text); }
+
+/* ── Error box ───────────────────────────────────────────── */
+.bk-errors {
+  background: var(--ds-danger-bg);
+  border: 1.5px solid var(--ds-danger-border);
+  border-radius: var(--ds-radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  color: var(--ds-danger);
+  font-size: 13px;
+  font-weight: 600;
+}
+.bk-errors ul { margin: 4px 0 0 14px; padding: 0; }
+.bk-errors li { margin-bottom: 2px; }
+.field-error {
+  font-size: 11.5px;
+  color: var(--ds-danger);
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+/* ── Slots sidebar ───────────────────────────────────────── */
+.slots-card {
+  background: var(--ds-panel);
+  border: 1.5px solid var(--ds-line);
+  border-radius: var(--ds-radius);
+  box-shadow: var(--ds-shadow-sm);
+  overflow: hidden;
+  position: sticky;
+  top: 16px;
+}
+.slots-head {
+  padding: 14px 16px;
+  border-bottom: 1.5px solid var(--ds-line);
+  background: var(--ds-panel-2);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ds-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.slots-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; }
+.slot-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1.5px solid var(--ds-line);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .1s, border-color .1s;
+  background: var(--ds-panel);
+  color: var(--ds-text);
+}
+.slot-pill:hover { background: var(--ds-panel-2); }
+.slot-pill.available { border-color: var(--ds-ok-border); background: var(--ds-ok-bg); color: var(--ds-ok); }
+.slot-pill.available:hover { background: #d0f0e0; }
+.slot-pill.unavailable {
+  border-color: var(--ds-line);
+  background: var(--ds-panel-2);
+  color: var(--ds-muted-2);
+  cursor: not-allowed;
+  opacity: .7;
+}
+.slot-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.slot-pill.available .slot-status { color: var(--ds-ok); }
+.slot-pill.unavailable .slot-status { color: var(--ds-muted-2); }
+.slots-empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ds-muted);
+}
+.slots-note {
+  padding: 10px 14px;
+  font-size: 11.5px;
+  color: var(--ds-muted);
+  border-top: 1px solid var(--ds-line);
+  line-height: 1.5;
+}
+</style>
+
+<!-- Non-field errors -->
+{% if form.non_field_errors %}
+<div class="bk-errors">
+  <strong>Please fix the following:</strong>
+  <ul>
+    {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<form method="post" id="bookingForm">
+{% csrf_token %}
+
+<div class="book-grid">
+
+  <!-- ── Left: form ── -->
+  <div class="bk-card">
+
+    <!-- Section 1: Pet Parent & Pet -->
+    <div class="bk-section">
+      <p class="bk-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Patient
+      </p>
+      <div class="bk-row">
+        <div class="bk-field">
+          <label class="bk-label" for="id_pet_parent">Pet Parent <span class="req">*</span></label>
+          <select name="pet_parent" id="id_pet_parent" class="bk-select" required>
+            <option value="">Search or select pet parent…</option>
+            {% for pp in form.fields.pet_parent.queryset %}
+              <option value="{{ pp.pk }}"
+                data-name="{{ pp.name }}"
+                data-phone="{{ pp.phone }}"
+                data-email="{{ pp.email }}"
+                {% if form.data.pet_parent == pp.pk|stringformat:"s" %}selected{% endif %}>
+                {{ pp.name }} — {{ pp.phone }}{% if pp.email %} · {{ pp.email }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+          {% if form.errors.pet_parent %}
+            <span class="field-error">{{ form.errors.pet_parent|join:", " }}</span>
+          {% endif %}
+          <span class="bk-hint" id="parent-info"></span>
+        </div>
+        <div class="bk-field">
+          <label class="bk-label" for="id_pet">Pet <span class="req">*</span></label>
+          <select name="pet" id="id_pet" class="bk-select" required>
+            <option value="">Select pet…</option>
+            {% if form.fields.pet.queryset %}
+              {% for pet in form.fields.pet.queryset %}
+                <option value="{{ pet.pk }}"
+                  {% if form.data.pet == pet.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ pet.name }} ({{ pet.species|title }}{% if pet.breed %}, {{ pet.breed }}{% endif %})
+                </option>
+              {% endfor %}
+            {% endif %}
+          </select>
+          {% if form.errors.pet %}
+            <span class="field-error">{{ form.errors.pet|join:", " }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Date & Time -->
+    <div class="bk-section">
+      <p class="bk-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        Date & Time
+      </p>
+      <div class="bk-row three">
+        <div class="bk-field">
+          <label class="bk-label" for="id_appointment_date">Date <span class="req">*</span></label>
+          <input type="date" name="appointment_date" id="id_appointment_date"
+            class="bk-input"
+            value="{{ form.data.appointment_date|default:prefill_date }}"
+            required>
+          {% if form.errors.appointment_date %}
+            <span class="field-error">{{ form.errors.appointment_date|join:", " }}</span>
+          {% endif %}
+        </div>
+        <div class="bk-field">
+          <label class="bk-label" for="id_appointment_time">Time <span class="req">*</span></label>
+          <input type="time" name="appointment_time" id="id_appointment_time"
+            class="bk-input"
+            value="{{ form.data.appointment_time|default:'' }}"
+            step="900"
+            required>
+          {% if form.errors.appointment_time %}
+            <span class="field-error">{{ form.errors.appointment_time|join:", " }}</span>
+          {% endif %}
+          <span class="bk-hint">Click a slot on the right to autofill, or enter manually.</span>
+        </div>
+        <div class="bk-field">
+          <label class="bk-label" for="id_duration_minutes">Duration <span class="req">*</span></label>
+          <select name="duration_minutes" id="id_duration_minutes" class="bk-select" required>
+            {% for val, label in form.fields.duration_minutes.choices %}
+              <option value="{{ val }}"
+                {% if form.data.duration_minutes == val|stringformat:"s" %}selected
+                {% elif not form.data.duration_minutes and val|stringformat:"s" == config.appointment_duration_minutes|stringformat:"s" %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if form.errors.duration_minutes %}
+            <span class="field-error">{{ form.errors.duration_minutes|join:", " }}</span>
+          {% endif %}
+          <span class="bk-hint">Slots update when changed. Pet parents always book {{ config.appointment_duration_minutes }} min.</span>
+        </div>
+      </div>
+      <div class="bk-row single">
+        <label class="bk-override">
+          <input type="checkbox" name="override_slot_rules" id="id_override_slot_rules"
+            {% if form.data.override_slot_rules %}checked{% endif %}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Override slot restrictions (weekends, hours, capacity)
+        </label>
+      </div>
+    </div>
+
+    <!-- Section 3: Appointment Details -->
+    <div class="bk-section">
+      <p class="bk-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+        Appointment Details
+      </p>
+      <div class="bk-row">
+        <div class="bk-field">
+          <label class="bk-label" for="id_appt_type">Appointment Type</label>
+          <select name="appt_type" id="id_appt_type" class="bk-select">
+            <option value="">Select type…</option>
+            {% for val, label in form.fields.appt_type.choices %}
+              {% if val %}
+                <option value="{{ val }}"
+                  {% if form.data.appt_type == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+        <div class="bk-field">
+          <label class="bk-label" for="id_assigned_provider">Assigned Vet / Provider</label>
+          <select name="assigned_provider" id="id_assigned_provider" class="bk-select">
+            <option value="">Unassigned</option>
+            {% for provider in form.fields.assigned_provider.queryset %}
+              <option value="{{ provider.pk }}"
+                {% if form.data.assigned_provider == provider.pk|stringformat:"s" %}selected{% endif %}>
+                {% with name=provider.get_full_name %}
+                  {% if name %}{{ name }}{% else %}{{ provider.email|default:provider.username }}{% endif %}
+                {% endwith %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="bk-row single">
+        <div class="bk-field">
+          <label class="bk-label" for="id_staff_notes">Reason / Notes</label>
+          <textarea name="staff_notes" id="id_staff_notes" class="bk-textarea"
+            placeholder="Reason for visit, clinical notes, special instructions…">{{ form.data.staff_notes|default:'' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Status -->
+    <div class="bk-section">
+      <p class="bk-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Status
+      </p>
+      <div class="bk-row" style="max-width:360px;">
+        <div class="bk-field">
+          <label class="bk-label" for="id_status">Initial Status <span class="req">*</span></label>
+          <select name="status" id="id_status" class="bk-select" required>
+            {% for val, label in form.fields.status.choices %}
+              <option value="{{ val }}"
+                {% if form.data.status == val %}selected
+                {% elif not form.data.status and val == 'confirmed' %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="bk-actions">
+      <button type="submit" class="bk-submit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Create Appointment
+      </button>
+      <a href="{% url 'appointments:admin_calendar' %}{% if prefill_date %}?view=day&date={{ prefill_date }}{% endif %}"
+         class="bk-cancel">Cancel</a>
+    </div>
+  </div>
+
+  <!-- ── Right: slots sidebar ── -->
+  <div class="slots-card">
+    <div class="slots-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Available Slots
+      <span id="slots-date-label" style="font-size:11px;font-weight:600;color:var(--ds-muted);margin-left:auto;"></span>
+    </div>
+    <div class="slots-body" id="slots-container">
+      {% if slots %}
+        {% for slot in slots %}
+        <button type="button"
+          class="slot-pill {% if slot.available %}available{% else %}unavailable{% endif %}"
+          {% if slot.available %}onclick="pickSlot('{{ slot.label }}')"{% else %}disabled title="{{ slot.reason }}"{% endif %}>
+          <span>{{ slot.label }}</span>
+          <span class="slot-status">{% if slot.available %}Open{% else %}{{ slot.reason|truncatechars:18 }}{% endif %}</span>
+        </button>
+        {% endfor %}
+      {% else %}
+        <div class="slots-empty">
+          Select a date to see available slots.
+        </div>
+      {% endif %}
+    </div>
+    <div class="slots-note">
+      Click an open slot to pre-fill the time field.<br>
+      Tick <strong>Override</strong> to book outside clinic hours.
+    </div>
+  </div>
+
+</div><!-- /book-grid -->
+</form>
+
+<script>
+// ── Pet parent → pet dynamic dropdown ──────────────────────────────────
+var parentSelect = document.getElementById('id_pet_parent');
+var petSelect    = document.getElementById('id_pet');
+var parentInfo   = document.getElementById('parent-info');
+var API_URL      = '{% url "appointments:admin_pets_by_parent_api" %}';
+
+function loadPets(parentId, preselectedPetId) {
+  petSelect.innerHTML = '<option value="">Loading…</option>';
+  if (!parentId) {
+    petSelect.innerHTML = '<option value="">Select pet…</option>';
+    return;
+  }
+  fetch(API_URL + '?parent_id=' + parentId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      petSelect.innerHTML = '<option value="">Select pet…</option>';
+      data.pets.forEach(function(p) {
+        var opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.label;
+        if (preselectedPetId && String(p.id) === String(preselectedPetId)) {
+          opt.selected = true;
+        }
+        petSelect.appendChild(opt);
+      });
+      if (data.pets.length === 1 && !preselectedPetId) {
+        petSelect.value = data.pets[0].id;
+      }
+    })
+    .catch(function() {
+      petSelect.innerHTML = '<option value="">Could not load pets</option>';
+    });
+}
+
+parentSelect.addEventListener('change', function() {
+  var opt = this.options[this.selectedIndex];
+  if (opt && opt.dataset.phone) {
+    parentInfo.textContent = opt.dataset.email ? opt.dataset.email + ' · ' + opt.dataset.phone : opt.dataset.phone;
+  } else {
+    parentInfo.textContent = '';
+  }
+  loadPets(this.value, null);
+});
+
+// On page load: if parent is already selected (POST error), reload pets
+(function() {
+  var pid = parentSelect.value;
+  if (pid) {
+    var preselected = '{{ form.data.pet|default:"" }}';
+    loadPets(pid, preselected);
+    // Show parent info
+    var opt = parentSelect.querySelector('option[value="' + pid + '"]');
+    if (opt) {
+      parentInfo.textContent = opt.dataset.email ? opt.dataset.email + ' · ' + opt.dataset.phone : opt.dataset.phone;
+    }
+  }
+})();
+
+// ── Slot picker → time field ─────────────────────────────────────────
+function pickSlot(label) {
+  // label looks like "09:00 AM" — convert to 24h for the input
+  var timeInput = document.getElementById('id_appointment_time');
+  var match = label.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return;
+  var h = parseInt(match[1], 10);
+  var m = parseInt(match[2], 10);
+  var ampm = match[3].toUpperCase();
+  if (ampm === 'PM' && h !== 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  timeInput.value = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  // Scroll to time field on mobile
+  timeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── Reload slots when date or duration changes ────────────────────
+var dateInput      = document.getElementById('id_appointment_date');
+var durationSelect = document.getElementById('id_duration_minutes');
+var slotsContainer = document.getElementById('slots-container');
+var slotsDateLabel = document.getElementById('slots-date-label');
+var SLOTS_API      = '{% url "appointments:admin_slots_api" %}';
+
+function loadSlots(dateStr) {
+  if (!dateStr) {
+    slotsContainer.innerHTML = '<div class="slots-empty">Select a date to see available slots.</div>';
+    slotsDateLabel.textContent = '';
+    return;
+  }
+  var d = new Date(dateStr + 'T00:00:00');
+  slotsDateLabel.textContent = d.toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+  slotsContainer.innerHTML = '<div class="slots-empty">Loading slots…</div>';
+
+  // Build URL with optional duration param
+  var dur = durationSelect ? durationSelect.value : '';
+  var url = SLOTS_API + '?date=' + dateStr;
+  if (dur) url += '&duration=' + dur;
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.slots || data.slots.length === 0) {
+        slotsContainer.innerHTML = '<div class="slots-empty">No slots for this date.</div>';
+        return;
+      }
+      slotsContainer.innerHTML = data.slots.map(function(s) {
+        var avail = s.available;
+        return '<button type="button" ' +
+          'class="slot-pill ' + (avail ? 'available' : 'unavailable') + '" ' +
+          (avail ? 'onclick="pickSlot(\'' + s.label + '\')"' : 'disabled title="' + (s.reason||'') + '"') + '>' +
+          '<span>' + s.label + '</span>' +
+          '<span class="slot-status">' + (avail ? 'Open' : (s.reason||'').substring(0,18)) + '</span>' +
+          '</button>';
+      }).join('');
+    })
+    .catch(function() {
+      slotsContainer.innerHTML = '<div class="slots-empty">Could not load slots.</div>';
+    });
+}
+
+dateInput.addEventListener('change', function() { loadSlots(this.value); });
+
+// Reload slots when duration changes (slot boundaries shift)
+if (durationSelect) {
+  durationSelect.addEventListener('change', function() {
+    var dateStr = dateInput.value;
+    if (dateStr) loadSlots(dateStr);
+  });
+}
+
+// Load on page entry if date pre-filled
+(function() {
+  var v = dateInput.value;
+  if (v) loadSlots(v);
+})();
+</script>
+{% endblock %}

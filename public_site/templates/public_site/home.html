@@ -1,0 +1,99 @@
+{% extends 'public_site/base.html' %}
+
+{% block content %}
+<section class="hero" aria-label="Hero">
+  <div class="hero-carousel" data-carousel>
+    {% for slide in hero_slides %}
+    <article class="hero-slide {% if forloop.first %}active{% endif %}" style="background-image:linear-gradient(110deg, rgba(9,26,34,.78), rgba(16,64,88,.42)), url('{{ slide.image }}');" aria-label="Slide {{ forloop.counter }}">
+      <div class="container hero-content">
+        <p class="eyebrow">Veterinary Nutrition Consultation</p>
+        <h1>{{ slide.headline }}</h1>
+        <p>{{ slide.sub }}</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="{% url 'brochure_landing' %}">Book Consultation</a>
+          <a class="btn btn-ghost" href="#how-it-works">Learn More</a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+    <button class="carousel-arrow prev" type="button" aria-label="Previous slide" data-carousel-prev>‹</button>
+    <button class="carousel-arrow next" type="button" aria-label="Next slide" data-carousel-next>›</button>
+    <div class="carousel-dots" data-carousel-dots></div>
+  </div>
+</section>
+
+<section class="container trust section-pad trust-premium">
+  <div class="section-head">
+    <p class="eyebrow-dark">Clinical Authority</p>
+    <h2>Why Families Trust Poshtik NutriVet</h2>
+  </div>
+  <div class="card-grid four">
+    <article class="feature-card feature-premium"><h3>Evidence-Based Nutrition</h3><p>Clinical reasoning based on veterinary nutrition science and practical adherence.</p></article>
+    <article class="feature-card feature-premium"><h3>Veterinary Expertise</h3><p>Plans aligned with medical history and referring veterinarian communication.</p></article>
+    <article class="feature-card feature-premium"><h3>Personalized Protocols</h3><p>No generic charts. Every plan is customized to pet, family, and condition.</p></article>
+    <article class="feature-card feature-premium"><h3>Online Consultations</h3><p>Structured tele-consults with clear action plans and follow-up guidance.</p></article>
+  </div>
+</section>
+
+<section class="container section-pad services-overview-premium">
+  <div class="section-head row-between">
+    <div>
+      <p class="eyebrow-dark">Programs</p>
+      <h2>Services Overview</h2>
+    </div>
+    <a href="{% url 'public_site:services' %}" class="text-link">View all services</a>
+  </div>
+  <div class="card-grid four services-overview-grid">
+    {% for name, desc in services %}
+    <article class="service-card service-overview-card">
+      <p class="service-chip">{{ forloop.counter|stringformat:"02d" }}</p>
+      <h3>{{ name }}</h3>
+      <p>{{ desc }}</p>
+      <a href="{% url 'public_site:services' %}">Learn more</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="how-it-works" class="funnel section-pad">
+  <div class="container">
+    <div class="section-head"><h2>How It Works</h2></div>
+    <ol class="steps">
+      <li><span>1</span><div><h3>Request consultation</h3><p>Start from brochure and submit your onboarding request.</p></div></li>
+      <li><span>2</span><div><h3>Receive onboarding forms</h3><p>Our team reviews and shares structured intake requirements.</p></div></li>
+      <li><span>3</span><div><h3>Make payment</h3><p>Payment is completed through shared link and verified by team.</p></div></li>
+      <li><span>4</span><div><h3>Submit detailed pet information</h3><p>Medical, diet, lifestyle, and clinical details are captured securely.</p></div></li>
+      <li><span>5</span><div><h3>Schedule consultation</h3><p>Book your one-on-one session in available consultation slots.</p></div></li>
+      <li><span>6</span><div><h3>Attend one-on-one session</h3><p>Clinical discussion with measurable nutrition targets.</p></div></li>
+      <li><span>7</span><div><h3>Receive customized nutrition plan</h3><p>Actionable protocol with follow-up recommendations.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="container section-pad outcomes-premium">
+  <div class="section-head row-between">
+    <div>
+      <p class="eyebrow-dark">Results</p>
+      <h2>Client Outcomes</h2>
+    </div>
+    <a href="{% url 'public_site:testimonials' %}" class="text-link">Read all testimonials</a>
+  </div>
+  <div class="card-grid three">
+    {% for item in testimonials_preview %}
+    <article class="quote-card quote-premium">
+      <p>“{{ item.quote }}”</p>
+      <h3>{{ item.name }}</h3>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="container section-pad final-cta final-cta-premium">
+  <h2>Begin With The Brochure And Consultation Request</h2>
+  <p>Your onboarding funnel starts from the brochure page. This is Step 1 before forms and payment.</p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="{% url 'brochure_landing' %}">Start Onboarding</a>
+    <a class="btn btn-secondary" href="{% url 'public_site:contact' %}">Contact Team</a>
+  </div>
+</section>
+{% endblock %}

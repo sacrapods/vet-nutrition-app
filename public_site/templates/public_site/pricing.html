@@ -1,0 +1,9 @@
+{% extends 'public_site/base.html' %}
+{% block content %}
+<section class="container section-pad page-hero"><h1>Pricing Framework</h1><p>We do not publish fixed pricing publicly because consultation intensity varies by case complexity.</p></section>
+<section class="container section-pad card-grid two">
+  <article class="service-detail"><h2>How Pricing Is Determined</h2><p>Pricing is based on clinical complexity, current diagnosis, required review depth, and follow-up intensity.</p></article>
+  <article class="service-detail"><h2>Request A Quote</h2><p>Start from the brochure and consultation request. Our team will provide quote details after initial review.</p></article>
+</section>
+<section class="container section-pad"><a class="btn btn-primary" href="{% url 'brochure_landing' %}">Request Consultation</a></section>
+{% endblock %}

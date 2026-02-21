@@ -1,0 +1,283 @@
+/* ─── NutriVet Design System — tokens.css ───────────── */
+:root {
+  /* Surfaces */
+  --ds-bg:       #f0f4f8;
+  --ds-panel:    #ffffff;
+  --ds-panel-2:  #f8fafc;
+
+  /* Text */
+  --ds-text:     #0f1e2b;
+  --ds-text-2:   #374b5a;
+  --ds-muted:    #6b7d8d;
+  --ds-muted-2:  #96aab8;
+
+  /* Borders */
+  --ds-line:     #e2eaef;
+  --ds-line-2:   #d0dbe5;
+
+  /* Brand — green (patient-facing) */
+  --ds-brand:    #1a6645;
+  --ds-brand-2:  #228055;
+  --ds-brand-3:  #e6f4ed;
+  --ds-brand-glow: rgba(26, 102, 69, 0.16);
+
+  /* Accent — blue (clinical/vet) */
+  --ds-accent:   #0b5394;
+  --ds-accent-2: #1570c0;
+  --ds-accent-3: #e8f1fb;
+
+  /* Semantic */
+  --ds-ok:            #1a7a4a;
+  --ds-ok-bg:         #e8f7ef;
+  --ds-ok-border:     #b6dfc8;
+  --ds-warn:          #a35a00;
+  --ds-warn-bg:       #fff4e0;
+  --ds-warn-border:   #f5cb7f;
+  --ds-danger:        #b53333;
+  --ds-danger-bg:     #fdeaea;
+  --ds-danger-border: #f0b8b8;
+
+  /* Shape */
+  --ds-radius-sm: 8px;
+  --ds-radius:    14px;
+  --ds-radius-lg: 20px;
+
+  /* Shadows */
+  --ds-shadow-sm: 0 1px 3px rgba(15,30,43,.06), 0 1px 2px rgba(15,30,43,.04);
+  --ds-shadow:    0 4px 16px rgba(15,30,43,.08), 0 1px 4px rgba(15,30,43,.05);
+  --ds-shadow-lg: 0 12px 36px rgba(15,30,43,.13), 0 4px 10px rgba(15,30,43,.07);
+
+  /* Motion */
+  --ds-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ds-dur:  180ms;
+
+  /* Focus */
+  --ds-focus: #0f62fe;
+}
+
+/* ─── Reset ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  color: var(--ds-text);
+  background: var(--ds-bg);
+}
+
+a { color: var(--ds-accent); }
+
+:focus-visible {
+  outline: 3px solid var(--ds-focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ─── Skip link ──────────────────────────────────────── */
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: 10px;
+  transform: translateY(-180%);
+  background: #0f1720;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: var(--ds-radius-sm);
+  z-index: 9999;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ─── App shell ──────────────────────────────────────── */
+.app-shell {
+  display: grid;
+  grid-template-columns: 256px 1fr;
+  min-height: 100vh;
+}
+
+/* ─── Sidebar ────────────────────────────────────────── */
+.app-sidebar {
+  background: linear-gradient(185deg, #071e10 0%, #0e3323 55%, #174e35 100%);
+  color: #c4ddd0;
+  padding: 20px 14px 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-sidebar.app-sidebar--blue {
+  background: linear-gradient(185deg, #061e33 0%, #0c3356 55%, #0f4880 100%);
+  color: #c8dbe8;
+}
+
+/* Brand */
+.app-sidebar .brand {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e4f0eb;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.app-sidebar.app-sidebar--blue .brand { color: #e8f2f9; }
+
+.app-sidebar .brand-sub {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(196,221,208,.5);
+  margin-bottom: 20px;
+  white-space: nowrap;
+}
+.app-sidebar.app-sidebar--blue .brand-sub { color: rgba(200,219,232,.5); }
+
+/* Nav section label */
+.app-sidebar .nav-section {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(196,221,208,.38);
+  padding: 14px 10px 6px;
+}
+.app-sidebar.app-sidebar--blue .nav-section { color: rgba(200,219,232,.38); }
+
+/* Nav links */
+.app-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(196,221,208,.82);
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-sm);
+  padding: 9px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  transition: background var(--ds-dur), border-color var(--ds-dur), color var(--ds-dur);
+}
+.app-sidebar nav a:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.1);
+  color: #e4f0eb;
+}
+.app-sidebar nav a.active {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(255,255,255,.18);
+  color: #ffffff;
+}
+.app-sidebar.app-sidebar--blue nav a { color: rgba(200,219,232,.82); }
+.app-sidebar.app-sidebar--blue nav a:hover { color: #e8f2f9; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-footer a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(196,221,208,.72);
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-sm);
+  padding: 9px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--ds-dur), border-color var(--ds-dur), color var(--ds-dur);
+}
+.sidebar-footer a:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.1);
+  color: #e4f0eb;
+}
+.app-sidebar--blue .sidebar-footer a { color: rgba(200,219,232,.72); }
+.app-sidebar--blue .sidebar-footer a:hover { color: #e8f2f9; }
+
+/* ─── Main content ───────────────────────────────────── */
+.app-main { padding: 20px 20px 32px; }
+
+/* ─── Empty state ────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ds-muted);
+}
+.empty-state h3 { margin: 0 0 6px; font-size: 16px; color: var(--ds-text); }
+.empty-state p  { margin: 0; font-size: 14px; }
+
+.empty-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.empty-actions a {
+  text-decoration: none;
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-radius-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--ds-panel);
+  color: var(--ds-text-2);
+  transition: background var(--ds-dur);
+}
+.empty-actions a:hover { background: var(--ds-panel-2); }
+
+/* ─── Autosave indicator ─────────────────────────────── */
+.autosave-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  padding: 5px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  color: rgba(255,255,255,.9);
+}
+.autosave-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8dc7a7;
+  flex-shrink: 0;
+}
+.autosave-indicator.saving .autosave-dot { background: #f3d27a; }
+.autosave-indicator.error  .autosave-dot { background: #ef8f8f; }
+
+/* ─── Responsive ─────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .app-sidebar { position: relative; height: auto; }
+  .app-main { padding-top: 14px; }
+}
+
+@media (max-width: 720px) {
+  .app-main { padding: 12px 12px 24px; }
+  .app-sidebar { padding: 14px 12px; }
+  .app-sidebar nav a { padding: 10px; font-size: 14px; }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ds-line-2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ds-muted-2); }

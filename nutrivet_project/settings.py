@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'intake_form.apps.IntakeFormConfig',
     'appointments.apps.AppointmentsConfig',
     'pet_admin_portal.apps.PetAdminPortalConfig',
+    'public_site.apps.PublicSiteConfig',
 ]
 
 MIDDLEWARE = [

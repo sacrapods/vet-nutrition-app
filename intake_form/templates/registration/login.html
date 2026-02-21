@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In | Poshtik NutriVet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'intake_form/auth.css' %}?v=20260221">
+</head>
+<body>
+  <div class="auth-shell">
+    <section class="auth-panel" aria-labelledby="signin-title">
+      <div class="brand">Poshtik NutriVet</div>
+      <h1 id="signin-title" class="auth-title">Sign In</h1>
+      <p class="auth-subtitle">Access your consultation workspace to complete forms, track appointments, and view updates.</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="msg">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" class="auth-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <label for="{{ form.username.id_for_label }}">Email</label>
+        {{ form.username }}
+        <p class="auth-help">Use the same email used during account activation.</p>
+        {% for error in form.username.errors %}<p class="field-errors">{{ error }}</p>{% endfor %}
+
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+        {% for error in form.password.errors %}<p class="field-errors">{{ error }}</p>{% endfor %}
+
+        <button type="submit" class="auth-btn">Sign In</button>
+      </form>
+
+      <div class="auth-links">
+        <a href="{% url 'password_reset' %}">Forgot password?</a>
+        <a href="{% url 'activate_account' %}">New user after payment? Activate account</a>
+        <a href="{% url 'brochure_landing' %}">New here? Start pre-consult request</a>
+      </div>
+    </section>
+
+    <aside class="auth-side" aria-label="Clinical login guidance">
+      <div class="side-card">
+        <h2>Secure Access</h2>
+        <p>Your account is protected with session security and role-based access control.</p>
+      </div>
+      <div class="side-card">
+        <h2>First-Time Users</h2>
+        <p>Complete activation after payment, verify your email, then sign in with your registered email and password.</p>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>

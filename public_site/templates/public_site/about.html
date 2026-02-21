@@ -1,0 +1,108 @@
+{% extends 'public_site/base.html' %}
+{% load static %}
+{% block content %}
+<section class="about-hero section-pad">
+  <div class="container about-hero-grid">
+    <div>
+      <p class="eyebrow-dark">About Poshtik NutriVet</p>
+      <h1>Clinical Nutrition Designed For Better Outcomes</h1>
+      <p>Poshtik NutriVet is built for discerning pet families seeking medically grounded nutrition care. Our work combines clinical discipline, practical household guidance, and measurable follow-up.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="{% url 'brochure_landing' %}">Start Consultation Request</a>
+        <a class="btn btn-secondary" href="{% url 'public_site:contact' %}">Contact Team</a>
+      </div>
+    </div>
+    <figure class="about-hero-image">
+      <img src="https://images.pexels.com/photos/7469213/pexels-photo-7469213.jpeg?auto=compress&cs=tinysrgb&w=1400" alt="Veterinary clinician with dog in a professional consultation setting">
+    </figure>
+  </div>
+</section>
+
+<section class="container section-pad doctor-spotlight">
+  <article class="doctor-card">
+    <div class="doctor-photo-wrap">
+      <img src="{% static 'public_site/images/dr-eunice-profile.svg' %}" alt="Dr. Eunice Thomas profile image">
+    </div>
+    <div class="doctor-content">
+      <p class="eyebrow-dark">Clinical Leadership</p>
+      <h2>Dr. Eunice Thomas</h2>
+      <p class="doctor-role">MSVC 9248 · Pet Nutrition Specialist · Clinical Nutrition Consultant</p>
+      <p>Based in Mumbai, Dr. Eunice Thomas is a passionate pet nutrition specialist with over five years of hands-on practice in companion-animal clinical care, focused on practical and evidence-based nutrition planning.</p>
+      <div class="doctor-pillars">
+        <span>Therapeutic Nutrition</span>
+        <span>Weight Management</span>
+        <span>Disease-Specific Diets</span>
+        <span>Digestive Health Nutrition</span>
+        <span>Client Education</span>
+      </div>
+      <ul>
+        <li>Mumbai-based specialist serving premium veterinary nutrition consultations</li>
+        <li>Builds personalized nutrition plans for small animals and companion pets</li>
+        <li>Focuses on adherence-friendly protocols that fit real home routines</li>
+        <li>Strong emphasis on clear client communication and adherence-focused care plans</li>
+        <li>Continuously updates clinical practice through courses and professional seminars</li>
+        <li>Earned multiple accolades, awards, and gold medals during veterinary academics</li>
+        <li>Known for disciplined work ethic, curiosity, and continuous skill enhancement in clinical nutrition practice</li>
+      </ul>
+    </div>
+  </article>
+</section>
+
+<section class="container section-pad education-block">
+  <div class="section-head">
+    <p class="eyebrow-dark">Education</p>
+    <h2>Academic Training</h2>
+  </div>
+  <div class="card-grid two">
+    <article class="service-detail premium-detail">
+      <h3>Bombay Veterinary College, Mumbai</h3>
+      <p><strong>M.V.Sc</strong></p>
+      <p>Postgraduate Veterinary Training · 2015–2017</p>
+    </article>
+    <article class="service-detail premium-detail">
+      <h3>Bombay Veterinary College, Mumbai</h3>
+      <p><strong>B.V.Sc. & A.H.</strong></p>
+      <p>Undergraduate Veterinary Degree · 2009–2014</p>
+    </article>
+  </div>
+</section>
+
+<section class="container section-pad about-pillars">
+  <div class="section-head">
+    <p class="eyebrow-dark">Our Framework</p>
+    <h2>How We Deliver Premium Nutrition Care</h2>
+  </div>
+  <div class="card-grid two">
+    <article class="service-detail premium-detail"><h3>Mission</h3><p>To improve companion-animal health outcomes through evidence-guided nutrition care delivered with clinical rigor and compassion.</p></article>
+    <article class="service-detail premium-detail"><h3>Scientific Approach</h3><p>Recommendations are grounded in current nutrition evidence, clinical reasoning, and continuous reassessment of patient response.</p></article>
+    <article class="service-detail premium-detail"><h3>Personalized Philosophy</h3><p>Plans are customized to each pet’s diagnosis, history, tolerance profile, and home reality for sustainable implementation.</p></article>
+    <article class="service-detail premium-detail"><h3>Online Consultation Model</h3><p>A structured digital pathway: onboarding intake, focused one-on-one review, practical plan delivery, and outcome-driven follow-ups.</p></article>
+  </div>
+</section>
+
+<section class="container section-pad about-values">
+  <div class="value-grid">
+    <article class="value-card">
+      <img src="https://images.pexels.com/photos/1904105/pexels-photo-1904105.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Healthy dog on examination table">
+      <div><h3>Evidence First</h3><p>Every recommendation begins with clinical relevance, evidence quality, and patient-specific suitability.</p></div>
+    </article>
+    <article class="value-card">
+      <img src="https://images.pexels.com/photos/1350593/pexels-photo-1350593.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Cat with attentive expression in natural light">
+      <div><h3>Measured Outcomes</h3><p>Progress is tracked with follow-up milestones, helping families and clinicians make informed adjustments.</p></div>
+    </article>
+    <article class="value-card">
+      <img src="https://images.pexels.com/photos/1906153/pexels-photo-1906153.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Pet owner and veterinarian discussing care plan">
+      <div><h3>Collaborative Care</h3><p>Nutrition is coordinated with broader veterinary management to support whole-patient care continuity.</p></div>
+    </article>
+  </div>
+</section>
+
+<section class="container section-pad final-cta final-cta-premium">
+  <h2>Start With The Brochure, Then Build A Clinical Plan</h2>
+  <p>The consultation funnel begins with a structured request so the team can evaluate case complexity and guide next steps.</p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="{% url 'brochure_landing' %}">Open Brochure</a>
+    <a class="btn btn-secondary" href="{% url 'public_site:contact' %}">Talk To Team</a>
+  </div>
+</section>
+{% endblock %}

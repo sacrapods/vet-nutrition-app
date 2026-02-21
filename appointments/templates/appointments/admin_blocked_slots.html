@@ -1,0 +1,46 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Blocked Time Slots{% endblock %}
+{% block page_title %}Blocked Time Slots{% endblock %}
+{% block page_subtitle %}Manage specific blocked appointment times.{% endblock %}
+
+{% block content %}
+<div class="panel" style="padding:12px; margin-bottom:12px;">
+  <form method="post" class="row" style="grid-template-columns:1fr 180px 1fr auto;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create">
+    <div class="field"><label>Date</label><input type="date" name="slot_date" required></div>
+    <div class="field"><label>Time</label><input type="time" name="slot_time" required></div>
+    <div class="field"><label>Reason (optional)</label><input type="text" name="reason"></div>
+    <button class="danger-btn" type="submit">Block Slot</button>
+  </form>
+</div>
+
+<section class="panel">
+  <div class="head"><h2>Current Blocked Slots</h2><span class="pill">{{ blocked_slots|length }}</span></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Slot (IST)</th><th>Reason</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for item in blocked_slots %}
+        <tr>
+          <td><strong>{{ item.start_at|ist|date:'d M Y, h:i A' }}</strong></td>
+          <td>{{ item.reason|default:'-' }}</td>
+          <td>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="id" value="{{ item.id }}">
+              <button class="small-btn reject" type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" class="empty">No blocked slots.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

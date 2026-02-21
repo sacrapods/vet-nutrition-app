@@ -1,0 +1,73 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Consultation Notes{% endblock %}
+{% block page_title %}Consultation Notes{% endblock %}
+{% block page_subtitle %}Notes repository + reusable template library for standardized nutrition documentation.{% endblock %}
+
+{% block content %}
+<div class="layout" style="grid-template-columns:2fr 1fr;">
+<section class="panel">
+  <div class="head"><h2>Notes Library</h2><span class="pill">{{ notes|length }} shown</span></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Appointment</th><th>Pet</th><th>User</th><th>Updated</th><th>Files</th><th>Details</th></tr></thead>
+      <tbody>
+      {% for note in notes %}
+        <tr>
+          <td>#{{ note.appointment.id }}</td>
+          <td><strong>{{ note.appointment.pet.name }}</strong></td>
+          <td>{{ note.appointment.user.email|default:note.appointment.user.username }}</td>
+          <td>{{ note.updated_at|date:'d M Y, H:i' }}</td>
+          <td>
+            {% if note.prescription_pdf %}<a href="{{ note.prescription_pdf.url }}" target="_blank">Prescription</a>{% endif %}
+            {% if note.prescription_pdf and note.diet_plan_pdf %} • {% endif %}
+            {% if note.diet_plan_pdf %}<a href="{{ note.diet_plan_pdf.url }}" target="_blank">Diet Plan</a>{% endif %}
+            {% if not note.prescription_pdf and not note.diet_plan_pdf %}-{% endif %}
+          </td>
+          <td><a class="small-btn" href="{% url 'appointments:admin_appointment_detail' note.appointment.id %}">Open</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="empty">No consultation notes available.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel" style="padding:12px;">
+  <h2 style="margin:0 0 10px;font-size:16px;">Create Note Template</h2>
+  <form method="post" style="display:grid;gap:8px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create_template">
+    <div class="field"><label>Title</label>{{ template_form.title }}</div>
+    <div class="field"><label>Template Body</label>{{ template_form.body }}</div>
+    <div class="field"><label>Active</label>{{ template_form.active }}</div>
+    <button class="small-btn approve" type="submit">Save Template</button>
+  </form>
+
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+    <h3 style="margin:0 0 8px;font-size:14px;">Existing Templates</h3>
+    <div style="display:grid;gap:8px;max-height:360px;overflow:auto;">
+      {% for tpl in templates %}
+        <div style="border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;">
+          <div style="display:flex;justify-content:space-between;gap:6px;align-items:center;">
+            <strong style="font-size:13px;">{{ tpl.title }}</strong>
+            <span class="pill">{% if tpl.active %}Active{% else %}Inactive{% endif %}</span>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin:8px 0;white-space:pre-wrap;">{{ tpl.body|truncatechars:140 }}</p>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_template">
+            <input type="hidden" name="template_id" value="{{ tpl.id }}">
+            <button class="small-btn" type="submit">{% if tpl.active %}Disable{% else %}Enable{% endif %}</button>
+          </form>
+        </div>
+      {% empty %}
+        <p class="empty" style="padding:8px;">No templates created yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+</div>
+{% endblock %}

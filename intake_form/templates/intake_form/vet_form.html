@@ -1,521 +1,1010 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical History - {{ pet.name }}</title>
+    <title>Clinical History — {{ pet.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'design_system/tokens.css' %}?v=20260221">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#FAF7F2;color:#2C2C2C;line-height:1.6}
-        .container{max-width:850px;margin:0 auto;padding:24px}
-        .nav{margin-bottom:20px}
-        .nav a{color:#2C5A8C;text-decoration:none;font-size:0.9rem}
-        .nav a:hover{text-decoration:underline}
+        body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
 
-        .header{background:linear-gradient(135deg,#1E4068,#2C5A8C,#4A8ABF);padding:32px;border-radius:14px;color:white;margin-bottom:28px;position:relative;overflow:hidden}
-        .header::before{content:'';position:absolute;top:-30px;right:-30px;width:150px;height:150px;background:rgba(255,255,255,0.05);border-radius:50%}
-        .header-label{font-size:0.75rem;letter-spacing:1.5px;opacity:0.7;margin-bottom:8px}
-        .header h1{font-size:1.5rem;font-weight:700;margin-bottom:12px}
-        .pet-info{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px}
-        .pet-info-item{background:rgba(255,255,255,0.12);padding:12px 18px;border-radius:10px;border:1px solid rgba(255,255,255,0.15)}
-        .pet-info-item .label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.8px;opacity:0.7;margin-bottom:2px}
-        .pet-info-item .value{font-size:1rem;font-weight:600}
-        .case-badge{font-family:'SF Mono',SFMono-Regular,Menlo,monospace;background:rgba(255,255,255,0.2);padding:4px 14px;border-radius:8px;font-size:0.85rem;font-weight:700;display:inline-block}
-
-        .card{background:white;border-radius:14px;padding:28px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.04);border:1.5px solid #f0ede8}
-        .card h2{font-size:1.05rem;color:#2C5A8C;margin-bottom:4px}
-        .card .subtitle{font-size:0.82rem;color:#999;margin-bottom:20px}
-
-        .form-group{margin-bottom:20px}
-        .form-group > label{display:block;font-weight:600;margin-bottom:8px;color:#2C2C2C;font-size:0.9rem}
-        input[type="text"],textarea{width:100%;padding:12px 14px;border:1.5px solid #D9D4CC;border-radius:8px;font-size:0.9rem;font-family:inherit;transition:all 0.2s}
-        input[type="text"]:focus,textarea:focus{outline:none;border-color:#4A8ABF;box-shadow:0 0 0 3px rgba(74,138,191,0.1)}
-        textarea{resize:both;min-height:100px;overflow:auto}
-
-        .radio-group{display:flex;gap:16px;flex-wrap:wrap}
-        .radio-group label{display:flex;align-items:center;gap:8px;padding:10px 18px;border:1.5px solid #D9D4CC;border-radius:50px;cursor:pointer;font-weight:500;font-size:0.9rem;transition:all 0.2s}
-        .radio-group label:hover{border-color:#4A8ABF;background:#F0F6FC}
-        .radio-group input[type="radio"]{width:auto;margin:0}
-        .radio-group input[type="radio"]:checked + span{color:#2C5A8C;font-weight:600}
-
-        .table-section{display:none;margin-top:20px;padding-top:16px;border-top:1px solid #f0ede8}
-        .table-section.visible{display:block}
-
-        .dynamic-table{width:100%;border-collapse:collapse;margin:8px 0}
-        .dynamic-table th{text-align:left;padding:10px 12px;background:#f5f8fc;font-size:0.82rem;letter-spacing:0.2px;color:#666;border-bottom:2px solid #e0e8f0;font-weight:600}
-        .dynamic-table td{padding:8px 4px}
-        .dynamic-table textarea{width:100%;padding:10px 12px;border:1.5px solid #D9D4CC;border-radius:8px;font-size:0.85rem;font-family:inherit;resize:vertical;min-height:38px;height:38px;overflow:hidden;line-height:1.4}
-        .dynamic-table textarea:focus{outline:none;border-color:#4A8ABF;box-shadow:0 0 0 3px rgba(74,138,191,0.1);overflow:auto}
-        .btn-add{display:inline-block;padding:8px 18px;background:#E8F0F8;color:#2C5A8C;border:1.5px solid #C0D8F0;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;margin-top:12px;transition:all 0.2s}
-        .btn-add:hover{background:#C0D8F0}
-        .btn-remove{background:none;border:none;color:#ccc;cursor:pointer;font-size:1.2rem;padding:4px 8px;transition:color 0.15s}
-        .btn-remove:hover{color:#e55}
-
-        .form-nav{display:flex;justify-content:space-between;margin-top:28px;padding-top:20px;border-top:2px solid #f0ede8}
-        .btn-back{padding:12px 28px;background:#f0ede8;color:#666;border:none;border-radius:10px;cursor:pointer;font-size:0.9rem;font-weight:600;text-decoration:none;transition:background 0.2s}
-        .btn-back:hover{background:#e0ddd8;text-decoration:none}
-        .btn-submit{padding:12px 36px;background:linear-gradient(135deg,#2C5A8C,#4A8ABF);color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.2s}
-        .btn-submit:hover{box-shadow:0 4px 12px rgba(44,90,140,0.3)}
-
-        .alert{padding:14px 18px;border-radius:10px;margin-bottom:20px;font-size:0.9rem;background:#E8F8E8;color:#2C6B2C;border:1px solid #C0E8C0}
-
-        /* Upload zone styles */
-        .upload-zone{border:2px dashed #C0D8F0;border-radius:12px;padding:32px 24px;text-align:center;cursor:pointer;background:#fafcff;transition:all 0.25s}
-        .upload-zone:hover,.upload-zone.dragover{border-color:#4A8ABF;background:#eef4fb}
-        .upload-zone .upload-icon{margin-bottom:12px}
-        .upload-zone .upload-text{font-size:0.9rem;color:#666;margin-bottom:4px}
-        .upload-zone .upload-hint{font-size:0.78rem;color:#aaa}
-        .upload-zone .browse-btn{display:inline-block;padding:8px 22px;background:#2C5A8C;color:white;border-radius:8px;font-weight:600;font-size:0.85rem;margin-top:14px;cursor:pointer;transition:background 0.2s;border:none}
-        .upload-zone .browse-btn:hover{background:#1E4068}
-        .file-chips{margin-top:12px}
-        .file-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f5f8fc;border:1px solid #e0e8f0;border-radius:8px;margin-top:6px;font-size:0.82rem}
-        .file-chip .file-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#e0e8f0;border-radius:6px;font-size:0.65rem;color:#666;font-weight:700;flex-shrink:0}
-        .file-chip .file-info{flex:1;min-width:0}
-        .file-chip .file-name{font-weight:600;color:#2C2C2C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .file-chip .file-size{font-size:0.75rem;color:#999}
-        .file-chip .file-remove{cursor:pointer;color:#ccc;font-size:1.1rem;padding:2px 6px;transition:color 0.15s;flex-shrink:0}
-        .file-chip .file-remove:hover{color:#e55}
-        .upload-progress{display:none;margin-top:16px;padding:14px;background:#f5f8fc;border-radius:10px;border:1px solid #e0e8f0}
-        .upload-progress.active{display:block}
-        .progress-label{font-size:0.82rem;color:#2C5A8C;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between}
-        .progress-bar-bg{width:100%;height:8px;background:#e0e8f0;border-radius:4px;overflow:hidden}
-        .progress-bar-fill{height:100%;background:linear-gradient(90deg,#2C5A8C,#4A8ABF);border-radius:4px;width:0%;transition:width 0.15s}
-
-        /* ── Tablet ≤768px ────────────────────────── */
-        @media (max-width: 768px) {
-            .container { padding: 12px; }
-            .header { padding: 20px 16px; }
-            .header h1 { font-size: 1.2rem; }
-            .header-label { font-size: 0.7rem; }
-            .card { padding: 20px 16px; }
-            .pet-info { gap: 12px; }
-            .pet-info-item { padding: 10px 14px; }
-            .dynamic-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .dynamic-table thead { min-width: 600px; }
-            .upload-zone { padding: 24px 16px; }
+        /* ── Page shell ─────────────────────────────── */
+        .vf-wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
         }
 
-        /* ── Phone ≤480px ─────────────────────────── */
-        @media (max-width: 480px) {
-            .container { padding: 8px; }
-            .header { padding: 16px 12px; }
-            .header h1 { font-size: 1.05rem; }
-            .header-label { font-size: 0.65rem; letter-spacing: 1px; }
-            .case-badge { font-size: 0.75rem; padding: 3px 10px; }
-            .pet-info { gap: 8px; }
-            .pet-info-item { padding: 8px 12px; flex: 1 1 calc(50% - 8px); }
-            .pet-info-item .value { font-size: 0.9rem; }
-            .card { padding: 16px 12px; }
-            .card h2 { font-size: 0.95rem; }
-            .card .subtitle { font-size: 0.78rem; }
-            .radio-group { gap: 8px; }
-            .radio-group label { padding: 8px 14px; font-size: 0.85rem; }
-            .upload-zone { padding: 20px 14px; }
-            .upload-zone .upload-text { font-size: 0.82rem; }
-            .upload-zone .upload-hint { font-size: 0.72rem; }
-            .upload-zone .browse-btn { padding: 8px 18px; font-size: 0.8rem; }
-            .form-nav { flex-direction: column-reverse; gap: 12px; }
-            .btn-back, .btn-submit { width: 100%; text-align: center; display: block; }
+        /* ── Alert ───────────────────────────────────── */
+        .vf-alert {
+            background: var(--ds-ok-bg);
+            border: 1px solid var(--ds-ok-border);
+            color: var(--ds-ok);
+            padding: 12px 16px;
+            border-radius: var(--ds-radius-sm);
+            font-size: 13.5px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
 
-            /* Dynamic table → stacked card layout */
-            .dynamic-table { display: block; overflow-x: visible; }
-            .dynamic-table thead { display: none; }
-            .dynamic-table tbody { display: block; }
-            .dynamic-table tbody tr {
-                display: block;
-                border: 1.5px solid #e0e8f0;
-                border-radius: 10px;
-                padding: 12px;
-                margin-bottom: 10px;
-                background: #fafcff;
+        /* ── Hero header ─────────────────────────────── */
+        .vf-header {
+            background: linear-gradient(128deg, #061e33 0%, #0c3356 50%, #0f4880 100%);
+            border-radius: var(--ds-radius-lg);
+            padding: 32px 36px 28px;
+            color: #fff;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--ds-shadow-lg);
+        }
+        .vf-header::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 180px; height: 180px;
+            background: rgba(255,255,255,.04);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .vf-eyebrow {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.5);
+            margin-bottom: 6px;
+        }
+        .vf-header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin: 0 0 12px;
+            line-height: 1.15;
+        }
+        .vf-case-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .vf-case-badge {
+            font-family: 'SF Mono', SFMono-Regular, Menlo, monospace;
+            background: rgba(255,255,255,.18);
+            border: 1px solid rgba(255,255,255,.22);
+            padding: 4px 13px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .pet-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .pet-chip {
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: var(--ds-radius-sm);
+            padding: 10px 16px;
+        }
+        .pet-chip .chip-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,.5);
+            margin-bottom: 2px;
+        }
+        .pet-chip .chip-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ── Autosave in header ──────────────────────── */
+        .autosave-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.18);
+            padding: 4px 11px;
+            border-radius: 99px;
+            font-size: 11.5px;
+            color: rgba(255,255,255,.82);
+            font-weight: 600;
+        }
+        .autosave-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.45);
+            flex-shrink: 0;
+        }
+        .autosave-indicator.saving .autosave-dot { background: #f3c84a; }
+        .autosave-indicator.error  .autosave-dot { background: #ef8f8f; }
+
+        /* ── Cards ───────────────────────────────────── */
+        .vf-card {
+            background: var(--ds-panel);
+            border: 1px solid var(--ds-line);
+            border-radius: var(--ds-radius);
+            padding: 28px 30px;
+            margin-bottom: 14px;
+            box-shadow: var(--ds-shadow-sm);
+        }
+        .card-title-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .card-title-icon {
+            width: 34px; height: 34px;
+            background: var(--ds-accent-3);
+            border-radius: var(--ds-radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-title-icon svg { width: 17px; height: 17px; stroke: var(--ds-accent); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .card-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--ds-text);
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
+        .card-sub {
+            font-size: 12.5px;
+            color: var(--ds-muted);
+            margin-bottom: 22px;
+            margin-left: 46px;
+        }
+
+        /* ── Form groups & inputs ────────────────────── */
+        .fg { margin-bottom: 18px; }
+        .fg > label, .fg-label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--ds-text-2);
+            margin-bottom: 7px;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--ds-line-2);
+            border-radius: var(--ds-radius-sm);
+            font-size: 13.5px;
+            font-family: inherit;
+            color: var(--ds-text);
+            background: var(--ds-panel);
+            transition: border-color var(--ds-dur) var(--ds-ease), box-shadow var(--ds-dur) var(--ds-ease);
+            outline: none;
+        }
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: var(--ds-accent);
+            box-shadow: 0 0 0 3px var(--ds-accent-3);
+        }
+        textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
+
+        .form-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+        .form-grid-4 .fg { margin-bottom: 0; }
+
+        /* ── Radio pills ─────────────────────────────── */
+        .radio-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .radio-pills label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border: 1.5px solid var(--ds-line-2);
+            border-radius: 99px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ds-text-2);
+            transition: border-color var(--ds-dur), background var(--ds-dur), color var(--ds-dur);
+        }
+        .radio-pills label:hover {
+            border-color: var(--ds-accent);
+            background: var(--ds-accent-3);
+            color: var(--ds-accent);
+        }
+        .radio-pills input[type="radio"] { accent-color: var(--ds-accent); }
+        .radio-pills input[type="radio"]:checked + span { color: var(--ds-accent); font-weight: 700; }
+
+        /* ── Dynamic tables ──────────────────────────── */
+        .table-section { display: none; margin-top: 20px; }
+        .table-section.visible { display: block; }
+
+        .dtable-wrap {
+            border: 1px solid var(--ds-line);
+            border-radius: var(--ds-radius-sm);
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .dtable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .dtable th {
+            text-align: left;
+            padding: 10px 12px;
+            background: var(--ds-panel-2);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ds-muted);
+            border-bottom: 1px solid var(--ds-line);
+        }
+        .dtable td {
+            padding: 6px 6px;
+            border-bottom: 1px solid var(--ds-line);
+            vertical-align: top;
+        }
+        .dtable tbody tr:last-child td { border-bottom: none; }
+        .dtable textarea {
+            width: 100%;
+            padding: 9px 11px;
+            border: 1.5px solid var(--ds-line);
+            border-radius: 6px;
+            font-size: 12.5px;
+            min-height: 38px;
+            height: 38px;
+            resize: vertical;
+            line-height: 1.4;
+        }
+        .dtable textarea:focus {
+            border-color: var(--ds-accent);
+            box-shadow: 0 0 0 2px var(--ds-accent-3);
+        }
+
+        .btn-add-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--ds-accent-3);
+            color: var(--ds-accent);
+            border: 1.5px solid rgba(11,83,148,.18);
+            border-radius: var(--ds-radius-sm);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: background var(--ds-dur), border-color var(--ds-dur);
+        }
+        .btn-add-row:hover { background: #d5e7f9; border-color: var(--ds-accent); }
+
+        .btn-remove {
+            background: none;
+            border: none;
+            color: var(--ds-muted-2);
+            cursor: pointer;
+            font-size: 15px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            line-height: 1;
+            transition: color var(--ds-dur), background var(--ds-dur);
+        }
+        .btn-remove:hover { color: var(--ds-danger); background: var(--ds-danger-bg); }
+
+        /* ── Upload zone ─────────────────────────────── */
+        .upload-zone {
+            border: 2px dashed var(--ds-line-2);
+            border-radius: var(--ds-radius);
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--ds-panel-2);
+            transition: border-color var(--ds-dur), background var(--ds-dur);
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--ds-accent);
+            background: var(--ds-accent-3);
+        }
+        .upload-zone svg { stroke: var(--ds-accent-2); margin-bottom: 10px; }
+        .upload-zone .upload-text { font-size: 13.5px; color: var(--ds-text-2); font-weight: 600; margin-bottom: 4px; }
+        .upload-zone .upload-hint { font-size: 11.5px; color: var(--ds-muted); }
+        .upload-zone .browse-btn {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 8px 22px;
+            background: var(--ds-accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--ds-radius-sm);
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background var(--ds-dur);
+        }
+        .upload-zone .browse-btn:hover { background: var(--ds-accent-2); }
+
+        /* File chips (new selections) */
+        .file-chips { margin-top: 10px; }
+        .file-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--ds-panel-2);
+            border: 1px solid var(--ds-line);
+            border-radius: var(--ds-radius-sm);
+            margin-top: 6px;
+            font-size: 12.5px;
+        }
+        .file-icon {
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--ds-accent-3);
+            border-radius: 6px;
+            font-size: 9px;
+            color: var(--ds-accent);
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .file-info { flex: 1; min-width: 0; }
+        .file-name { font-weight: 600; color: var(--ds-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-size { font-size: 11px; color: var(--ds-muted); }
+        .file-remove { cursor: pointer; color: var(--ds-muted-2); font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: color var(--ds-dur), background var(--ds-dur); flex-shrink: 0; }
+        .file-remove:hover { color: var(--ds-danger); background: var(--ds-danger-bg); }
+
+        /* Previously-uploaded files */
+        .uploads-prev { margin-bottom: 16px; }
+        .uploads-prev-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ds-muted);
+            margin-bottom: 8px;
+        }
+        .upload-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--ds-panel-2);
+            border: 1px solid var(--ds-line);
+            border-radius: var(--ds-radius-sm);
+            margin-bottom: 6px;
+        }
+        .upload-thumb {
+            width: 44px; height: 44px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--ds-line);
+            flex-shrink: 0;
+        }
+        .upload-thumb-icon {
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--ds-accent-3);
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--ds-accent);
+            flex-shrink: 0;
+        }
+        .upload-name {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ds-accent);
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .upload-name:hover { text-decoration: underline; }
+        .upload-date { font-size: 11.5px; color: var(--ds-muted); white-space: nowrap; }
+
+        /* Upload progress */
+        .upload-progress { display: none; margin-top: 16px; padding: 14px 16px; background: var(--ds-panel-2); border-radius: var(--ds-radius-sm); border: 1px solid var(--ds-line); }
+        .upload-progress.active { display: block; }
+        .progress-label { font-size: 12px; color: var(--ds-accent); font-weight: 700; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .progress-bar-bg { width: 100%; height: 6px; background: var(--ds-line); border-radius: 99px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--ds-accent), var(--ds-accent-2)); border-radius: 99px; width: 0%; transition: width 0.15s; }
+
+        /* ── Form footer ─────────────────────────────── */
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--ds-line);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .footer-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .btn-cancel {
+            display: inline-flex; align-items: center;
+            padding: 11px 22px;
+            background: var(--ds-panel);
+            border: 1.5px solid var(--ds-line-2);
+            border-radius: var(--ds-radius-sm);
+            font-size: 13px; font-weight: 700;
+            color: var(--ds-text-2);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background var(--ds-dur), border-color var(--ds-dur);
+        }
+        .btn-cancel:hover { background: var(--ds-panel-2); border-color: var(--ds-muted-2); }
+
+        .btn-draft {
+            display: inline-flex; align-items: center;
+            padding: 11px 22px;
+            background: var(--ds-accent-3);
+            border: 1.5px solid rgba(11,83,148,.18);
+            border-radius: var(--ds-radius-sm);
+            font-size: 13px; font-weight: 700;
+            color: var(--ds-accent);
+            cursor: pointer;
+            transition: background var(--ds-dur);
+        }
+        .btn-draft:hover { background: #d5e7f9; }
+
+        .btn-submit-form {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 11px 28px;
+            background: linear-gradient(135deg, var(--ds-accent) 0%, var(--ds-accent-2) 100%);
+            border: none;
+            border-radius: var(--ds-radius-sm);
+            font-size: 13px; font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(11,83,148,.22);
+            transition: box-shadow var(--ds-dur), opacity var(--ds-dur);
+        }
+        .btn-submit-form:hover { box-shadow: 0 4px 14px rgba(11,83,148,.35); }
+        .btn-submit-form:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ── Responsive ──────────────────────────────── */
+        @media (max-width: 768px) {
+            .vf-header { padding: 24px 20px 20px; }
+            .vf-header h1 { font-size: 1.35rem; }
+            .vf-wrap { padding: 16px 14px 48px; }
+            .vf-card { padding: 20px 18px; }
+            .dtable-wrap { overflow-x: auto; }
+            .dtable { min-width: 560px; }
+        }
+        @media (max-width: 480px) {
+            .vf-header { padding: 18px 16px 16px; border-radius: var(--ds-radius); }
+            .vf-header h1 { font-size: 1.15rem; }
+            .pet-chips { gap: 8px; }
+            .pet-chip { padding: 8px 12px; flex: 1 1 calc(50% - 8px); }
+            .vf-card { padding: 16px 14px; }
+            .card-sub { margin-left: 0; margin-top: 6px; }
+            .card-title-row { align-items: center; }
+            .form-footer { flex-direction: column-reverse; }
+            .btn-cancel, .btn-draft, .btn-submit-form { width: 100%; justify-content: center; }
+            /* Dynamic table → stacked on phone */
+            .dtable-wrap { overflow-x: visible; }
+            .dtable, .dtable tbody, .dtable tr, .dtable td { display: block; min-width: 0; }
+            .dtable thead { display: none; }
+            .dtable tbody tr {
+                border: 1px solid var(--ds-line);
+                border-radius: var(--ds-radius-sm);
+                padding: 10px;
+                margin-bottom: 8px;
+                background: var(--ds-panel-2);
             }
-            .dynamic-table tbody td {
-                display: block;
-                padding: 4px 0;
-                position: relative;
-            }
-            .dynamic-table tbody td::before {
+            .dtable tbody td { padding: 4px 0; }
+            .dtable tbody td::before {
                 content: attr(data-label);
                 display: block;
-                font-size: 0.72rem;
-                font-weight: 600;
-                color: #2C5A8C;
-                letter-spacing: 0.3px;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--ds-accent);
+                letter-spacing: 0.04em;
                 margin-bottom: 2px;
             }
-            .dynamic-table tbody td:last-child {
-                text-align: right;
-                padding-top: 8px;
-                border-top: 1px solid #f0ede8;
-                margin-top: 4px;
-            }
-            .dynamic-table tbody td:last-child::before { display: none; }
-            .dynamic-table textarea { min-height: 36px; }
-
-            /* File chips compact */
-            .file-chip { padding: 8px 10px; gap: 8px; }
-            .file-chip .file-icon { width: 28px; height: 28px; font-size: 0.6rem; }
-            .file-chip .file-name { font-size: 0.8rem; }
+            .dtable tbody td:last-child { text-align: right; padding-top: 8px; border-top: 1px solid var(--ds-line); margin-top: 4px; }
+            .dtable tbody td:last-child::before { display: none; }
+            .upload-zone { padding: 22px 14px; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="nav">
-        <a href="{% url 'case_detail' pet.pk %}">← Back to {{ pet.name }}</a>
-    </div>
-
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-
-    <div class="header">
-        <div class="header-label">To be filled by the Referring Vet / Primary Vet</div>
-        <h1>Clinical History Form</h1>
-        <div style="margin-top:4px"><span class="case-badge">{{ pet.owner.case_id }}</span></div>
-
-        <div class="pet-info">
-            <div class="pet-info-item">
-                <div class="label">Patient</div>
-                <div class="value">{{ pet.name }}</div>
-            </div>
-            <div class="pet-info-item">
-                <div class="label">Breed</div>
-                <div class="value">{{ pet.breed }}</div>
-            </div>
-            <div class="pet-info-item">
-                <div class="label">Age</div>
-                <div class="value">{{ pet.dob_age }}</div>
-            </div>
-            <div class="pet-info-item">
-                <div class="label">Owner</div>
-                <div class="value">{{ pet.owner.name }}</div>
-            </div>
-            {% if pet.current_weight_kg %}
-            <div class="pet-info-item">
-                <div class="label">Weight</div>
-                <div class="value">{{ pet.current_weight_kg }} kg</div>
-            </div>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+    <aside class="app-sidebar app-sidebar--blue" aria-label="Primary navigation">
+        <p class="brand">POSHTIK NUTRIVET</p>
+        <p class="brand-sub">Vet Clinical Form</p>
+        <nav>
+            <p class="nav-section">Navigation</p>
+            {% if cancel_url %}
+            <a href="{{ cancel_url }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 7l9 9 9-9"/></svg>
+                Case Detail
+            </a>
             {% endif %}
+            <a href="{% url 'vet_cases' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                Vet Cases
+            </a>
+            <a class="active" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+                Vet Form
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                Logout
+            </a>
         </div>
-    </div>
+    </aside>
 
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
+    <main id="main-content" class="app-main">
+        <div class="vf-wrap">
 
-        <!-- Clinical Conditions -->
-        <div class="card">
-            <h2>Clinical Conditions Being Treated</h2>
-            <p class="subtitle">Current medical conditions, their symptoms, and ongoing treatment</p>
-
-            <div class="form-group">
-                <label>Is this patient currently being treated for any medical conditions?</label>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="has_conditions" value="yes" onclick="document.getElementById('conditions-section').classList.add('visible')" {% if conditions %}checked{% endif %}>
-                        <span>Yes</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="has_conditions" value="no" onclick="document.getElementById('conditions-section').classList.remove('visible')" {% if not conditions %}checked{% endif %}>
-                        <span>No</span>
-                    </label>
-                </div>
-            </div>
-
-            <div id="conditions-section" class="table-section {% if conditions %}visible{% endif %}">
-                <table class="dynamic-table" id="conditions-table">
-                    <thead>
-                        <tr>
-                            <th>Condition / Disease</th>
-                            <th>Clinical Symptoms</th>
-                            <th>Medication</th>
-                            <th>Dose & Frequency</th>
-                            <th>Treatment Length</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for c in conditions %}
-                        <tr>
-                            <td data-label="Condition / Disease"><textarea name="cond_disease[]">{{ c.condition_disease }}</textarea></td>
-                            <td data-label="Clinical Symptoms"><textarea name="cond_symptoms[]">{{ c.clinical_symptoms }}</textarea></td>
-                            <td data-label="Medication"><textarea name="cond_medication[]">{{ c.medication_name }}</textarea></td>
-                            <td data-label="Dose & Frequency"><textarea name="cond_dose[]">{{ c.dose_frequency }}</textarea></td>
-                            <td data-label="Treatment Length"><textarea name="cond_length[]">{{ c.treatment_length }}</textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td data-label="Condition / Disease"><textarea name="cond_disease[]" placeholder="e.g. Diabetes"></textarea></td>
-                            <td data-label="Clinical Symptoms"><textarea name="cond_symptoms[]" placeholder="Symptoms observed"></textarea></td>
-                            <td data-label="Medication"><textarea name="cond_medication[]" placeholder="Medication name"></textarea></td>
-                            <td data-label="Dose & Frequency"><textarea name="cond_dose[]" placeholder="e.g. 5mg twice daily"></textarea></td>
-                            <td data-label="Treatment Length"><textarea name="cond_length[]" placeholder="e.g. 3 months"></textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <button type="button" class="btn-add" onclick="addRow('conditions-table',['cond_disease[]','cond_symptoms[]','cond_medication[]','cond_dose[]','cond_length[]'])">+ Add Condition</button>
-            </div>
-        </div>
-
-        <!-- Long-term Medications -->
-        <div class="card">
-            <h2>Long-term Medications</h2>
-            <p class="subtitle">Medications the patient has been on for an extended period</p>
-
-            <div class="form-group">
-                <label>Is this patient on any long-term medications?</label>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="has_medications" value="yes" onclick="document.getElementById('meds-section').classList.add('visible')" {% if medications %}checked{% endif %}>
-                        <span>Yes</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="has_medications" value="no" onclick="document.getElementById('meds-section').classList.remove('visible')" {% if not medications %}checked{% endif %}>
-                        <span>No</span>
-                    </label>
-                </div>
-            </div>
-
-            <div id="meds-section" class="table-section {% if medications %}visible{% endif %}">
-                <table class="dynamic-table" id="meds-table">
-                    <thead>
-                        <tr>
-                            <th>Medication Name</th>
-                            <th>Dose</th>
-                            <th>Frequency</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for m in medications %}
-                        <tr>
-                            <td data-label="Medication Name"><textarea name="med_name[]">{{ m.medication_name }}</textarea></td>
-                            <td data-label="Dose"><textarea name="med_dose[]">{{ m.dose }}</textarea></td>
-                            <td data-label="Frequency"><textarea name="med_frequency[]">{{ m.frequency }}</textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td data-label="Medication Name"><textarea name="med_name[]" placeholder="Medication name"></textarea></td>
-                            <td data-label="Dose"><textarea name="med_dose[]" placeholder="e.g. 10mg"></textarea></td>
-                            <td data-label="Frequency"><textarea name="med_frequency[]" placeholder="e.g. Once daily"></textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <button type="button" class="btn-add" onclick="addRow('meds-table',['med_name[]','med_dose[]','med_frequency[]'])">+ Add Medication</button>
-            </div>
-        </div>
-
-        <!-- Surgical History -->
-        <div class="card">
-            <h2>Surgical / Procedure History</h2>
-            <p class="subtitle">Previous surgeries or medical procedures performed</p>
-
-            <div class="form-group">
-                <label>Has this patient undergone any surgeries or procedures?</label>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="has_surgeries" value="yes" onclick="document.getElementById('surg-section').classList.add('visible')" {% if surgeries %}checked{% endif %}>
-                        <span>Yes</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="has_surgeries" value="no" onclick="document.getElementById('surg-section').classList.remove('visible')" {% if not surgeries %}checked{% endif %}>
-                        <span>No</span>
-                    </label>
-                </div>
-            </div>
-
-            <div id="surg-section" class="table-section {% if surgeries %}visible{% endif %}">
-                <table class="dynamic-table" id="surg-table">
-                    <thead>
-                        <tr>
-                            <th>Surgery / Procedure</th>
-                            <th>Date Performed</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for s in surgeries %}
-                        <tr>
-                            <td data-label="Surgery / Procedure"><textarea name="surg_name[]">{{ s.surgery_name }}</textarea></td>
-                            <td data-label="Date Performed"><textarea name="surg_date[]">{{ s.date_performed }}</textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td data-label="Surgery / Procedure"><textarea name="surg_name[]" placeholder="e.g. Spay / Neuter"></textarea></td>
-                            <td data-label="Date Performed"><textarea name="surg_date[]" placeholder="e.g. Jan 2025"></textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <button type="button" class="btn-add" onclick="addRow('surg-table',['surg_name[]','surg_date[]'])">+ Add Surgery</button>
-            </div>
-        </div>
-
-        <!-- Diagnostic Imaging -->
-        <div class="card">
-            <h2>Diagnostic Imaging</h2>
-            <p class="subtitle">X-rays, ultrasounds, MRIs, or other imaging studies</p>
-
-            <div class="form-group">
-                <label>Has any diagnostic imaging been performed?</label>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="has_imaging" value="yes" onclick="document.getElementById('img-section').classList.add('visible')" {% if imaging %}checked{% endif %}>
-                        <span>Yes</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="has_imaging" value="no" onclick="document.getElementById('img-section').classList.remove('visible')" {% if not imaging %}checked{% endif %}>
-                        <span>No</span>
-                    </label>
-                </div>
-            </div>
-
-            <div id="img-section" class="table-section {% if imaging %}visible{% endif %}">
-                <table class="dynamic-table" id="img-table">
-                    <thead>
-                        <tr>
-                            <th>Imaging Type</th>
-                            <th>Date Performed</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for im in imaging %}
-                        <tr>
-                            <td data-label="Imaging Type"><textarea name="img_type[]">{{ im.imaging_type }}</textarea></td>
-                            <td data-label="Date Performed"><textarea name="img_date[]">{{ im.date_performed }}</textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td data-label="Imaging Type"><textarea name="img_type[]" placeholder="e.g. X-ray, Ultrasound, MRI"></textarea></td>
-                            <td data-label="Date Performed"><textarea name="img_date[]" placeholder="e.g. Feb 2026"></textarea></td>
-                            <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()">x</button></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <button type="button" class="btn-add" onclick="addRow('img-table',['img_type[]','img_date[]'])">+ Add Imaging</button>
-            </div>
-        </div>
-
-        <!-- Blood Work / Lab Reports Upload -->
-        <div class="card">
-            <h2>Blood Work / Lab Reports</h2>
-            <p class="subtitle">Upload CBC, biochemistry reports, and other lab work</p>
-
-            {% if blood_work_uploads %}
-            <div style="margin-bottom:16px">
-                <p style="font-weight:600;font-size:0.85rem;color:#666;margin-bottom:10px">Previously Uploaded Files:</p>
-                {% for upload in blood_work_uploads %}
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f5f8fc;border-radius:8px;margin-bottom:6px;border:1px solid #e0e8f0">
-                    {% if upload.is_image %}
-                    <img src="{{ upload.file.url }}" alt="{{ upload.original_filename }}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #ddd">
-                    {% else %}
-                    <span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#e0e8f0;border-radius:6px;font-size:0.7rem;color:#666;font-weight:600">PDF</span>
-                    {% endif %}
-                    <a href="{{ upload.file.url }}" target="_blank" style="flex:1;color:#2C5A8C;font-size:0.85rem;text-decoration:none;font-weight:500">{{ upload.original_filename }}</a>
-                    <span style="color:#999;font-size:0.75rem">{{ upload.uploaded_at|date:"d M Y" }}</span>
-                    <form method="POST" action="{% url 'delete_vet_upload' upload.id %}" style="margin:0" onsubmit="return confirm('Remove this file?')">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-remove" title="Remove file">x</button>
-                    </form>
-                </div>
-                {% endfor %}
-            </div>
+            {% if messages %}
+            {% for message in messages %}
+            <div class="vf-alert">{{ message }}</div>
+            {% endfor %}
             {% endif %}
 
-            <div class="form-group">
-                <input type="file" id="file-blood_work" name="vet_files_blood_work" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.doc,.docx" style="display:none">
-                <div class="upload-zone" data-input="file-blood_work">
-                    <div class="upload-icon">
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6v24M14 18l10-10 10 10" stroke="#4A8ABF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 30v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8" stroke="#4A8ABF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <!-- Hero header -->
+            <div class="vf-header">
+                <div class="vf-eyebrow">To be filled by the Referring Vet / Primary Vet</div>
+                <h1>Clinical History Form</h1>
+                <div class="vf-case-row">
+                    <span class="vf-case-badge">{{ pet.owner.case_id }}</span>
+                    <div id="autosave-indicator" class="autosave-indicator" aria-live="polite">
+                        <span class="autosave-dot"></span>
+                        <span id="autosave-text">Draft sync ready</span>
                     </div>
-                    <div class="upload-text">Drag and drop files here</div>
-                    <div class="upload-hint">PDF, JPG, PNG, DOC — max 10 MB each</div>
-                    <button type="button" class="browse-btn">Browse Files</button>
                 </div>
-                <div class="file-chips" id="chips-blood_work"></div>
-            </div>
-        </div>
-
-        <!-- Diagnostic Imaging Reports Upload -->
-        <div class="card">
-            <h2>Diagnostic Imaging Reports</h2>
-            <p class="subtitle">Upload X-ray, ultrasound, MRI reports and images</p>
-
-            {% if imaging_uploads %}
-            <div style="margin-bottom:16px">
-                <p style="font-weight:600;font-size:0.85rem;color:#666;margin-bottom:10px">Previously Uploaded Files:</p>
-                {% for upload in imaging_uploads %}
-                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f5f8fc;border-radius:8px;margin-bottom:6px;border:1px solid #e0e8f0">
-                    {% if upload.is_image %}
-                    <img src="{{ upload.file.url }}" alt="{{ upload.original_filename }}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #ddd">
-                    {% else %}
-                    <span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#e0e8f0;border-radius:6px;font-size:0.7rem;color:#666;font-weight:600">PDF</span>
-                    {% endif %}
-                    <a href="{{ upload.file.url }}" target="_blank" style="flex:1;color:#2C5A8C;font-size:0.85rem;text-decoration:none;font-weight:500">{{ upload.original_filename }}</a>
-                    <span style="color:#999;font-size:0.75rem">{{ upload.uploaded_at|date:"d M Y" }}</span>
-                    <form method="POST" action="{% url 'delete_vet_upload' upload.id %}" style="margin:0" onsubmit="return confirm('Remove this file?')">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-remove" title="Remove file">x</button>
-                    </form>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <div class="form-group">
-                <input type="file" id="file-diagnostic_imaging" name="vet_files_diagnostic_imaging" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.dcm" style="display:none">
-                <div class="upload-zone" data-input="file-diagnostic_imaging">
-                    <div class="upload-icon">
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6v24M14 18l10-10 10 10" stroke="#4A8ABF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 30v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8" stroke="#4A8ABF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div class="pet-chips">
+                    <div class="pet-chip">
+                        <div class="chip-label">Patient</div>
+                        <div class="chip-value">{{ pet.name }}</div>
                     </div>
-                    <div class="upload-text">Drag and drop files here</div>
-                    <div class="upload-hint">PDF, JPG, PNG, DICOM — max 10 MB each</div>
-                    <button type="button" class="browse-btn">Browse Files</button>
+                    <div class="pet-chip">
+                        <div class="chip-label">Breed</div>
+                        <div class="chip-value">{{ pet.breed|default:"—" }}</div>
+                    </div>
+                    <div class="pet-chip">
+                        <div class="chip-label">Age</div>
+                        <div class="chip-value">{{ pet.dob_age|default:"—" }}</div>
+                    </div>
+                    <div class="pet-chip">
+                        <div class="chip-label">Owner</div>
+                        <div class="chip-value">{{ pet.owner.name }}</div>
+                    </div>
+                    {% if pet.current_weight_kg %}
+                    <div class="pet-chip">
+                        <div class="chip-label">Weight</div>
+                        <div class="chip-value">{{ pet.current_weight_kg }} kg</div>
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="file-chips" id="chips-diagnostic_imaging"></div>
             </div>
-        </div>
 
-        <!-- Additional Notes -->
-        <div class="card">
-            <h2>Additional Clinical Notes</h2>
-            <p class="subtitle">Any other observations, recommendations, or referral notes</p>
-            <div class="form-group">
-                <textarea name="additional_notes" placeholder="Any additional clinical notes, observations, or recommendations...">{% if clinical %}{{ clinical.additional_notes }}{% endif %}</textarea>
-            </div>
-        </div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
 
-        <!-- Upload progress bar (shown during form submit) -->
-        <div class="upload-progress" id="upload-progress">
-            <div class="progress-label">
-                <span id="progress-text">Uploading files...</span>
-                <span id="progress-pct">0%</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="progress-bar"></div>
-            </div>
-        </div>
+                <!-- Referring Vet Details -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div class="card-title">Referring Veterinarian Details</div>
+                    </div>
+                    <div class="card-sub">Confirm or update primary vet contact before submitting clinical history</div>
+                    <div class="form-grid-4">
+                        <div class="fg">
+                            <label>Veterinarian Name</label>
+                            <input type="text" name="vet_name" value="{% if primary_vet %}{{ primary_vet.vet_name }}{% endif %}" placeholder="Dr. Name">
+                        </div>
+                        <div class="fg">
+                            <label>Practice / Clinic</label>
+                            <input type="text" name="vet_practice" value="{% if primary_vet %}{{ primary_vet.practice_name_location }}{% endif %}" placeholder="Clinic name and location">
+                        </div>
+                        <div class="fg">
+                            <label>Clinic Phone</label>
+                            <input type="text" name="vet_phone" value="{% if primary_vet %}{{ primary_vet.clinic_phone }}{% endif %}" placeholder="+91 ...">
+                        </div>
+                        <div class="fg">
+                            <label>Clinic Email</label>
+                            <input type="text" name="vet_email" value="{% if primary_vet %}{{ primary_vet.email }}{% endif %}" placeholder="clinic@example.com">
+                        </div>
+                    </div>
+                </div>
 
-        <div class="form-nav">
-            <a href="{% url 'case_detail' pet.pk %}" class="btn-back">Cancel</a>
-            <button type="button" class="btn-submit" id="submit-btn" onclick="submitWithProgress()">Save Clinical History</button>
+                <!-- Clinical Conditions -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <div class="card-title">Clinical Conditions Being Treated</div>
+                    </div>
+                    <div class="card-sub">Current medical conditions, symptoms, and ongoing treatment</div>
+                    <div class="fg">
+                        <label class="fg-label">Is this patient currently being treated for any medical conditions?</label>
+                        <div class="radio-pills">
+                            <label>
+                                <input type="radio" name="has_conditions" value="yes" onclick="document.getElementById('conditions-section').classList.add('visible')" {% if conditions %}checked{% endif %}>
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="has_conditions" value="no" onclick="document.getElementById('conditions-section').classList.remove('visible')" {% if not conditions %}checked{% endif %}>
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="conditions-section" class="table-section {% if conditions %}visible{% endif %}">
+                        <div class="dtable-wrap">
+                            <table class="dtable" id="conditions-table">
+                                <thead>
+                                    <tr>
+                                        <th>Condition / Disease</th>
+                                        <th>Clinical Symptoms</th>
+                                        <th>Medication</th>
+                                        <th>Dose &amp; Frequency</th>
+                                        <th>Treatment Length</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in conditions %}
+                                    <tr>
+                                        <td data-label="Condition / Disease"><textarea name="cond_disease[]">{{ c.condition_disease }}</textarea></td>
+                                        <td data-label="Clinical Symptoms"><textarea name="cond_symptoms[]">{{ c.clinical_symptoms }}</textarea></td>
+                                        <td data-label="Medication"><textarea name="cond_medication[]">{{ c.medication_name }}</textarea></td>
+                                        <td data-label="Dose &amp; Frequency"><textarea name="cond_dose[]">{{ c.dose_frequency }}</textarea></td>
+                                        <td data-label="Treatment Length"><textarea name="cond_length[]">{{ c.treatment_length }}</textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td data-label="Condition / Disease"><textarea name="cond_disease[]" placeholder="e.g. Diabetes"></textarea></td>
+                                        <td data-label="Clinical Symptoms"><textarea name="cond_symptoms[]" placeholder="Symptoms observed"></textarea></td>
+                                        <td data-label="Medication"><textarea name="cond_medication[]" placeholder="Medication name"></textarea></td>
+                                        <td data-label="Dose &amp; Frequency"><textarea name="cond_dose[]" placeholder="e.g. 5mg twice daily"></textarea></td>
+                                        <td data-label="Treatment Length"><textarea name="cond_length[]" placeholder="e.g. 3 months"></textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn-add-row" onclick="addRow('conditions-table',['cond_disease[]','cond_symptoms[]','cond_medication[]','cond_dose[]','cond_length[]'])">
+                            + Add Condition
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Long-term Medications -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 3v18M8 7h8M8 17h8M6 12h12"/></svg>
+                        </div>
+                        <div class="card-title">Long-term Medications</div>
+                    </div>
+                    <div class="card-sub">Medications the patient has been on for an extended period</div>
+                    <div class="fg">
+                        <label class="fg-label">Is this patient on any long-term medications?</label>
+                        <div class="radio-pills">
+                            <label>
+                                <input type="radio" name="has_medications" value="yes" onclick="document.getElementById('meds-section').classList.add('visible')" {% if medications %}checked{% endif %}>
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="has_medications" value="no" onclick="document.getElementById('meds-section').classList.remove('visible')" {% if not medications %}checked{% endif %}>
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="meds-section" class="table-section {% if medications %}visible{% endif %}">
+                        <div class="dtable-wrap">
+                            <table class="dtable" id="meds-table">
+                                <thead>
+                                    <tr>
+                                        <th>Medication Name</th>
+                                        <th>Dose</th>
+                                        <th>Frequency</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in medications %}
+                                    <tr>
+                                        <td data-label="Medication Name"><textarea name="med_name[]">{{ m.medication_name }}</textarea></td>
+                                        <td data-label="Dose"><textarea name="med_dose[]">{{ m.dose }}</textarea></td>
+                                        <td data-label="Frequency"><textarea name="med_frequency[]">{{ m.frequency }}</textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td data-label="Medication Name"><textarea name="med_name[]" placeholder="Medication name"></textarea></td>
+                                        <td data-label="Dose"><textarea name="med_dose[]" placeholder="e.g. 10mg"></textarea></td>
+                                        <td data-label="Frequency"><textarea name="med_frequency[]" placeholder="e.g. Once daily"></textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn-add-row" onclick="addRow('meds-table',['med_name[]','med_dose[]','med_frequency[]'])">
+                            + Add Medication
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Surgical History -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <div class="card-title">Surgical / Procedure History</div>
+                    </div>
+                    <div class="card-sub">Previous surgeries or medical procedures performed</div>
+                    <div class="fg">
+                        <label class="fg-label">Has this patient undergone any surgeries or procedures?</label>
+                        <div class="radio-pills">
+                            <label>
+                                <input type="radio" name="has_surgeries" value="yes" onclick="document.getElementById('surg-section').classList.add('visible')" {% if surgeries %}checked{% endif %}>
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="has_surgeries" value="no" onclick="document.getElementById('surg-section').classList.remove('visible')" {% if not surgeries %}checked{% endif %}>
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="surg-section" class="table-section {% if surgeries %}visible{% endif %}">
+                        <div class="dtable-wrap">
+                            <table class="dtable" id="surg-table">
+                                <thead>
+                                    <tr>
+                                        <th>Surgery / Procedure</th>
+                                        <th>Date Performed</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in surgeries %}
+                                    <tr>
+                                        <td data-label="Surgery / Procedure"><textarea name="surg_name[]">{{ s.surgery_name }}</textarea></td>
+                                        <td data-label="Date Performed"><textarea name="surg_date[]">{{ s.date_performed }}</textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td data-label="Surgery / Procedure"><textarea name="surg_name[]" placeholder="e.g. Spay / Neuter"></textarea></td>
+                                        <td data-label="Date Performed"><textarea name="surg_date[]" placeholder="e.g. Jan 2025"></textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn-add-row" onclick="addRow('surg-table',['surg_name[]','surg_date[]'])">
+                            + Add Surgery
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Imaging -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+                        </div>
+                        <div class="card-title">Diagnostic Imaging</div>
+                    </div>
+                    <div class="card-sub">X-rays, ultrasounds, MRIs, or other imaging studies</div>
+                    <div class="fg">
+                        <label class="fg-label">Has any diagnostic imaging been performed?</label>
+                        <div class="radio-pills">
+                            <label>
+                                <input type="radio" name="has_imaging" value="yes" onclick="document.getElementById('img-section').classList.add('visible')" {% if imaging %}checked{% endif %}>
+                                <span>Yes</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="has_imaging" value="no" onclick="document.getElementById('img-section').classList.remove('visible')" {% if not imaging %}checked{% endif %}>
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="img-section" class="table-section {% if imaging %}visible{% endif %}">
+                        <div class="dtable-wrap">
+                            <table class="dtable" id="img-table">
+                                <thead>
+                                    <tr>
+                                        <th>Imaging Type</th>
+                                        <th>Date Performed</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for im in imaging %}
+                                    <tr>
+                                        <td data-label="Imaging Type"><textarea name="img_type[]">{{ im.imaging_type }}</textarea></td>
+                                        <td data-label="Date Performed"><textarea name="img_date[]">{{ im.date_performed }}</textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td data-label="Imaging Type"><textarea name="img_type[]" placeholder="e.g. X-ray, Ultrasound, MRI"></textarea></td>
+                                        <td data-label="Date Performed"><textarea name="img_date[]" placeholder="e.g. Feb 2026"></textarea></td>
+                                        <td><button type="button" class="btn-remove" onclick="this.closest('tr').remove()" title="Remove row">×</button></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn-add-row" onclick="addRow('img-table',['img_type[]','img_date[]'])">
+                            + Add Imaging
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Blood Work / Lab Reports Upload -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                        </div>
+                        <div class="card-title">Blood Work / Lab Reports</div>
+                    </div>
+                    <div class="card-sub">Upload CBC, biochemistry reports, and other lab work</div>
+
+                    {% if blood_work_uploads %}
+                    <div class="uploads-prev">
+                        <div class="uploads-prev-label">Previously Uploaded</div>
+                        {% for upload in blood_work_uploads %}
+                        <div class="upload-row">
+                            {% if upload.is_image %}
+                                <img class="upload-thumb" src="{{ upload.file.url }}" alt="{{ upload.original_filename }}">
+                            {% else %}
+                                <div class="upload-thumb-icon">PDF</div>
+                            {% endif %}
+                            <a class="upload-name" href="{{ upload.file.url }}" target="_blank">{{ upload.original_filename }}</a>
+                            <span class="upload-date">{{ upload.uploaded_at|date:"d M Y" }}</span>
+                            {% if can_delete_uploads %}
+                            <form method="POST" action="{% url 'delete_vet_upload' upload.id %}" style="margin:0" onsubmit="return confirm('Remove this file?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-remove" title="Remove file">×</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="fg">
+                        <input type="file" id="file-blood_work" name="vet_files_blood_work" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.doc,.docx" style="display:none">
+                        <div class="upload-zone" data-input="file-blood_work">
+                            <svg width="44" height="44" viewBox="0 0 48 48" fill="none"><path d="M24 6v24M14 18l10-10 10 10" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 30v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <div class="upload-text">Drag and drop files here</div>
+                            <div class="upload-hint">PDF, JPG, PNG, DOC — max 10 MB each</div>
+                            <button type="button" class="browse-btn">Browse Files</button>
+                        </div>
+                        <div class="file-chips" id="chips-blood_work"></div>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Imaging Reports Upload -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                        <div class="card-title">Diagnostic Imaging Reports</div>
+                    </div>
+                    <div class="card-sub">Upload X-ray, ultrasound, MRI reports and images</div>
+
+                    {% if imaging_uploads %}
+                    <div class="uploads-prev">
+                        <div class="uploads-prev-label">Previously Uploaded</div>
+                        {% for upload in imaging_uploads %}
+                        <div class="upload-row">
+                            {% if upload.is_image %}
+                                <img class="upload-thumb" src="{{ upload.file.url }}" alt="{{ upload.original_filename }}">
+                            {% else %}
+                                <div class="upload-thumb-icon">PDF</div>
+                            {% endif %}
+                            <a class="upload-name" href="{{ upload.file.url }}" target="_blank">{{ upload.original_filename }}</a>
+                            <span class="upload-date">{{ upload.uploaded_at|date:"d M Y" }}</span>
+                            {% if can_delete_uploads %}
+                            <form method="POST" action="{% url 'delete_vet_upload' upload.id %}" style="margin:0" onsubmit="return confirm('Remove this file?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-remove" title="Remove file">×</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="fg">
+                        <input type="file" id="file-diagnostic_imaging" name="vet_files_diagnostic_imaging" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.dcm" style="display:none">
+                        <div class="upload-zone" data-input="file-diagnostic_imaging">
+                            <svg width="44" height="44" viewBox="0 0 48 48" fill="none"><path d="M24 6v24M14 18l10-10 10 10" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 30v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <div class="upload-text">Drag and drop files here</div>
+                            <div class="upload-hint">PDF, JPG, PNG, DICOM — max 10 MB each</div>
+                            <button type="button" class="browse-btn">Browse Files</button>
+                        </div>
+                        <div class="file-chips" id="chips-diagnostic_imaging"></div>
+                    </div>
+                </div>
+
+                <!-- Additional Clinical Notes -->
+                <div class="vf-card">
+                    <div class="card-title-row">
+                        <div class="card-title-icon">
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        </div>
+                        <div class="card-title">Additional Clinical Notes</div>
+                    </div>
+                    <div class="card-sub">Any other observations, recommendations, or referral notes</div>
+                    <div class="fg">
+                        <textarea name="additional_notes" placeholder="Any additional clinical notes, observations, or recommendations…" style="min-height:120px">{% if clinical %}{{ clinical.additional_notes }}{% endif %}</textarea>
+                    </div>
+                </div>
+
+                <!-- Upload progress bar -->
+                <div class="upload-progress" id="upload-progress">
+                    <div class="progress-label">
+                        <span id="progress-text">Uploading files…</span>
+                        <span id="progress-pct">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progress-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Form footer -->
+                <div class="form-footer">
+                    {% if cancel_url %}
+                        <a href="{{ cancel_url }}" class="btn-cancel">Cancel</a>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+                    <div class="footer-actions">
+                        {% if show_draft_button %}
+                            <button type="button" class="btn-draft" onclick="submitWithProgress('save_draft')">Save Draft</button>
+                        {% endif %}
+                        <button type="button" class="btn-submit-form" id="submit-btn" onclick="submitWithProgress('submit')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>
+                            Save Clinical History
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
+    </main>
 </div>
 
+{{ draft_payload|json_script:"vet-draft-data" }}
 <script>
 /* ── Dynamic table rows ── */
 function addRow(tableId, fieldNames) {
@@ -529,7 +1018,7 @@ function addRow(tableId, fieldNames) {
         tr.appendChild(td);
     });
     var td = document.createElement('td');
-    td.innerHTML = '<button type="button" class="btn-remove" onclick="this.closest(\'tr\').remove()">x</button>';
+    td.innerHTML = '<button type="button" class="btn-remove" onclick="this.closest(\'tr\').remove()" title="Remove row">×</button>';
     tr.appendChild(td);
     tbody.appendChild(tr);
 }
@@ -560,12 +1049,11 @@ function renderChips(inputId) {
         var ext = getFileExt(f.name);
         var isImg = ['JPG','JPEG','PNG','GIF','BMP','WEBP','TIFF'].indexOf(ext) >= 0;
         chip.innerHTML =
-            '<div class="file-icon" style="' + (isImg ? 'background:#e0f0e8;color:#4A7A4F' : 'background:#e0e8f0;color:#666') + '">' + ext + '</div>' +
+            '<div class="file-icon">' + ext + '</div>' +
             '<div class="file-info"><div class="file-name">' + f.name + '</div><div class="file-size">' + formatSize(f.size) + '</div></div>' +
             '<span class="file-remove" data-idx="' + i + '" data-input="' + inputId + '">&#10005;</span>';
         container.appendChild(chip);
     }
-    /* Remove-chip click handlers */
     container.querySelectorAll('.file-remove').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var idx = parseInt(this.getAttribute('data-idx'));
@@ -597,49 +1085,46 @@ function addFiles(inputId, newFiles) {
     renderChips(inputId);
 }
 
-/* Init all upload zones */
 document.querySelectorAll('.upload-zone').forEach(function(zone) {
     var inputId = zone.getAttribute('data-input');
     var fileInput = document.getElementById(inputId);
 
-    /* Click to browse */
     zone.addEventListener('click', function(e) {
-        if (e.target.closest('.browse-btn') || e.target === zone || e.target.closest('.upload-icon') || e.target.closest('.upload-text') || e.target.closest('.upload-hint')) {
+        if (e.target.closest('.browse-btn') || e.target === zone || e.target.closest('svg') || e.target.closest('.upload-text') || e.target.closest('.upload-hint')) {
             fileInput.click();
         }
     });
 
-    /* File input change */
     fileInput.addEventListener('change', function() {
-        if (this.files.length > 0) {
-            addFiles(inputId, this.files);
-        }
+        if (this.files.length > 0) addFiles(inputId, this.files);
     });
 
-    /* Drag events */
-    zone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        zone.classList.add('dragover');
-    });
-    zone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        zone.classList.remove('dragover');
-    });
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', function(e) { e.preventDefault(); e.stopPropagation(); zone.classList.remove('dragover'); });
     zone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         zone.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-            addFiles(inputId, e.dataTransfer.files);
-        }
+        if (e.dataTransfer.files.length > 0) addFiles(inputId, e.dataTransfer.files);
     });
 });
 
 /* ── Submit with upload progress ── */
-function submitWithProgress() {
+function submitWithProgress(action) {
+    window.__vetFormSubmitting = true;
     var form = document.querySelector('form');
+    var oldActionInput = form.querySelector('input[name="action"]');
+    if (oldActionInput) oldActionInput.remove();
+    var actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = action || 'submit';
+    form.appendChild(actionInput);
+
+    if (action === 'save_draft') {
+        form.submit();
+        return;
+    }
+
     var formData = new FormData(form);
     var progressWrap = document.getElementById('upload-progress');
     var progressBar = document.getElementById('progress-bar');
@@ -647,25 +1132,16 @@ function submitWithProgress() {
     var progressText = document.getElementById('progress-text');
     var submitBtn = document.getElementById('submit-btn');
 
-    /* Check if there are files to upload */
     var hasFiles = false;
     for (var pair of formData.entries()) {
-        if (pair[1] instanceof File && pair[1].size > 0) {
-            hasFiles = true;
-            break;
-        }
+        if (pair[1] instanceof File && pair[1].size > 0) { hasFiles = true; break; }
     }
 
-    /* If no files, just submit normally (faster) */
-    if (!hasFiles) {
-        form.submit();
-        return;
-    }
+    if (!hasFiles) { form.submit(); return; }
 
-    /* Show progress */
     progressWrap.classList.add('active');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Uploading...';
+    submitBtn.textContent = 'Uploading…';
     submitBtn.style.opacity = '0.6';
 
     var xhr = new XMLHttpRequest();
@@ -676,11 +1152,7 @@ function submitWithProgress() {
             var pct = Math.round((e.loaded / e.total) * 100);
             progressBar.style.width = pct + '%';
             progressPct.textContent = pct + '%';
-            if (pct < 100) {
-                progressText.textContent = 'Uploading files...';
-            } else {
-                progressText.textContent = 'Processing...';
-            }
+            progressText.textContent = pct < 100 ? 'Uploading files…' : 'Processing…';
         }
     });
 
@@ -689,25 +1161,112 @@ function submitWithProgress() {
             progressText.textContent = 'Done!';
             progressBar.style.width = '100%';
             progressPct.textContent = '100%';
-            /* Follow redirect — Django returns 302, XMLHttpRequest follows it and returns the final page */
-            window.location.href = xhr.responseURL || '{% url "case_detail" pet.pk %}';
+            window.location.href = xhr.responseURL || '{{ submit_redirect_url }}';
         } else {
-            progressText.textContent = 'Error uploading. Retrying...';
+            progressText.textContent = 'Error uploading. Retrying…';
             submitBtn.disabled = false;
             submitBtn.textContent = 'Save Clinical History';
             submitBtn.style.opacity = '1';
-            /* Fallback: normal submit */
             form.submit();
         }
     });
 
     xhr.addEventListener('error', function() {
-        progressText.textContent = 'Network error. Retrying...';
+        progressText.textContent = 'Network error. Retrying…';
         form.submit();
     });
 
     xhr.send(formData);
 }
+
+/* ── Autosave ── */
+(function() {
+    var form = document.querySelector('form');
+    var autosaveTimer = null;
+    var autosaveIndicator = document.getElementById('autosave-indicator');
+    var autosaveText = document.getElementById('autosave-text');
+    var autosaveToast = document.createElement('div');
+    autosaveToast.style.cssText = 'position:fixed;right:14px;bottom:14px;background:#edf8f3;border:1px solid #c9d9d2;color:#205940;padding:8px 10px;border-radius:8px;font-size:12px;display:none;z-index:9999;font-weight:600';
+    autosaveToast.textContent = 'Draft autosaved';
+    document.body.appendChild(autosaveToast);
+
+    function autosaveNow() {
+        if (window.__vetFormSubmitting) return;
+        autosaveIndicator.classList.add('saving');
+        autosaveIndicator.classList.remove('error');
+        autosaveText.textContent = 'Saving draft…';
+        var fd = new FormData(form);
+        fd.set('action', 'autosave');
+        fd.delete('vet_files_blood_work');
+        fd.delete('vet_files_diagnostic_imaging');
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+        }).then(function(resp) {
+            if (!resp.ok) return;
+            return resp.json();
+        }).then(function(data) {
+            autosaveToast.style.display = 'block';
+            setTimeout(function(){ autosaveToast.style.display = 'none'; }, 1200);
+            autosaveIndicator.classList.remove('saving', 'error');
+            if (data && data.saved_at) {
+                var dt = new Date(data.saved_at);
+                autosaveText.textContent = 'Saved at ' + dt.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            } else {
+                autosaveText.textContent = 'Draft saved';
+            }
+        }).catch(function(){
+            autosaveIndicator.classList.remove('saving');
+            autosaveIndicator.classList.add('error');
+            autosaveText.textContent = 'Autosave failed';
+        });
+    }
+
+    function queueAutosave() {
+        if (window.__vetFormSubmitting) return;
+        if (autosaveTimer) clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(autosaveNow, 900);
+    }
+
+    form.addEventListener('input', queueAutosave);
+    form.addEventListener('change', queueAutosave);
+
+    /* Draft restore */
+    var draft = {};
+    try { draft = JSON.parse(document.getElementById("vet-draft-data").textContent || "{}"); } catch(e) { draft = {}; }
+
+    function qsaByName(name) {
+        return document.querySelectorAll('[name="' + name.replace(/"/g, '\\"') + '"]');
+    }
+
+    Object.keys(draft).forEach(function(name) {
+        if (name === "action") return;
+        var values = Array.isArray(draft[name]) ? draft[name] : [draft[name]];
+        var controls = qsaByName(name);
+        if (!controls.length) return;
+        var first = controls[0];
+        if (first.type === "radio") {
+            controls.forEach(function(ctrl) {
+                ctrl.checked = values.indexOf(ctrl.value) !== -1;
+                ctrl.dispatchEvent(new Event("change", { bubbles: true }));
+            });
+            return;
+        }
+        if (first.type === "checkbox") {
+            controls.forEach(function(ctrl) {
+                ctrl.checked = values.indexOf(ctrl.value) !== -1 || values.indexOf("on") !== -1;
+                ctrl.dispatchEvent(new Event("change", { bubbles: true }));
+            });
+            return;
+        }
+        controls.forEach(function(ctrl, idx) {
+            ctrl.value = values[idx] !== undefined ? values[idx] : "";
+            ctrl.dispatchEvent(new Event("input", { bubbles: true }));
+            ctrl.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+    });
+})();
 </script>
 </body>
 </html>

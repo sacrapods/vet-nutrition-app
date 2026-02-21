@@ -1,0 +1,121 @@
+{% extends 'appointments/admin/base.html' %}
+{% load appointments_extras %}
+
+{% block title %}Appointment Detail{% endblock %}
+{% block page_title %}Appointment #{{ appointment.id }}{% endblock %}
+{% block page_subtitle %}Full detail page for appointment operations, provider ownership, notes and audit history.{% endblock %}
+{% block top_action %}<a class="btn" href="{% url 'appointments:admin_appointments' %}">Back to List</a>{% endblock %}
+
+{% block content %}
+<div class="layout" style="grid-template-columns:1fr 1fr;">
+  <section class="panel">
+    <div class="head"><h2>Appointment Information</h2></div>
+    <div class="tbl">
+      <table>
+        <tbody>
+          <tr><th>Pet</th><td>{{ appointment.pet.name }}</td></tr>
+          <tr><th>User</th><td>{% with name=appointment.user.get_full_name %}{% if name %}{{ name }} <span style="color:var(--ds-muted);font-size:12px;">({{ appointment.user.email }})</span>{% else %}{{ appointment.user.email|default:appointment.user.username }}{% endif %}{% endwith %}</td></tr>
+          <tr><th>Assigned Provider</th><td>{% if appointment.assigned_provider %}{% with name=appointment.assigned_provider.get_full_name %}{% if name %}{{ name }}{% else %}{{ appointment.assigned_provider.email|default:appointment.assigned_provider.username }}{% endif %}{% endwith %}{% else %}-{% endif %}</td></tr>
+          <tr><th>Assigned At</th><td>{% if appointment.assigned_at %}{{ appointment.assigned_at|ist|date:'d M Y, h:i A' }}{% else %}-{% endif %}</td></tr>
+          <tr><th>Start</th><td>{{ appointment.start_at|ist|date:'d M Y, h:i A' }}</td></tr>
+          <tr><th>End</th><td>{{ appointment.end_at|ist|date:'d M Y, h:i A' }}</td></tr>
+          <tr><th>Type</th><td>{{ appointment.appointment_type_label }}</td></tr>
+          <tr><th>Status</th><td><span class="status s-{{ appointment.status }}">{{ appointment.get_status_display }}</span></td></tr>
+          <tr><th>Payment</th><td>{{ appointment.get_payment_status_display }}{% if appointment.payment_reference %} • {{ appointment.payment_reference }}{% endif %}</td></tr>
+          <tr><th>Last Modified By</th><td>{% if appointment.last_modified_by %}{% with name=appointment.last_modified_by.get_full_name %}{% if name %}{{ name }}{% else %}{{ appointment.last_modified_by.email|default:appointment.last_modified_by.username }}{% endif %}{% endwith %}{% else %}-{% endif %}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" style="padding:14px;">
+    <h2 style="margin:0 0 10px; font-size:17px;">Update Status & Notes</h2>
+    <form method="post" enctype="multipart/form-data" style="display:grid; gap:10px;">
+      {% csrf_token %}
+      <div class="field"><label>Status</label>{{ status_form.status }}</div>
+      <div class="field"><label>Payment Status</label>{{ status_form.payment_status }}</div>
+      <div class="field"><label>Payment Reference</label>{{ status_form.payment_reference }}</div>
+      <div class="field"><label>Assigned Provider</label>{{ status_form.assigned_provider }}</div>
+      <div class="field"><label>Consultation Notes</label>{{ note_form.notes }}</div>
+      <div class="field">
+        <label>Prescription PDF</label>
+        <label class="file-upload-label">
+          {{ note_form.prescription_pdf }}
+          <span class="file-upload-btn">Choose file</span>
+          <span class="file-upload-name">No file chosen</span>
+        </label>
+      </div>
+      <div class="field">
+        <label>Diet Plan PDF</label>
+        <label class="file-upload-label">
+          {{ note_form.diet_plan_pdf }}
+          <span class="file-upload-btn">Choose file</span>
+          <span class="file-upload-name">No file chosen</span>
+        </label>
+      </div>
+      <button class="btn btn-primary" type="submit">Save Changes</button>
+    </form>
+
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+      <h3 style="margin:0 0 8px;font-size:14px;">Apply Note Template</h3>
+      <form method="post" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="apply_note_template">
+        <div class="field" style="min-width:240px;">
+          <label>Template</label>
+          <select name="template_id" required>
+            <option value="">Select template</option>
+            {% for tpl in note_templates %}
+              <option value="{{ tpl.id }}">{{ tpl.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="small-btn" type="submit">Append Template</button>
+      </form>
+    </div>
+  </section>
+</div>
+
+<section class="panel" style="margin-top:12px;">
+  <div class="head"><h2>Reschedule Request History</h2></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Requested By</th><th>Requested Slot</th><th>Status</th><th>Reviewed By</th><th>Note</th></tr></thead>
+      <tbody>
+      {% for req in reschedule_requests %}
+        <tr>
+          <td>{% with name=req.requested_by.get_full_name %}{% if name %}{{ name }}{% else %}{{ req.requested_by.email|default:req.requested_by.username }}{% endif %}{% endwith %}</td>
+          <td>{{ req.requested_start_at|ist|date:'d M Y, h:i A' }}</td>
+          <td><span class="pill">{{ req.get_status_display }}</span></td>
+          <td>{% if req.reviewed_by %}{% with name=req.reviewed_by.get_full_name %}{% if name %}{{ name }}{% else %}{{ req.reviewed_by.email|default:req.reviewed_by.username }}{% endif %}{% endwith %}{% else %}-{% endif %}</td>
+          <td>{{ req.admin_note|default:'-' }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="empty">No reschedule requests yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel" style="margin-top:12px;">
+  <div class="head"><h2>Audit Trail</h2></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>When</th><th>Action</th><th>By</th><th>Summary</th></tr></thead>
+      <tbody>
+      {% for log in audit_logs %}
+        <tr>
+          <td>{{ log.created_at|date:'d M Y, H:i' }}</td>
+          <td>{{ log.action }}</td>
+          <td>{% if log.changed_by %}{% with name=log.changed_by.get_full_name %}{% if name %}{{ name }}{% else %}{{ log.changed_by.email|default:log.changed_by.username }}{% endif %}{% endwith %}{% else %}System{% endif %}</td>
+          <td>{{ log.summary|default:'-' }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="empty">No audit entries for this appointment yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

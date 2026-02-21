@@ -1,0 +1,226 @@
+{% load appointments_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Reschedule</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f3f6f5;--panel:#fff;--line:#d8e2dd;--text:#17221d;--muted:#62726c;--brand:#1f6a4b;--brand-soft:#e8f4ee;--accent:#175e95;--accent-soft:#e7f1fa;--warn:#9a5e2f;--warn-soft:#faeee3;--radius:16px;--shadow:0 16px 34px rgba(19,29,25,.09)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Manrope',sans-serif;background:radial-gradient(circle at 0 0,#e6eeea 0,transparent 36%),radial-gradient(circle at 100% 0,#e8eef7 0,transparent 28%),var(--bg);color:var(--text)}
+    .wrap{max-width:1180px;margin:28px auto;padding:0 16px}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+    h1{margin:0;font-size:34px;letter-spacing:-.03em}
+    .sub{margin-top:6px;font-size:14px;color:var(--muted);max-width:780px}
+    .btn{display:inline-block;text-decoration:none;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:800;border:1px solid var(--line);background:#fff;color:#34423d}
+    .alert{margin-bottom:12px;border-radius:10px;padding:10px 12px;font-size:14px;border:1px solid #e6c7ac;background:var(--warn-soft);color:#6c4527}
+    .info{margin-bottom:12px;border-radius:10px;padding:10px 12px;border:1px solid #c6d9ce;background:#edf8f2;color:#245a42;font-size:14px}
+    .layout{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:start}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .head{padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfdfc,#f7faf9)}
+    .head h2{margin:0;font-size:19px}
+    .head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .body{padding:14px 16px 16px}
+    .field label{display:block;margin-bottom:6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#6f7f79;font-weight:800}
+    .field input,.field select{width:100%;border:1px solid #d5dfda;border-radius:10px;padding:10px;font-family:inherit;font-size:14px}
+    .calendar-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .month-title{font-size:18px;font-weight:800}
+    .nav{display:flex;gap:6px}
+    .icon-btn{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-weight:800}
+    .calendar{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+    .dow{padding:8px 0;text-align:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#73837d;background:#f8fbfa;border-bottom:1px solid var(--line);font-weight:800}
+    .day{border:none;border-right:1px solid #edf2ef;border-bottom:1px solid #edf2ef;background:#fff;min-height:52px;padding:8px;text-align:left;cursor:pointer}
+    .day:nth-child(7n){border-right:none}
+    .day:hover{background:#f2f8f5}
+    .day.disabled{color:#bdc7c3;background:#fafafa;cursor:not-allowed}
+    .day.selected{background:var(--brand-soft);outline:2px solid #95c6af;outline-offset:-2px;font-weight:800}
+    .day.muted{background:#fbfdfc;color:#a8b3ae;cursor:default}
+    .meta{margin-top:10px;color:var(--muted);font-size:13px}
+    .slot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:360px;overflow:auto;padding-right:2px}
+    .slot{border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px;cursor:pointer;text-align:left}
+    .slot .t{font-weight:800;font-size:14px}
+    .slot .s{margin-top:3px;font-size:11px;color:#73827c}
+    .slot:hover{border-color:#99b8ab}
+    .slot.disabled{opacity:.55;cursor:not-allowed;background:#fafafa}
+    .slot.selected{border-color:#95c6af;background:var(--brand-soft)}
+    .badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
+    .badge-note{background:var(--accent-soft);color:var(--accent)}
+    .badge-warn{background:var(--warn-soft);color:var(--warn)}
+    .summary{margin-top:12px;border:1px dashed #bed1c7;border-radius:12px;background:#f8fcfa;padding:12px}
+    .summary .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:14px}
+    .summary .k{color:var(--muted)}
+    .summary .v{font-weight:700;text-align:right}
+    .confirm{margin-top:12px;border:none;width:100%;background:linear-gradient(130deg,#1e6144,#2c7a57);color:#fff;border-radius:12px;padding:12px;font-weight:800;cursor:pointer}
+    .confirm:disabled{background:#b7c8c1;cursor:not-allowed}
+    .hint{margin-top:8px;color:#6c7b75;font-size:12px;text-align:center}
+    .hide-native{display:none}
+    @media (max-width:1024px){.top{flex-direction:column}.top .btn{width:100%;text-align:center}.layout{grid-template-columns:1fr}}
+    @media (max-width:640px){.wrap{margin:16px auto;padding:0 10px}h1{font-size:28px}.body,.head{padding-left:12px;padding-right:12px}.slot-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Request Reschedule</h1>
+      <div class="sub">Select a preferred slot and submit a request. Reschedule is applied only after admin or vet approval.</div>
+    </div>
+    <a class="btn" href="{% url 'appointments:pet_dashboard' %}">Back</a>
+  </div>
+
+  {% if messages %}{% for message in messages %}<div class="alert">{{ message }}</div>{% endfor %}{% endif %}
+  <div class="info">Current slot: <strong>{{ appointment.start_at|ist|date:'d M Y, h:i A' }}</strong></div>
+
+  <form method="post" id="reschedule-form">
+    {% csrf_token %}
+    <div class="hide-native">{{ form.appointment_date }}{{ form.appointment_time }}{{ form.lock_token }}</div>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="head"><h2>Step 1: Select Date</h2><p>Weekdays only. Weekend dates are disabled.</p></div>
+        <div class="body">
+          <div class="calendar-toolbar">
+            <div class="month-title" id="month-title"></div>
+            <div class="nav">
+              <button type="button" class="icon-btn" id="prev-month">‹</button>
+              <button type="button" class="icon-btn" id="next-month">›</button>
+            </div>
+          </div>
+          <div class="calendar">
+            <div class="calendar-grid" id="dow-row"></div>
+            <div class="calendar-grid" id="day-grid"></div>
+          </div>
+          <div class="meta" id="selected-date-label">No date selected.</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>Step 2: Select Time + Send Request</h2><p>Pick one slot and submit your approval request.</p></div>
+        <div class="body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong>Available Slots</strong>
+            <span class="badge badge-warn">Remaining: <span id="remaining-slots">0</span></span>
+          </div>
+          <div id="slots-grid" class="slot-grid">
+            <div class="slot disabled"><div class="t">Select date first</div><div class="s">Slots will appear here</div></div>
+          </div>
+
+          <div class="summary">
+            <div class="row"><span class="k">Current</span><span class="v">{{ appointment.start_at|ist|date:'d M Y, h:i A' }}</span></div>
+            <div class="row"><span class="k">Requested Date</span><span class="v" id="sum-date">-</span></div>
+            <div class="row"><span class="k">Requested Time</span><span class="v" id="sum-time">-</span></div>
+            <div class="row"><span class="k">Type</span><span class="v">{{ appointment.appointment_type_label }}</span></div>
+            <div class="row"><span class="k">Timezone</span><span class="v">Asia/Kolkata</span></div>
+          </div>
+
+          <button type="submit" class="confirm" id="confirm-btn" disabled>Send Reschedule Request</button>
+          <div class="hint">No instant change. Admin or vet must approve this request.</div>
+        </div>
+      </section>
+    </div>
+  </form>
+</div>
+
+<script>
+(function() {
+  const IST_LOCALE = 'en-IN';
+  const form = document.getElementById('reschedule-form');
+  const dateInput = document.getElementById('id_appointment_date');
+  const timeInput = document.getElementById('id_appointment_time');
+  const lockInput = document.getElementById('id_lock_token');
+  const remainingEl = document.getElementById('remaining-slots');
+  const slotsGrid = document.getElementById('slots-grid');
+  const confirmBtn = document.getElementById('confirm-btn');
+  const monthTitle = document.getElementById('month-title');
+  const dayGrid = document.getElementById('day-grid');
+  const dowRow = document.getElementById('dow-row');
+  const selectedDateLabel = document.getElementById('selected-date-label');
+  const sumDate = document.getElementById('sum-date');
+  const sumTime = document.getElementById('sum-time');
+
+  let viewDate = new Date();
+  let selectedDate = '';
+
+  function pad(n){return String(n).padStart(2,'0');}
+  function isPast(dateObj){const t=new Date();t.setHours(0,0,0,0);const d=new Date(dateObj);d.setHours(0,0,0,0);return d<t;}
+  function formatDatePretty(iso){if(!iso)return '-';const d=new Date(iso+'T00:00:00');return d.toLocaleDateString(IST_LOCALE,{day:'2-digit',month:'short',year:'numeric',weekday:'short'});}
+
+  function syncSummary(){sumDate.textContent=selectedDate?formatDatePretty(selectedDate):'-';sumTime.textContent=timeInput.value?timeInput.value:'-';}
+
+  function renderDows(){dowRow.innerHTML='';['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(lbl=>{const el=document.createElement('div');el.className='dow';el.textContent=lbl;dowRow.appendChild(el);});}
+
+  function renderCalendar(){
+    const y=viewDate.getFullYear();const m=viewDate.getMonth();
+    monthTitle.textContent=viewDate.toLocaleDateString(IST_LOCALE,{month:'long',year:'numeric'});
+    const first=new Date(y,m,1);const last=new Date(y,m+1,0);const offset=first.getDay();
+    dayGrid.innerHTML='';
+    for(let i=0;i<offset;i++){const blank=document.createElement('button');blank.type='button';blank.className='day muted';blank.disabled=true;dayGrid.appendChild(blank);}
+    for(let d=1;d<=last.getDate();d++){
+      const current=new Date(y,m,d);
+      const iso=`${current.getFullYear()}-${pad(current.getMonth()+1)}-${pad(current.getDate())}`;
+      const weekend=current.getDay()===0||current.getDay()===6;
+      const disabled=weekend||isPast(current);
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='day'+(disabled?' disabled':'')+(iso===selectedDate?' selected':'');
+      btn.textContent=String(d);
+      btn.disabled=disabled;
+      btn.addEventListener('click',async()=>{
+        selectedDate=iso;
+        dateInput.value=iso;
+        timeInput.value='';
+        lockInput.value='';
+        confirmBtn.disabled=true;
+        selectedDateLabel.textContent=`Selected: ${formatDatePretty(iso)}`;
+        renderCalendar();
+        syncSummary();
+        await loadSlots();
+      });
+      dayGrid.appendChild(btn);
+    }
+    if(!selectedDate){selectedDateLabel.textContent='No date selected.';}
+  }
+
+  async function loadSlots(){
+    if(!selectedDate)return;
+    const res=await fetch(`{% url 'appointments:available_slots_api' %}?date=${selectedDate}`);
+    const data=await res.json();
+    slotsGrid.innerHTML='';
+    remainingEl.textContent=data.remaining??0;
+
+    (data.slots||[]).forEach(slot=>{
+      const card=document.createElement('button');
+      card.type='button';
+      card.className='slot'+(slot.available?'':' disabled');
+      card.innerHTML=`<div class="t">${slot.label}</div><div class="s">${slot.available?'Available':(slot.reason||'Unavailable')}</div>`;
+      if(!slot.available){card.disabled=true;slotsGrid.appendChild(card);return;}
+      card.addEventListener('click',()=>{
+        document.querySelectorAll('.slot').forEach(el=>el.classList.remove('selected'));
+        card.classList.add('selected');
+        timeInput.value=String(slot.hour).padStart(2,'0')+':00';
+        syncSummary();
+        confirmBtn.disabled=false;
+      });
+      slotsGrid.appendChild(card);
+    });
+  }
+
+  document.getElementById('prev-month').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1);renderCalendar();});
+  document.getElementById('next-month').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1);renderCalendar();});
+
+  form.addEventListener('submit',(e)=>{
+    if(!dateInput.value||!timeInput.value){e.preventDefault();alert('Please select a date and slot first.');}
+  });
+
+  renderDows();
+  renderCalendar();
+  syncSummary();
+})();
+</script>
+</body>
+</html>

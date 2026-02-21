@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - NutriVet</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
+        .card { max-width: 520px; margin: 50px auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        h1 { margin-top: 0; font-size: 24px; }
+        label { display: block; margin: 10px 0 6px; font-weight: 600; }
+        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+        button { margin-top: 16px; width: 100%; padding: 11px; background: #2d6a4f; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .helptext { font-size: 12px; color: #666; display: block; margin-top: 4px; }
+        .errorlist { color: #a11; margin: 6px 0; padding-left: 18px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Create Pet Parent account</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+                {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+            {% endfor %}
+            <button type="submit">Register</button>
+        </form>
+        <p style="margin-top:14px;text-align:center">Already registered? <a href="{% url 'login' %}">Login</a></p>
+    </div>
+</body>
+</html>

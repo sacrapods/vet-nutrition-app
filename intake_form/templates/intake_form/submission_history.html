@@ -1,0 +1,205 @@
+{% load static appointments_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Parent Dashboard - NutriVet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'design_system/tokens.css' %}?v=20260221">
+    <style>
+        /* shell-fallback: protects nav if static CSS fails */
+        html, body { margin:0 !important; padding:0 !important; }
+        .skip-link { position:fixed; left:12px; top:10px; transform:translateY(-180%); background:#0f1720; color:#fff; padding:8px 12px; border-radius:8px; z-index:9999; text-decoration:none; font-size:13px; font-weight:700; }
+        .skip-link:focus { transform:translateY(0); }
+        .app-shell { display:grid; grid-template-columns:244px 1fr; min-height:100dvh; margin:0 !important; }
+        .app-sidebar { background:linear-gradient(180deg,#102b23,#173a30); color:#dce7e1; padding:18px 12px; position:sticky; top:0; height:100dvh; overflow:auto; box-shadow:inset -1px 0 0 rgba(255,255,255,.06); }
+        .app-sidebar.app-sidebar--blue { background:linear-gradient(180deg,#173754,#2c5a8c); }
+        .app-sidebar .brand { margin:0 0 14px; font-size:17px; font-weight:800; letter-spacing:-.01em; color:#dce7e1; }
+        .app-sidebar nav a { display:block; color:#dce7e1; text-decoration:none; border:1px solid transparent; border-radius:10px; padding:9px 10px; font-size:13px; font-weight:700; margin-bottom:4px; }
+        .app-sidebar nav a:hover,.app-sidebar nav a.active { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.18); }
+        .app-main { padding:18px 16px 30px; }
+        @media (max-width:1080px){ .app-shell{grid-template-columns:1fr;} .app-sidebar{position:relative;height:auto;} .app-main{padding-top:12px;} }
+        body { font-family: "Manrope", "Avenir Next", "Segoe UI", sans-serif; }
+        .hero { background: linear-gradient(120deg, #14352b, #1f5f46 45%, #2f7757); border-radius: 22px; padding: 24px; color: #fff; box-shadow: var(--ds-shadow); border: 1px solid rgba(255,255,255,.14); }
+        .hero-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+        .hero h1 { font-size: 34px; letter-spacing: -.02em; }
+        .hero p { color: rgba(255,255,255,.82); margin-top: 6px; font-size: 14px; max-width: 700px; }
+        .hero-actions { display:flex; gap:8px; flex-wrap:wrap; }
+        .btn { text-decoration:none; border-radius:12px; border:1px solid rgba(255,255,255,.25); color:#fff; background:rgba(255,255,255,.12); padding:10px 12px; font-size:13px; font-weight:800; white-space:nowrap; }
+        .btn-strong { background:#fff; color:#144132; border-color:#fff; }
+        .btn-draft { background:#f6eadf; color:#7a4f2b; border-color:#f1d8bf; }
+        .stats { margin-top:16px; display:grid; gap:10px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+        .stat { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:10px 12px; }
+        .stat .k { font-size:11px; color:rgba(255,255,255,.72); text-transform:uppercase; letter-spacing:.08em; }
+        .stat .v { font-size:24px; font-weight:800; margin-top:4px; }
+        .search-panel { margin-top:14px; background:var(--ds-panel); border:1px solid var(--ds-line); border-radius:14px; box-shadow:0 10px 22px rgba(23,32,38,.05); padding:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .search-panel input { flex:1; min-width:220px; border:1px solid var(--ds-line); border-radius:10px; padding:10px 12px; font-size:14px; background:#fbfdff; }
+        .search-panel button, .search-panel a { text-decoration:none; border:1px solid var(--ds-line); border-radius:10px; padding:10px 12px; font-size:13px; font-weight:700; background:#fff; color:#233138; }
+        .search-panel button { background:var(--ds-brand); color:#fff; border-color:var(--ds-brand); }
+        .notice { margin-top:12px; background:#eff9f3; border:1px solid #bcdcc8; color:#215d45; border-radius:10px; padding:11px 12px; font-size:14px; }
+        .panel { margin-top:14px; background:var(--ds-panel); border:1px solid var(--ds-line); border-radius:var(--ds-radius); box-shadow:0 12px 26px rgba(23,32,38,.05); overflow:hidden; }
+        .panel-head { padding:14px 16px; border-bottom:1px solid #e8eef3; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; background:linear-gradient(180deg,#fbfdff,#f7fafc); }
+        .panel-head h2 { font-size:19px; letter-spacing:-.01em; }
+        .small { font-size:12px; color:var(--ds-muted); }
+        .table-wrap { overflow:auto; }
+        table { width:100%; border-collapse:collapse; min-width:760px; }
+        th,td { padding:12px 14px; border-bottom:1px solid #edf2f6; text-align:left; font-size:14px; vertical-align:middle; }
+        th { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#73828d; background:#f9fbfd; }
+        .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; color:#31515f; font-weight:800; }
+        .chip { display:inline-block; border-radius:999px; padding:4px 9px; margin:2px 4px 2px 0; font-size:11px; font-weight:800; background:#eaf2f7; color:#36576a; }
+        .links a { display:inline-block; text-decoration:none; color:#2f4d7f; font-size:12px; font-weight:800; margin-right:9px; margin-bottom:4px; }
+        .muted { color:var(--ds-muted); }
+        .status { display:inline-block; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:800; }
+        .s-pending { background:#fff3cd; color:#856404; }
+        .s-confirmed { background:#e7f0fa; color:#1f5ea7; }
+        .s-completed { background:#e6f3ec; color:#1f6a4b; }
+        .s-cancelled, .s-rescheduled, .s-no_show { background:#f0f0f0; color:#555; }
+        @media (max-width: 1020px) { .stats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 720px) {
+            .hero { padding: 18px 14px; border-radius: 16px; }
+            .hero h1 { font-size: 28px; }
+            .stats { grid-template-columns: 1fr; }
+            .hero-actions { width: 100%; }
+            .hero-actions .btn { width: 100%; text-align: center; }
+            .search-panel { flex-direction: column; align-items: stretch; }
+            .search-panel input, .search-panel button, .search-panel a { width: 100%; text-align: center; }
+            th, td { padding: 10px 9px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="app-shell">
+    <aside class="app-sidebar" aria-label="Primary navigation">
+        <div class="brand">POSHTIK NUTRIVET</div>
+        <div class="brand-sub">Pet Parent Portal</div>
+        <nav>
+            <div class="nav-section">My Account</div>
+            <a class="active" href="{% url 'submission_history' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            <a href="{% url 'appointments:pet_dashboard' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+                Appointments
+            </a>
+            <div class="nav-section">Forms</div>
+            <a href="{% url 'intake_form' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+                Intake Form
+            </a>
+            <a href="{% url 'homemade_diet_questionnaire' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 2h18v4H3zM3 10h18v4H3zM3 18h18v4H3z"/></svg>
+                Homemade Form
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="M14 8l4 4-4 4M18 12H9"/></svg>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <main id="main-content" class="app-main">
+        <section class="hero">
+            <div class="hero-top">
+                <div>
+                    <h1>Pet Parent Dashboard</h1>
+                    <p>Track submissions, continue drafts, and manage your nutrition workflow from one place.</p>
+                </div>
+                <div class="hero-actions">
+                    <a class="btn btn-strong" href="{% url 'intake_form' %}">New Intake Form</a>
+                    <a class="btn" href="{% url 'homemade_diet_questionnaire' %}">New Homemade Form</a>
+                    <a class="btn" href="{% url 'appointments:book' %}">Book Appointment</a>
+                    {% if has_intake_draft %}<a class="btn btn-draft" href="{% url 'intake_form' %}">Continue Intake Draft</a>{% endif %}
+                    {% if has_homemade_draft %}<a class="btn btn-draft" href="{% url 'homemade_diet_questionnaire' %}">Continue Homemade Draft</a>{% endif %}
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat"><div class="k">Intake Submissions</div><div class="v">{{ stats.intake_count }}</div></div>
+                <div class="stat"><div class="k">Pets Added</div><div class="v">{{ stats.pet_count }}</div></div>
+                <div class="stat"><div class="k">Homemade Forms</div><div class="v">{{ stats.homemade_count }}</div></div>
+            </div>
+        </section>
+
+        <form class="search-panel" method="get" role="search" aria-label="Submission search">
+            <input type="text" name="q" value="{{ q }}" placeholder="Search submissions and appointments…" aria-label="Search submissions and appointments">
+            <button type="submit">Search</button>
+            {% if q %}<a href="{% url 'submission_history' %}">Clear</a>{% endif %}
+        </form>
+
+        {% if flash_messages %}
+            {% for message in flash_messages %}
+                <div class="notice">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="panel">
+            <div class="panel-head"><h2>Intake Submissions</h2><div class="small">{{ stats.intake_count }} total</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Case ID</th><th>Pet(s)</th><th>Submitted</th><th>Details</th></tr></thead>
+                    <tbody>
+                        {% for parent in parents %}
+                        <tr>
+                            <td class="mono">{{ parent.case_id }}</td>
+                            <td>{% for pet in parent.pets.all %}<span class="chip">{{ pet.name }}</span>{% endfor %}</td>
+                            <td class="muted">{{ parent.created_at|date:"d M Y, h:i A" }}</td>
+                            <td class="links">{% for pet in parent.pets.all %}<a href="{% url 'case_detail' pet.pk %}">{{ pet.name }} details</a>{% endfor %}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4"><div class="empty-state"><h3>No intake submissions yet</h3><p>Start your first intake form to begin your care journey.</p><div class="empty-actions"><a href="{% url 'intake_form' %}">Start Intake Form</a></div></div></td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>Homemade Questionnaire Submissions</h2><div class="small">{{ stats.homemade_count }} total</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Pet</th><th>Species</th><th>Submitted</th></tr></thead>
+                    <tbody>
+                        {% for item in homemade_submissions %}
+                        <tr>
+                            <td><strong>{{ item.pet_name }}</strong></td>
+                            <td class="muted">{{ item.get_species_display }}</td>
+                            <td class="muted">{{ item.created_at|date:"d M Y, h:i A" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3"><div class="empty-state"><h3>No homemade submissions yet</h3><p>Use homemade questionnaire if you prefer home-cooked planning.</p><div class="empty-actions"><a href="{% url 'homemade_diet_questionnaire' %}">Open Homemade Form</a></div></div></td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head"><h2>Appointment History</h2><div class="small">{% if q %}matching "{{ q }}"{% else %}recent 10{% endif %}</div></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Pet</th><th>Date &amp; Time (IST)</th><th>Type</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for appt in appointments %}
+                        <tr>
+                            <td><strong>{{ appt.pet.name }}</strong></td>
+                            <td class="muted">{{ appt.start_at|ist|date:"d M Y, h:i A" }}</td>
+                            <td><span class="chip">{{ appt.appointment_type_label }}</span></td>
+                            <td><span class="status s-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4"><div class="empty-state"><h3>No appointments yet</h3><p>Book your first consultation to get started.</p><div class="empty-actions"><a href="{% url 'appointments:book' %}">Book Appointment</a></div></div></td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

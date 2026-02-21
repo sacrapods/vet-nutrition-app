@@ -1,0 +1,36 @@
+{% extends "admin/base_site.html" %}
+{% load appointments_extras %}
+{% block content %}
+<style>
+.ap-wrap{background:#fff;border:1px solid #d8e1dd;border-radius:12px;overflow:hidden}
+.ap-head{padding:12px 14px;border-bottom:1px solid #edf2ef;background:#f8fbfa}
+.ap-table{width:100%;border-collapse:collapse}
+.ap-table th,.ap-table td{padding:11px 12px;border-bottom:1px solid #edf2ef;text-align:left;font-size:13px}
+.ap-table th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6f7d78}
+.ap-badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:11px;background:#eef3f6;color:#35515e;font-weight:700}
+</style>
+<h1>{{ title }}</h1>
+<p><a href="{% url 'admin:appointments_appointment_calendar' %}">Back to calendar</a></p>
+{% if blocked %}<p style="color:#ba2121;font-weight:700;">This day is blocked.</p>{% endif %}
+
+<div class="ap-wrap">
+  <div class="ap-head"><strong>{{ day }}</strong></div>
+  <table class="ap-table">
+    <thead><tr><th>Time (IST)</th><th>Pet</th><th>User</th><th>Type</th><th>Status</th><th>Edit</th></tr></thead>
+    <tbody>
+    {% for appointment in appointments %}
+      <tr>
+        <td>{{ appointment.start_at|ist|date:'h:i A' }}</td>
+        <td>{{ appointment.pet.name }}</td>
+        <td>{{ appointment.user.username }}</td>
+        <td><span class="ap-badge">{{ appointment.appointment_type_label }}</span></td>
+        <td>{{ appointment.get_status_display }}</td>
+        <td><a href="{% url 'admin:appointments_appointment_change' appointment.id %}">Edit</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6">No appointments for this day.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
